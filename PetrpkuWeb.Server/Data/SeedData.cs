@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Server.Data
             {
                 new UserInfo()
                 {
-                    UserId = 1,
+                    UserInfoId = 1,
                     LoginName = "bart",
                     FirstName = "Петр",
                     LastName = "Петров",
@@ -26,7 +26,7 @@ namespace PetrpkuWeb.Server.Data
                 },
                 new UserInfo()
                 {
-                    UserId = 2,
+                    UserInfoId = 2,
                     LoginName = "marge",
                     FirstName = "Марина",
                     LastName = "Матросова",
@@ -38,7 +38,7 @@ namespace PetrpkuWeb.Server.Data
                 },
                 new UserInfo()
                 {
-                    UserId = 3,
+                    UserInfoId = 3,
                     LoginName = "liza",
                     FirstName = "Оксана",
                     LastName = "Малкина",
@@ -50,7 +50,7 @@ namespace PetrpkuWeb.Server.Data
                 },
                 new UserInfo()
                 {
-                    UserId = 4,
+                    UserInfoId = 4,
                     LoginName = "gomer",
                     FirstName = "Иван",
                     LastName = "Иванов",
@@ -67,101 +67,101 @@ namespace PetrpkuWeb.Server.Data
                 new Duty()
                 {
                     DutyId = 1,
-                    UserId = 1,
+                    UserInfoId = 1,
                     DayOfDuty = new DateTime(2019, 07, 31)
                 },
                  new Duty()
                  {
                      DutyId = 2,
-                     UserId = 2,
+                     UserInfoId = 2,
                      DayOfDuty = new DateTime(2019, 08, 1)
                  },
                  new Duty()
                  {
                      DutyId = 3,
-                     UserId = 3,
+                     UserInfoId = 3,
                      DayOfDuty = new DateTime(2019, 08, 2)
                  },
                  new Duty()
                 {
                     DutyId = 4,
-                    UserId = 4,
+                    UserInfoId = 4,
                     DayOfDuty = new DateTime(2019, 07, 31)
                 },
                  new Duty()
                  {
                      DutyId = 5,
-                     UserId = 1,
+                     UserInfoId = 1,
                      DayOfDuty = new DateTime(2019, 08, 1)
                  },
                  new Duty()
                  {
                      DutyId = 6,
-                     UserId = 2,
+                     UserInfoId = 2,
                      DayOfDuty = new DateTime(2019, 08, 2)
                  },
                  new Duty()
                 {
                     DutyId = 7,
-                    UserId = 3,
+                    UserInfoId = 3,
                     DayOfDuty = new DateTime(2019, 07, 31)
                 },
                  new Duty()
                  {
                      DutyId = 8,
-                     UserId = 4,
+                     UserInfoId = 4,
                      DayOfDuty = new DateTime(2019, 08, 1)
                  },
                  new Duty()
                  {
                      DutyId = 9,
-                     UserId = 1,
+                     UserInfoId = 1,
                      DayOfDuty = new DateTime(2019, 08, 2)
                  }
             };
 
-            var newsPosts = new NewsPost[]
+            var articles = new Article[]
             {
-                new NewsPost()
+                new Article()
                 {
-                    NewsId = 1,
+                    ArticleId = 1,
                     Title = "Новость №1",
                     Content = "Очень длинная новосьт, которая сама не знает о чем она но это и не важно, т.к. это просто тестовый текст",
-                    UserId = 1
+                    UserInfoId = 1
                 },
-                new NewsPost()
+                new Article()
                 {
-                    NewsId = 2,
+                    ArticleId = 2,
                     Title = "Новость №2",
                     Content = "Очень длинная новосьт, которая сама не знает о чем она но это и не важно, т.к. это просто тестовый текст",
-                    UserId = 3
+                    UserInfoId = 3
                 },
-                new NewsPost()
+                new Article()
                 {
-                    NewsId = 3,
+                    ArticleId = 3,
                     Title = "Новость №3",
                     Content = "Очень длинная новосьт, которая сама не знает о чем она но это и не важно, т.к. это просто тестовый текст",
-                    UserId = 3
+                    UserInfoId = 3
                 },
-                new NewsPost()
+                new Article()
                 {
-                    NewsId = 4,
+                    ArticleId = 4,
                     Title = "Новость №4",
                     Content = "Очень длинная новосьт, которая сама не знает о чем она но это и не важно, т.к. это просто тестовый текст",
-                    UserId = 3
+                    UserInfoId = 3
                 },
-                new NewsPost()
+                new Article()
                 {
-                    NewsId = 5,
+                    ArticleId = 5,
                     Title = "Новость №5",
                     Content = "Очень длинная новосьт, которая сама не знает о чем она но это и не важно, т.к. это просто тестовый текст",
-                    UserId = 1
+                    UserInfoId = 1
                 },
             };
 
             db.Users.AddRange(users);
             db.Duties.AddRange(duties);
-            db.NewsPosts.AddRange(newsPosts);
+            db.Articles.AddRange(articles);
             db.SaveChanges();
         }
     }

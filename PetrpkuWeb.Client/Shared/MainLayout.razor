@@ -1,22 +1,30 @@
 @inherits LayoutComponentBase
+@inject IAppVersionService AppVersionService
 
-<header class="sidebar">
-    <NavMenu />
-</header>
+    <header>
+        <!-- Main foto  -->
+        <div class="main-bgfoto">
+        </div>
+        <NavMenu />
+    </header>
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-    </div>
-
-    <div class="content px-4">
+<main> 
+    <div>
         @Body
     </div>
-</div>
+</main>
 
-<footer class="footer">
-    <nav class="navbar footer-bgfoto">
-        <a class="navbar-brand">Лаборатория ИОТ &copy; 2019 </a>
-        <p>v.0.0.1</p>
-    </nav>
+<footer class="page-footer footer-bgfoto">
+    <div class="footer-copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    Лаборатория ИОТ &copy; 2019
+                </div>
+                <div class="col l6 s12">
+                    v: @AppVersionService.Version
+                </div>
+            </div>
+        </div>
+    </div>
 </footer>

@@ -17,7 +17,7 @@ namespace PetrpkuWeb.Server.Data
         {
         }
 
-        public DbSet<NewsPost> NewsPosts { get; set; }
+        public DbSet<Article> Articles { get; set; }
         public DbSet<UserInfo> Users { get; set; }
         public DbSet<Duty> Duties { get; set; }
         

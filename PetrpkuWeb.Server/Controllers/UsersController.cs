@@ -21,7 +21,7 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<List<UserInfo>>> GetUsers()
         {
             return await _db.Users.ToListAsync();

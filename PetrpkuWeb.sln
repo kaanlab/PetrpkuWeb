@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29123.89
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.Client", "PetrpkuWeb.Client\PetrpkuWeb.Client.csproj", "{F6F29108-5112-4D90-AB60-ED06B07F334B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetrpkuWeb.Server", "PetrpkuWeb.Server\PetrpkuWeb.Server.csproj", "{480155D1-5C7C-4A4B-BD2F-BBD8E8F32ED9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.Server", "PetrpkuWeb.Server\PetrpkuWeb.Server.csproj", "{480155D1-5C7C-4A4B-BD2F-BBD8E8F32ED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetrpkuWeb.Shared", "PetrpkuWeb.Shared\PetrpkuWeb.Shared.csproj", "{AEA75AA5-6795-4F03-9252-16195F88C577}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.Shared", "PetrpkuWeb.Shared\PetrpkuWeb.Shared.csproj", "{AEA75AA5-6795-4F03-9252-16195F88C577}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,6 +9,7 @@ namespace PetrpkuWeb.Client
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBlazoredLocalStorage();
+            services.AddTransient<IAppVersionService, AppVersionService>();
         }
 
         public void Configure(IComponentsApplicationBuilder app)

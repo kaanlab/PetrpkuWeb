@@ -4,14 +4,14 @@ using System.Text;
 
 namespace PetrpkuWeb.Shared.Models
 {
-    public class NewsPost
+    public class Article
     {
-        public int NewsId { get; set; }
+        public int ArticleId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
 
         // relationship
-        public int UserId { get; set; }
+        public int UserInfoId { get; set; }
         public UserInfo Author { get; set; }
     }
 }

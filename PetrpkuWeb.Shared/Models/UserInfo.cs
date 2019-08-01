@@ -6,7 +6,7 @@ namespace PetrpkuWeb.Shared.Models
 {
     public class UserInfo
     {
-        public int UserId { get; set; }
+        public int UserInfoId { get; set; }
         public string LoginName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -19,7 +19,7 @@ namespace PetrpkuWeb.Shared.Models
 
         // relationship
         public IEnumerable<Duty> DaysOfDuty { get; set; }
-        public IEnumerable<NewsPost> NewsPosts { get; set; }
+        public IEnumerable<Article> Articles { get; set; }
 
     }
 }

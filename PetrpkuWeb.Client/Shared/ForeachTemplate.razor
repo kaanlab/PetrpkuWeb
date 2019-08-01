@@ -1,0 +1,34 @@
+﻿@typeparam TItem
+
+@if (items == null)
+{
+    @LoadingContent
+}
+else if (items.Count == 0)
+{
+    @EmptyContent
+}
+else
+{
+    @foreach (var item in items)
+    {
+        @ItemContent(item)
+    }
+
+}
+
+
+@code {
+
+    List<TItem> items;
+
+    [Parameter] Func<Task<List<TItem>>> Loader { get; set; }
+    [Parameter] RenderFragment LoadingContent { get; set; }
+    [Parameter] RenderFragment EmptyContent { get; set; }
+    [Parameter] RenderFragment<TItem> ItemContent { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        items = await Loader();
+    }
+}
