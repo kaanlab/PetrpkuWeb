@@ -1,37 +1,13 @@
 ﻿@page "/"
 
-@inject HttpClient HttpClient
-
 <div class="container">
     <div class="section">
         <div class="row">
             <div class="col s12 m4">
-                <table class="table">
-                    <tbody>
-                        <ForeachTemplate Loader="@LoadUsers">
-                            <LoadingContent>
-                                <tr>
-                                    <td>Loading...</td>
-                                </tr>
-                            </LoadingContent>
-                            <EmptyContent>
-                                <tr>
-                                    <td>No Users...</td>
-                                </tr>
-                            </EmptyContent>
-                            <ItemContent Context="item">
-                                <tr>
-                                    <td>@item.LoginName</td>
-                                    <td>@item.LastName</td>
-                                    <td>@item.FirstName</td>
-                                </tr>
-                            </ItemContent>
-                        </ForeachTemplate>
-                    </tbody>
-                </table>
+                <ShowUsers></ShowUsers>
             </div>
             <div class="col s12 m4">
-                Welcome to your new app.
+                <ShowArticles></ShowArticles>
             </div>
             <div class="col s12 m4">
                 <SurveyPrompt Title="How is Blazor working for you?" />
@@ -40,11 +16,3 @@
         </div>
     </div>
 </div>
-
-@code {
-
-    async Task<List<UserInfo>> LoadUsers()
-    {
-        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
-    }
-}

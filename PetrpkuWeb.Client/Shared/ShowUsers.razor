@@ -1,0 +1,33 @@
+﻿@inject HttpClient HttpClient
+
+<table class="table">
+    <tbody>
+        <ForeachTemplate Loader="@LoadUsers">
+            <LoadingContent>
+                <tr>
+                    <td>Loading...</td>
+                </tr>
+            </LoadingContent>
+            <EmptyContent>
+                <tr>
+                    <td>No Users...</td>
+                </tr>
+            </EmptyContent>
+            <ItemContent Context="item">
+                <tr>
+                    <td>@item.LoginName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.FirstName</td>
+                </tr>
+            </ItemContent>
+        </ForeachTemplate>
+    </tbody>
+</table>
+
+@code {
+
+    async Task<List<UserInfo>> LoadUsers()
+    {
+        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+    }
+}

@@ -1,0 +1,52 @@
+﻿@inject HttpClient HttpClient
+
+
+    <ForeachTemplate Loader="@LoadArticles">
+        <LoadingContent>
+            <div class="preloader-wrapper big active">
+                <div class="spinner-layer spinner-blue-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+        </LoadingContent>
+        <EmptyContent>
+            <div class="card-content white-text">
+                <span class="card-title">
+                    No content...
+                </span>
+            </div>
+        </EmptyContent>
+        <ItemContent Context="item">
+            <div class="card grey lighten-5 z-depth-1">
+                <div class="card-content">
+                    <span class="card-title">@item.Title</span>
+                    <p>@item.Content</p>
+                </div>
+                <div class="row valign-wrapper">
+                    <div class="col s2">
+                        <img src=@item.Author.PhotoUrl alt="" class="circle responsive-img"> 
+                    </div>
+                    <div class="col s10">
+                        <span class="black-text">
+                            @item.Author.FirstName
+                        </span>
+                    </div>
+                </div>                
+            </div>
+        </ItemContent>
+    </ForeachTemplate>
+
+
+@code {
+
+    async Task<List<Article>> LoadArticles()
+    {
+        return await HttpClient.GetJsonAsync<List<Article>>("api/articles/all");
+    }
+}
