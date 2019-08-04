@@ -1,35 +1,42 @@
-﻿<div class="navbar-fixed" id="sticky-nav">
-    <nav class="nav-bgfoto">
-        <div class="nav-wrapper">
-            <a href="#" class="brand-logo">
-                <img src="/img/site/logo.png" width="30" height="30" alt="">
-                Петрозаводское ПКУ
-            </a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li>
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="oi oi-home" aria-hidden="true"></span> Home
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link" href="counter">
-                        <span class="oi oi-plus" aria-hidden="true"></span> Counter
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link" href="counter">
-                        <span class="oi oi-plus" aria-hidden="true"></span> Counter
-                    </NavLink>
-                </li>
-            </ul>
-        </div>
-    </nav>
-</div>
+﻿@inject IJSRuntime JSRuntime
+
+<nav class="navbar-fixed" id="sticky-nav">
+    <div class="nav-wrapper nav-bgfoto">
+        <a href="#" class="brand-logo">
+            <img src="/img/site/logo.png" width="30" height="30" alt="">
+            Петрозаводское ПКУ
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li>
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </li>
+            <li>
+                <NavLink class="nav-link" href="counter">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                </NavLink>
+            </li>
+            <li>
+                <NavLink class="nav-link" href="counter">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                </NavLink>
+            </li>
+        </ul>
+    </div>
+</nav>
 
 @code {
+
     bool collapseNavMenu = true;
 
     string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected async override Task OnAfterRenderAsync()
+    {
+        await JSRuntime.InvokeAsync<object>("stickyNav");
+        
+    }
 
     void ToggleNavMenu()
     {
