@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server.Controllers
@@ -25,6 +26,20 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<List<UserInfo>>> GetUsers()
         {
             return await _db.Users.ToListAsync();
+        }
+
+        [HttpGet("birthdaysforweek")]
+        public async Task<ActionResult<List<UserInfo>>> GetUsersBirthdaysForWeek()
+        {
+            var _firstDayOfWeek = DateTime.Now.FirstDayOfWeek();
+            // AddDay(1) this is because a DateTime used as a date is really the very beginning of that day, 
+            // and doesn't extend to the end of the day
+            var _lastDayOfWeek = DateTime.Now.LastDayOfWeek().AddDays(1);
+
+            return await _db.Users
+                .Where(d => (d.Birthday.DayOfYear >= _firstDayOfWeek.DayOfYear && d.Birthday.DayOfYear <= _lastDayOfWeek.DayOfYear))
+                .OrderByDescending(o => o.Birthday)
+                .ToListAsync();
         }
     }
 }

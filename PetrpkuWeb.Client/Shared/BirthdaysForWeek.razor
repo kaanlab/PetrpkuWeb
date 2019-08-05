@@ -1,0 +1,50 @@
+@inject HttpClient HttpClient
+
+<h4>Дни рождения c @FirstDayOfWeek по @LastDayOfWeek:</h4>
+
+<ForeachTemplate Loader="@LoadBirthdaysForWeek">
+    <LoadingContent>
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </LoadingContent>
+    <EmptyContent>
+        <div class="card-content">
+            <span class="card-title">
+                именинников нет
+            </span>
+        </div>
+    </EmptyContent>
+    <ItemContent Context="item">
+        <div class="card">
+            <div class="card-image">
+                <img src="@item.PhotoUrl" />
+                <span class="card-title">@item.LastName</span>
+            </div>
+            <div class="card-content">
+                <p>@item.WorkingPosition</p>
+                <p>@item.Birthday.Day</p>
+            </div>
+        </div>
+    </ItemContent>
+</ForeachTemplate>
+
+
+@code {
+
+    public string FirstDayOfWeek { get; set; } = DateTime.Now.FirstDayOfWeek().ToShortDateString();
+    public string LastDayOfWeek { get; set; } = DateTime.Now.LastDayOfWeek().ToShortDateString();
+
+    public async Task<List<UserInfo>> LoadBirthdaysForWeek()
+    {
+        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/birthdaysforweek");
+    }
+}

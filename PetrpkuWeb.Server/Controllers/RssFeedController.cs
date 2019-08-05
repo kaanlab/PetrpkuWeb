@@ -39,17 +39,17 @@ namespace PetrpkuWeb.Server.Controllers
                 var document = XDocument.Parse(result);
 
                 rssNews = (from descendant in document.Descendants("item")
-                                select new RssNewsItem()
-                                {
-                                    Description = descendant.Element("description").Value,
-                                    Title = descendant.Element("title").Value,
-                                    Link = descendant.Element("link").Value,
-                                    PublishDate = DateTime.Parse(descendant.Element("pubDate").Value),
-                                    Enclosure = descendant.Element("enclosure").FirstAttribute.Value
-                                }).Take(10).ToList();
+                           select new RssNewsItem()
+                           {
+                               Description = descendant.Element("description").Value,
+                               Title = descendant.Element("title").Value,
+                               Link = descendant.Element("link").Value,
+                               PublishDate = DateTime.Parse(descendant.Element("pubDate").Value),
+                               Enclosure = descendant.Element("enclosure").FirstAttribute.Value
+                           }).Take(10).ToList();
+
                 _cache.Set("ListOfRssNews", rssNews, TimeSpan.FromMinutes(10));
             }
-
             return rssNews;
         }
     }
