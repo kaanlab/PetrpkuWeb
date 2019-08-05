@@ -1,0 +1,47 @@
+@inject HttpClient HttpClient
+
+<ForeachTemplate Loader="@LoadRssFeed">
+    <LoadingContent>
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </LoadingContent>
+    <EmptyContent>
+        <div class="card-content white-text">
+            <span class="card-title">
+                No rss data...
+            </span>
+        </div>
+    </EmptyContent>
+    <ItemContent Context="item">
+        <div class="card">
+            <a href="@item.Link">
+                <div class="card-image">
+                    <img src="@item.Enclosure" />
+                    <span class="card-title">@item.Title</span>
+                </div>
+                <div class="card-content">
+                    <p>@item.PublishDate</p>
+                </div>
+            </a>
+        </div>
+    </ItemContent>
+</ForeachTemplate>
+
+
+@code {
+
+    async Task<List<RssNewsItem>> LoadRssFeed()
+    {
+        return await HttpClient.GetJsonAsync<List<RssNewsItem>>("api/rssfeed/cachedrss");
+    }
+
+}

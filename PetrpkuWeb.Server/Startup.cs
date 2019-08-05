@@ -41,6 +41,10 @@ namespace PetrpkuWeb.Server
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] { MediaTypeNames.Application.Octet });
             });
+
+            //services.AddCors();
+            services.AddMemoryCache();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +56,8 @@ namespace PetrpkuWeb.Server
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseStaticFiles();
 
