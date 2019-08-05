@@ -1,0 +1,32 @@
+@inject HttpClient HttpClient
+
+<h4>Сегодня дежурный:</h4>
+
+@if (duty == null)
+{
+    <h4>дежурных нет</h4>
+}
+else
+{
+    <div class="card">
+        <div class="card-image">
+            <img src="@duty.AssignedTo.PhotoUrl" />
+            <span class="card-title">@duty.AssignedTo.LastName</span>
+        </div>
+        <div class="card-content">
+            <p>@duty.AssignedTo.WorkingPosition</p>
+        </div>
+    </div>
+}
+
+
+@code {
+
+    Duty duty;
+
+
+    protected async override Task OnInitAsync()
+    {
+        duty = await HttpClient.GetJsonAsync<Duty>("/api/duty/whoisdutytoday");
+    }
+}
