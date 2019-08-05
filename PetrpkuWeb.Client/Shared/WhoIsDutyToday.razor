@@ -4,7 +4,11 @@
 
 @if (duty == null)
 {
-    <h4>дежурных нет</h4>
+    <div class="card">
+        <div class="card-content">
+            <p>нет дежурного</p>
+        </div>
+    </div>
 }
 else
 {
@@ -22,11 +26,14 @@ else
 
 @code {
 
+    string apiUrl = "/api/duty/whoisdutytoday";
     Duty duty;
-
 
     protected async override Task OnInitAsync()
     {
-        duty = await HttpClient.GetJsonAsync<Duty>("/api/duty/whoisdutytoday");
+        var response = await HttpClient.GetAsync(apiUrl);
+
+        if ((int)response.StatusCode == 200)
+            duty = await HttpClient.GetJsonAsync<Duty>(apiUrl);
     }
 }

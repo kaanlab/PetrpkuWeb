@@ -22,13 +22,12 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpGet("whoisdutytoday")]
-        public ActionResult<Duty> GetWhoIsDutyToday()
+        public async Task<ActionResult<Duty>> GetWhoIsDutyToday()
         {
-            var whoIsDuty = _db.Duties
+            return await _db.Duties
                 .Where(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear)
                 .Include(u => u.AssignedTo)
-                .FirstOrDefault();
-            return whoIsDuty;
+                .FirstOrDefaultAsync();
         }
     }
 }
