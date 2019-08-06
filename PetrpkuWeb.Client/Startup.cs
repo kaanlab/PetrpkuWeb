@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
+using PetrpkuWeb.Client.Extensions;
 
 namespace PetrpkuWeb.Client
 {
@@ -14,6 +15,8 @@ namespace PetrpkuWeb.Client
 
         public void Configure(IComponentsApplicationBuilder app)
         {
+            app.SetCultureInfo("ru-RU");
+
             app.AddComponent<App>("app");
         }
     }
