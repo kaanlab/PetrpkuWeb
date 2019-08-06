@@ -21,13 +21,22 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [HttpGet("whoisdutytoday")]
+        [HttpGet("today")]
         public async Task<ActionResult<Duty>> GetWhoIsDutyToday()
         {
             return await _db.Duties
                 .Where(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear)
                 .Include(u => u.AssignedTo)
                 .FirstOrDefaultAsync();
+        }
+
+        [HttpPost("monthlist")]
+        public async Task<ActionResult<List<Duty>>> GetDutyMonth([FromBody] SelectedDate selectedDate)
+        {
+            return await _db.Duties
+                .Where(d => (d.DayOfDuty.Month == selectedDate.Month && d.DayOfDuty.Year == selectedDate.Year))
+                .Include(u => u.AssignedTo)
+                .ToListAsync();
         }
     }
 }
