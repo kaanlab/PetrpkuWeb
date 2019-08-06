@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
@@ -34,21 +35,28 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (!_cache.TryGetValue("ListOfRssNews", out List<RssNewsItem> rssNews))
             {
-                var webClient = new WebClient();
-                var result = await webClient.DownloadStringTaskAsync(_url);
-                var document = XDocument.Parse(result);
+                string response;
+                using (var client = new HttpClient())
+                {
+                    response = await client.GetStringAsync(_url);
+                }
 
-                rssNews = (from descendant in document.Descendants("item")
-                           select new RssNewsItem()
-                           {
-                               Description = descendant.Element("description").Value,
-                               Title = descendant.Element("title").Value,
-                               Link = descendant.Element("link").Value,
-                               PublishDate = DateTime.Parse(descendant.Element("pubDate").Value),
-                               Enclosure = descendant.Element("enclosure").FirstAttribute.Value
-                           }).Take(10).ToList();
+                if (response != null)
+                {
+                    var document = XDocument.Parse(response);
 
-                _cache.Set("ListOfRssNews", rssNews, TimeSpan.FromMinutes(10));
+                    rssNews = (from descendant in document.Descendants("item")
+                               select new RssNewsItem
+                               {
+                                   Description = descendant.Element("description").Value,
+                                   Title = descendant.Element("title").Value,
+                                   Link = descendant.Element("link").Value,
+                                   PublishDate = DateTime.Parse(descendant.Element("pubDate").Value),
+                                   Enclosure = descendant.Element("enclosure").FirstAttribute.Value
+                               }).Take(10).ToList();
+
+                    _cache.Set("ListOfRssNews", rssNews, TimeSpan.FromMinutes(10));
+                }
             }
             return rssNews;
         }
