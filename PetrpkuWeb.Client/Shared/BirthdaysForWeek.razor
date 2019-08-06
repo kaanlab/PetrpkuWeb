@@ -45,6 +45,6 @@
 
     public async Task<List<UserInfo>> LoadBirthdaysForWeek()
     {
-        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/birthdaysforweek");
+        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/birthdaysweek");
     }
 }

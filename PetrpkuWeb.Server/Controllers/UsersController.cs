@@ -29,7 +29,7 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.Users.ToListAsync();
         }
 
-        [HttpGet("birthdaysforweek")]
+        [HttpGet("birthdaysweek")]
         public async Task<ActionResult<List<UserInfo>>> GetUsersBirthdaysForWeek()
         {
             var firstDayOfWeek = DateTime.Now.FirstDayOfWeek();
