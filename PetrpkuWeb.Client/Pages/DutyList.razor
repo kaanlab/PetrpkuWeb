@@ -1,7 +1,70 @@
 @page "/dutylist"
 
+@using System.Globalization
+@inject HttpClient HttpClient
+
 <h3>DutyList</h3>
+<div class="container">
+    <div class="row">
+
+        @foreach (var weekday in daysOfWeek)
+        {
+            <div class="col s1">@weekday</div>
+        }
+    </div>
+
+    <div class="row">
+
+
+        @foreach (KeyValuePair<int, string> dic in dutyDic)
+        {
+            if (dic.Value == null)
+            {
+                <div class="col s1">
+                    @dic.Key
+                    дежурного нет
+                </div>
+            }
+            else
+            {
+                <div class="col s1">
+                    @dic.Key
+                    @dic.Value
+                </div>
+            }
+        }
+
+    </div>
+</div>
 
 @code {
 
+    Dictionary<int, string> dutyDic = new Dictionary<int, string>();
+    IEnumerable<string> daysOfWeek;
+    DateTime startDate;
+
+
+    public int Month { get; set; } = 08;
+    public int Year { get; set; } = 2019;
+
+
+    protected async override Task OnInitAsync()
+    {
+        var dutyList = HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{Month}/{Year}");
+
+        daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
+            .Cast<DayOfWeek>()
+            .OrderBy(day => day < DayOfWeek.Monday)
+            .Select(d => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(d));
+
+        
+    }
+
+    void CreateCalendar()
+    {
+
+
+
+
+    }
 }

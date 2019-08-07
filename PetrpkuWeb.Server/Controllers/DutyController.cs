@@ -30,13 +30,30 @@ namespace PetrpkuWeb.Server.Controllers
                 .FirstOrDefaultAsync();
         }
 
-        [HttpPost("monthlist")]
-        public async Task<ActionResult<List<Duty>>> GetDutyMonth([FromBody] SelectedDate selectedDate)
+        [HttpGet("month/{selectedMonth}/{selectedYear}")]
+        public async Task<ActionResult<Dictionary<int,Duty>>> GetDutyMonth([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
-            return await _db.Duties
-                .Where(d => (d.DayOfDuty.Month == selectedDate.Month && d.DayOfDuty.Year == selectedDate.Year))
+            var dutyList = await _db.Duties
+                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
                 .ToListAsync();
+
+            var currentMonth = new DateTime(selectedYear, selectedMonth, 1);
+            var startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
+            var days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i));
+
+            var dutyDic = new Dictionary<int, Duty>();
+
+            foreach (var day in days)
+            {
+                var personsOnDuty = dutyList?.GroupBy(e => e.DayOfDuty);
+                var duty = personsOnDuty?.SingleOrDefault(k => k.Key == day)?
+                    .Select(v => v).FirstOrDefault();
+
+                dutyDic.Add(day.Day, duty);
+            }
+
+            return dutyDic;
         }
     }
 }
