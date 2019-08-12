@@ -1,0 +1,70 @@
+@using System.Globalization
+@inject HttpClient HttpClient
+
+<h3>DutyList</h3>
+<div class="container">
+    <div class="row">
+        @if (daysOfWeek != null)
+        {
+            @foreach (var weekday in daysOfWeek)
+            {
+                <div class="col s1">@weekday</div>
+            }
+        }
+    </div>
+
+    <div class="row">
+        @if (days != null)
+        {
+            @foreach (var day in days)
+            {
+                <div class="col s1">
+                    <p>@day.Day</p>
+
+                    @if (listOfDuty != null)
+                    {
+                        @foreach (var user in listOfDuty)
+                        {
+
+                            if (user.DayOfDuty.Day == day.Day)
+                            {
+                                <p>@user.AssignedTo.LastName</p>
+                            }
+                           
+                        }
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+@code {
+
+    public List<Duty> listOfDuty;
+    public List<string> daysOfWeek;
+    public List<DateTime> days;
+
+
+
+    public int Month { get; set; } = 08;
+    public int Year { get; set; } = 2019;
+
+
+    protected async override Task OnInitAsync()
+    {
+        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{Month}/{Year}");
+
+        daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
+            .Cast<DayOfWeek>()
+            .OrderBy(day => day < DayOfWeek.Monday)
+            .Select(d => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(d)).ToList();
+
+        var currentMonth = new DateTime(Year, Month, 1);
+        var startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
+        days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i)).ToList();
+
+
+    }
+}

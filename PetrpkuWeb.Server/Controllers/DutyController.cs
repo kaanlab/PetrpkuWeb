@@ -31,29 +31,37 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpGet("month/{selectedMonth}/{selectedYear}")]
-        public async Task<ActionResult<Dictionary<int,Duty>>> GetDutyMonth([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
+        public async Task<ActionResult<List<Duty>>> GetDutyMonth([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
-            var dutyList = await _db.Duties
+            return await _db.Duties
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
                 .ToListAsync();
 
-            var currentMonth = new DateTime(selectedYear, selectedMonth, 1);
-            var startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
-            var days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i));
+            //var currentMonth = new DateTime(selectedYear, selectedMonth, 1);
+            //var startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
+            //var days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i));
 
-            var dutyDic = new Dictionary<int, Duty>();
+            //var calendarViewList = new List<CalendarView>();
 
-            foreach (var day in days)
-            {
-                var personsOnDuty = dutyList?.GroupBy(e => e.DayOfDuty);
-                var duty = personsOnDuty?.SingleOrDefault(k => k.Key == day)?
-                    .Select(v => v).FirstOrDefault();
+            //foreach (var day in days)
+            //{
+            //    var personsOnDuty = dutyList?
+            //        .GroupBy(e => e.DayOfDuty);
+            //    var duty = personsOnDuty?
+            //        .SingleOrDefault(k => k.Key == day)?
+            //        .Select(v => v)
+            //        .FirstOrDefault();
 
-                dutyDic.Add(day.Day, duty);
-            }
+            //    var calendarView = new CalendarView();
+            //    calendarView.Day = day.Day;
+            //    calendarView.DutyUser = duty?.AssignedTo;
 
-            return dutyDic;
+
+            //    calendarViewList.Add(calendarView);
+            //}
+
+            //return calendarViewList;
         }
     }
 }
