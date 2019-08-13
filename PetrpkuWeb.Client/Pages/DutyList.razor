@@ -1,3 +1,25 @@
 @page "/dutylist"
 
-<Calendar />
+<div class="container mb-5">
+    <div class="row">
+        <MatDatePicker @bind-Value="@Date1"></MatDatePicker>
+    </div>
+    <div class="row">
+        <Calendar Month="@Date1.Value.Month" Year="@Date1.Value.Year" />
+    </div>
+</div>
+
+
+
+@code {
+
+    private string MDate { get; set; }
+    private string YDate { get; set; }
+    public DateTime? Date1 { get; set; } = DateTime.Now;
+
+    private void UpdateDate()
+    {
+        MDate = "08";
+        YDate = "2019";
+    }
+}

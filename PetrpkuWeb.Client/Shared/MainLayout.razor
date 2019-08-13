@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 @inject IAppVersionService AppVersionService
 
-<header>
+<header class="mb-3 shadow-lg">
     <!-- Main foto  -->
     <div class="main-bgfoto">
     </div>
@@ -9,21 +9,17 @@
 </header>
 
 <main>
-    <div>
-        @Body
-    </div>
+    @Body
 </main>
 
-<footer class="page-footer footer-bgfoto">
-    <div class="footer-copyright">
-        <div class="container">
-            <div class="row">
-                <div class="col l6 s12">
-                    Лаборатория ИОТ &copy; 2019
-                </div>
-                <div class="col l6 s12">
-                    v: @AppVersionService.Version
-                </div>
+<footer class="footer fixed-bottom footer-bgfoto">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <p class="text-left">Лаборатория ИОТ &copy; 2019</p>
+            </div>
+            <div class="col-6">
+                <p class="text-right">v: @AppVersionService.Version</p>
             </div>
         </div>
     </div>

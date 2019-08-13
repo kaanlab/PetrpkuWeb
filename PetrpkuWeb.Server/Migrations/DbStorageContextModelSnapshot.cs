@@ -23,6 +23,8 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.Property<string>("Content");
 
+                    b.Property<DateTime>("PublishDate");
+
                     b.Property<string>("Title");
 
                     b.Property<int>("UserInfoId");

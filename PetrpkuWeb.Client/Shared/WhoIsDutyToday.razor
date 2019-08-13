@@ -1,24 +1,20 @@
 @inject HttpClient HttpClient
 
-<h4>Сегодня дежурный:</h4>
-
 @if (duty == null)
 {
-    <div class="card">
-        <div class="card-content">
-            <p>нет дежурного</p>
+    <div class="card border-danger mb-3">
+        <div class="card-body">
+            <p class="card-text">нет</p>
         </div>
     </div>
 }
 else
 {
-    <div class="card">
-        <div class="card-image">
-            <img src="@duty.AssignedTo.PhotoUrl" />
-            <span class="card-title">@duty.AssignedTo.LastName</span>
-        </div>
-        <div class="card-content">
-            <p>@duty.AssignedTo.WorkingPosition</p>
+    <div class="card mb-2">
+        <img src="@duty.AssignedTo.PhotoUrl" class="card-img-top" />
+        <div class="card-body">
+            <h5 class="card-title">@duty.AssignedTo.LastName</h5>
+            <p class="card-text"><small class="text-muted">@duty.AssignedTo.WorkingPosition</small></p>
         </div>
     </div>
 }

@@ -9,8 +9,8 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(DbStorageContext))]
-    [Migration("20190801080007_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20190813114038_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,6 +24,8 @@ namespace PetrpkuWeb.Server.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content");
+
+                    b.Property<DateTime>("PublishDate");
 
                     b.Property<string>("Title");
 

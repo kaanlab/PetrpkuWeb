@@ -2,36 +2,25 @@
 
 <ForeachTemplate Loader="@LoadRssFeed">
     <LoadingContent>
-        <div class="preloader-wrapper big active">
-            <div class="spinner-layer spinner-blue-only">
-                <div class="circle-clipper left">
-                    <div class="circle"></div>
-                </div><div class="gap-patch">
-                    <div class="circle"></div>
-                </div><div class="circle-clipper right">
-                    <div class="circle"></div>
-                </div>
-            </div>
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
     </LoadingContent>
     <EmptyContent>
-        <div class="card-content white-text">
-            <span class="card-title">
-                No rss data...
-            </span>
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">No rss data...</p>
+            </div>
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div class="card">
-            <a href="@item.Link">
-                <div class="card-image">
-                    <img src="@item.Enclosure" />
-                    <span class="card-title">@item.Title</span>
-                </div>
-                <div class="card-content">
-                    <p>@item.PublishDate</p>
-                </div>
-            </a>
+        <div class="card mb-2">
+            <img src="@item.Enclosure" class="card-img-top" />
+            <div class="card-body">
+                <h5 class="card-title">@item.Title</h5>
+                <p class="card-text"><small class="text-muted">@item.PublishDate</small></p>
+            </div>
+            <a class="stretched-link" href="@item.Link"></a>
         </div>
     </ItemContent>
 </ForeachTemplate>

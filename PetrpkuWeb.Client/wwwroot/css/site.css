@@ -1,4 +1,4 @@
-﻿.loader {
+.loader {
     position: absolute;
     top: 0;
     left: calc(50% - 250px);
@@ -8,13 +8,11 @@
 }
 
 .main-bgfoto {
-    background-color: #2cbbbb;
     background-image: url(../img/site/header-big.JPG);
     background-position: 50% 50%;
     background-repeat: no-repeat;
     background-size: cover;
-    color: #fff;
-    padding-top: 26em;
+    padding-top: 20em;
 }
 
 .nav-bgfoto {
@@ -32,7 +30,6 @@
     background-position: 50% 75%;
     background-repeat: no-repeat;
     color: #fff;
-    padding-bottom: 1em;
 }
 
 /* The sticky class is added to the navbar with JS when it reaches its scroll position */
@@ -46,3 +43,11 @@
         padding-top: 60px;
     }
 
+#toggler-button {
+    color: white;
+}
+
+a.custom-card,
+    a.custom-card:hover {
+    color: inherit;
+}

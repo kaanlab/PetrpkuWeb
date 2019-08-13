@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PetrpkuWeb.Server.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -36,6 +36,7 @@ namespace PetrpkuWeb.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
+                    PublishDate = table.Column<DateTime>(nullable: false),
                     UserInfoId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

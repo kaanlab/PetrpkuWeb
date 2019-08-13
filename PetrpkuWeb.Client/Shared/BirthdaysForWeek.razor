@@ -4,34 +4,24 @@
 
 <ForeachTemplate Loader="@LoadBirthdaysForWeek">
     <LoadingContent>
-        <div class="preloader-wrapper big active">
-            <div class="spinner-layer spinner-blue-only">
-                <div class="circle-clipper left">
-                    <div class="circle"></div>
-                </div><div class="gap-patch">
-                    <div class="circle"></div>
-                </div><div class="circle-clipper right">
-                    <div class="circle"></div>
-                </div>
-            </div>
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
     </LoadingContent>
     <EmptyContent>
-        <div class="card-content">
-            <span class="card-title">
-                именинников нет
-            </span>
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">именинников нет</p>
+            </div>
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div class="card">
-            <div class="card-image">
-                <img src="@item.PhotoUrl" />
-                <span class="card-title">@item.LastName</span>
-            </div>
-            <div class="card-content">
-                <p>@item.WorkingPosition</p>
-                <p>@item.Birthday.Day</p>
+        <div class="card mb-2">
+            <img src="@item.PhotoUrl" class="card-img-top" />
+            <div class="card-body">
+                <h5 class="card-title">@item.LastName</h5>
+                <span class="badge badge-info">@item.Birthday.Day-ого числа</span>
+                <p class="card-text"><small class="text-muted">@item.WorkingPosition</small></p>
             </div>
         </div>
     </ItemContent>

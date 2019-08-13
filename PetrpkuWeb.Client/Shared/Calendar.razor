@@ -1,56 +1,68 @@
 @using System.Globalization
 @inject HttpClient HttpClient
 
-<h3>DutyList</h3>
+
 <div class="container">
-    <div class="row">
+    <row>
+        <h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @currentMonth.ToString("MMMM yyyy").ToLower() г.</h2>
+    </row>
+    <div class="row d-none d-lg-flex p-1 bg-dark text-white">
         @if (daysOfWeek != null)
         {
             @foreach (var weekday in daysOfWeek)
             {
-                <div class="col s1">@weekday</div>
+                <div class="col-lg p-1 text-center">@weekday</div>
             }
         }
     </div>
 
-    <div class="row">
+    <div class="row border border-right-0 border-bottom-0">
         @if (days != null)
         {
             @foreach (var day in days)
             {
-                <div class="col s1">
-                    <p>@day.Day</p>
 
+                if (day.DayOfWeek == DayOfWeek.Monday && day != startDate)
+                {
+                    <div class="w-100"></div>
+                }
+
+                <div class="col-lg p-2 border border-left-0 border-top-0 @(day.Month != currentMonth.Month ? mutedClass : null)">
+                    <h5 class="row align-items-center">
+                        <span class="col-1">@day.Day</span>
+                    </h5>
                     @if (listOfDuty != null)
                     {
-                        @foreach (var user in listOfDuty)
-                        {
-
-                            if (user.DayOfDuty.Day == day.Day)
+                        <div style="min-height:5rem;">
+                            @foreach (var user in listOfDuty)
                             {
-                                <p>@user.AssignedTo.LastName</p>
+                                if (user.DayOfDuty.Day == day.Day)
+                                {
+                                    <img src="@user.AssignedTo.PhotoUrl" class="rounded-circle mr-3" style="width: 3rem;">
+                                    <h5 class="mt-0">@user.AssignedTo.LastName</h5>
+                                    <p class="card-text"><small class="text-muted"> @user.AssignedTo.WorkingPosition</small></p>
+                                }
                             }
-                           
-                        }
+                        </div>
                     }
                 </div>
             }
         }
-
     </div>
 </div>
 
 @code {
 
-    public List<Duty> listOfDuty;
-    public List<string> daysOfWeek;
-    public List<DateTime> days;
+    [Parameter] public int Month { get; set; }
+    [Parameter] public int Year { get; set; }
 
+    List<Duty> listOfDuty;
+    List<string> daysOfWeek;
+    List<DateTime> days;
+    DateTime startDate;
+    DateTime currentMonth;
 
-
-    public int Month { get; set; } = 08;
-    public int Year { get; set; } = 2019;
-
+    string mutedClass = "d-none d-lg-inline-block bg-light text-muted";
 
     protected async override Task OnInitAsync()
     {
@@ -61,10 +73,9 @@
             .OrderBy(day => day < DayOfWeek.Monday)
             .Select(d => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(d)).ToList();
 
-        var currentMonth = new DateTime(Year, Month, 1);
-        var startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
+        currentMonth = new DateTime(Year, Month, 1);
+        startDate = currentMonth.AddDays(1 - (int)currentMonth.DayOfWeek);
         days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i)).ToList();
-
 
     }
 }

@@ -9,12 +9,17 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="2.0.7" />
+    <PackageReference Include="MatBlazor" Version="1.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.0.0-preview7.19365.7" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.0.0-preview7.19365.7" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PetrpkuWeb.Shared\PetrpkuWeb.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\bootstrap\css\" />
   </ItemGroup>
 
 </Project>
