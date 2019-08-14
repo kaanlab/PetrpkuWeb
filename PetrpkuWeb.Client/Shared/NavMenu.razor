@@ -1,12 +1,13 @@
 @inject IJSRuntime JSRuntime
 
+
 <nav class="navbar navbar-dark navbar-expand-lg nav-bgfoto" id="sticky-nav">
-        <a class="navbar-brand mr-3">
-            <img src="/img/site/logo.png" width="30" height="30" alt="">
-            Петрозаводское ПКУ
-        </a>
+    <a class="navbar-brand mr-3">
+        <img src="/img/site/logo.png" width="30" height="30" alt="">
+        Петрозаводское ПКУ
+    </a>
     <button class="navbar-toggler" aria-label="Toggle navigation" @onclick="() => ToggleNavMenu()">
-                <MatIcon id="toggler-button">apps</MatIcon>
+        <MatIcon id="toggler-button">apps</MatIcon>
     </button>
     <div class="@NavMenuCssClass navbar-collapse">
         <ul class="navbar-nav">
@@ -19,6 +20,7 @@
         </ul>
     </div>
 </nav>
+
 
 @code {
 

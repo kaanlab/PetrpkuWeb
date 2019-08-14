@@ -1,5 +1,6 @@
 @inject HttpClient HttpClient
 
+
 @if (duty == null)
 {
     <div class="card border-danger mb-3">
@@ -22,11 +23,11 @@ else
 
 @code {
 
-    string apiUrl = "/api/duty/today";
     Duty duty;
 
-    protected async override Task OnInitAsync()
+    protected async override Task OnInitializedAsync()
     {
+        var apiUrl = "/api/duty/today";
         var response = await HttpClient.GetAsync(apiUrl);
 
         if ((int)response.StatusCode == 200)

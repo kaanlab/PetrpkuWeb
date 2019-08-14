@@ -34,7 +34,7 @@
     List<UserInfo> users;
     Duty duty;
 
-    protected async override Task OnInitAsync()
+    protected async override Task OnInitializedAsync()
     {
         users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
     }

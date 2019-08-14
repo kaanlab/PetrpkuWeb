@@ -1,4 +1,5 @@
-﻿@typeparam TItem
+@typeparam TItem
+
 
 @if (items == null)
 {
@@ -22,10 +23,10 @@ else
 
     List<TItem> items;
 
-    [Parameter] Func<Task<List<TItem>>> Loader { get; set; }
-    [Parameter] RenderFragment LoadingContent { get; set; }
-    [Parameter] RenderFragment EmptyContent { get; set; }
-    [Parameter] RenderFragment<TItem> ItemContent { get; set; }
+    [Parameter] public Func<Task<List<TItem>>> Loader { get; set; }
+    [Parameter] public RenderFragment LoadingContent { get; set; }
+    [Parameter] public RenderFragment EmptyContent { get; set; }
+    [Parameter] public RenderFragment<TItem> ItemContent { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
