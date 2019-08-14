@@ -1,0 +1,28 @@
+@inject HttpClient HttpClient
+
+@if (rss == null)
+{
+    <div class="alert alert-danger" role="alert">
+        No rss data...
+    </div>
+}
+else
+{
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">@rss.Title</h4>
+        <p>@((MarkupString)rss.Description)</p>
+        <a class="stretched-link" href="@rss.Link"></a>
+    </div>
+}
+
+@code {
+    public RssCalend rss;
+
+    protected async override Task OnInitAsync()
+    {
+        var items = await HttpClient.GetJsonAsync<List<RssCalend>>("api/rssfeed/calend");
+        var random = new Random();
+        var index = random.Next(items.Count);
+        rss = items[index];
+    }
+}

@@ -17,7 +17,8 @@ namespace PetrpkuWeb.Server.Controllers
     [ApiController]
     public class RssFeedController : ControllerBase
     {
-        private readonly string _url = "http://petrpku.mil.ru/more/Novosti/rss";
+        private readonly string _urlMil = "http://petrpku.mil.ru/more/Novosti/rss";
+        private readonly string _urlCalend = "https://www.calend.ru/img/export/today-events.rss";
         private readonly IMemoryCache _cache;
 
         public RssFeedController(IMemoryCache memoryCache)
@@ -25,20 +26,26 @@ namespace PetrpkuWeb.Server.Controllers
             _cache = memoryCache;
         }
 
-        [HttpGet("cachedrss")]
-        public async Task<ActionResult<List<RssNewsItem>>> GetCachedNews()
+        [HttpGet("mil")]
+        public async Task<ActionResult<List<RssMil>>> GetCachedMil()
         {
-            return await GetRssNewsAndCache();
+            return await GetRssMilAndCache();
         }
 
-        private async Task<List<RssNewsItem>> GetRssNewsAndCache()
+        [HttpGet("calend")]
+        public async Task<ActionResult<List<RssCalend>>> GetCachedCalend()
         {
-            if (!_cache.TryGetValue("ListOfRssNews", out List<RssNewsItem> rssNews))
+            return await GetRssCalendAndCache();
+        }
+
+        private async Task<List<RssMil>> GetRssMilAndCache()
+        {
+            if (!_cache.TryGetValue("ListOfRssMil", out List<RssMil> rssNews))
             {
                 string response;
                 using (var client = new HttpClient())
                 {
-                    response = await client.GetStringAsync(_url);
+                    response = await client.GetStringAsync(_urlMil);
                 }
 
                 if (response != null)
@@ -46,7 +53,7 @@ namespace PetrpkuWeb.Server.Controllers
                     var document = XDocument.Parse(response);
 
                     rssNews = (from descendant in document.Descendants("item")
-                               select new RssNewsItem
+                               select new RssMil
                                {
                                    Description = descendant.Element("description").Value,
                                    Title = descendant.Element("title").Value,
@@ -55,7 +62,36 @@ namespace PetrpkuWeb.Server.Controllers
                                    Enclosure = descendant.Element("enclosure").FirstAttribute.Value
                                }).Take(10).ToList();
 
-                    _cache.Set("ListOfRssNews", rssNews, TimeSpan.FromMinutes(10));
+                    _cache.Set("ListOfRssMil", rssNews, TimeSpan.FromMinutes(10));
+                }
+            }
+            return rssNews;
+        }
+
+        private async Task<List<RssCalend>> GetRssCalendAndCache()
+        {
+            if (!_cache.TryGetValue("ListOfRssCalend", out List<RssCalend> rssNews))
+            {
+                string response;
+                using (var client = new HttpClient())
+                {
+                    response = await client.GetStringAsync(_urlCalend);
+                }
+
+                if (response != null)
+                {
+                    var document = XDocument.Parse(response);
+
+                    rssNews = (from descendant in document.Descendants("item")
+                        select new RssCalend()
+                        {
+                            Description = descendant.Element("description").Value,
+                            Title = descendant.Element("title").Value,
+                            Link = descendant.Element("link").Value,
+                            Guid = descendant.Element("guid").Value
+                        }).ToList();
+
+                    _cache.Set("ListOfRssCalend", rssNews, TimeSpan.FromHours(1));
                 }
             }
             return rssNews;
