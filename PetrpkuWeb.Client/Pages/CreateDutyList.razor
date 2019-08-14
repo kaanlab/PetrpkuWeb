@@ -1,0 +1,54 @@
+@page "/createdutylist"
+
+@inject HttpClient HttpClient
+
+<h3>CreateDutyList</h3>
+
+<div>
+    <label>Extra Toppings:</label>
+    @if (users == null)
+    {
+        <select class="custom-select" disabled>
+            <option>(loading...)</option>
+        </select>
+    }
+    else if (duty.AssignedTo != null)
+    {
+        <div>(maximum reached)</div>
+    }
+    else
+    {
+        <select class="custom-select" @onchange="@UserSelected">
+            <option value="-1" disabled selected>(select)</option>
+            @for (var i = 0; i < users.Count; i++)
+            {
+                <option value="@i">@users[i].LastName - @users[i].WorkingPosition</option>
+            }
+        </select>
+    }
+</div>
+
+
+@code {
+
+    List<UserInfo> users;
+    Duty duty;
+
+    protected async override Task OnInitAsync()
+    {
+        users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+    }
+
+    void UserSelected(UIChangeEventArgs e)
+    {
+        if (int.TryParse((string)e.Value, out var index) && index >= 0)
+        {
+            AddUser(users[index]);
+        }
+    }
+
+    void AddUser(UserInfo user)
+    {
+        duty.AssignedTo.UserInfoId = user.UserInfoId;
+    }
+}

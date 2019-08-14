@@ -1,15 +1,18 @@
 @inherits LayoutComponentBase
 @inject IAppVersionService AppVersionService
 
-<header class="mb-3 shadow-lg">
+<header class="shadow-lg">
     <!-- Main foto  -->
     <div class="main-bgfoto">
     </div>
     <NavMenu />
 </header>
 
-<main>
-    @Body
+<main class="container mt-3 mb-5">
+    
+        <CalendRss />
+        @Body
+    
 </main>
 
 <footer class="footer fixed-bottom footer-bgfoto">

@@ -1,25 +1,101 @@
 @page "/dutylist"
 
-<div class="container mb-5">
-    <div class="row">
-        <MatDatePicker @bind-Value="@Date1"></MatDatePicker>
+@using System.Globalization
+@inject HttpClient HttpClient
+
+
+<div class="row">
+    <h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @PikDate.Value.ToString("dd MMMM yyyy").ToLower() г.</h2>
+
+</div>
+<div class="row">
+    <div class="col-10">
+        <div class="row d-none d-lg-flex p-1 bg-dark text-white">
+            @if (daysOfWeek != null)
+            {
+                @foreach (var weekday in daysOfWeek)
+                {
+                    <div class="col-lg p-1 text-center">@weekday</div>
+                }
+            }
+        </div>
+        <div class="row border border-right-0 border-bottom-0">
+            @if (days != null)
+            {
+                @foreach (var day in days)
+                {
+
+                    if (day.DayOfWeek == DayOfWeek.Monday && day != startDate)
+                    {
+                        <div class="w-100"></div>
+                    }
+
+                    <div class="col-lg p-2 border border-left-0 border-top-0 @(day.Month != currentMonth.Month ? mutedClass : null)">
+                        <h5 class="row align-items-center">
+                            <span class="col-1">@day.Day</span>
+                        </h5>
+                        @if (listOfDuty != null)
+                        {
+                            <div style="min-height:5rem;">
+                                @foreach (var user in listOfDuty)
+                                {
+                                    if (user.DayOfDuty.DayOfYear == day.DayOfYear)
+                                    {
+                                        <img src="@user.AssignedTo.PhotoUrl" class="rounded-circle mr-3" style="width: 3rem;">
+                                        <h5 class="mt-0">@user.AssignedTo.LastName</h5>
+                                        <p class="card-text"><small class="text-muted"> @user.AssignedTo.WorkingPosition</small></p>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
     </div>
-    <div class="row">
-        <Calendar Month="@Date1.Value.Month" Year="@Date1.Value.Year" />
+    <div class="col-2">
+        <div class="mb-2">
+            <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="@PikDate"></MatDatePicker>
+        </div>
+        <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month,PikDate.Value.Year))"></MatButton>
     </div>
 </div>
 
 
-
 @code {
 
-    private string MDate { get; set; }
-    private string YDate { get; set; }
-    public DateTime? Date1 { get; set; } = DateTime.Now;
+    public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
 
-    private void UpdateDate()
+    List<Duty> listOfDuty;
+    List<string> daysOfWeek;
+    List<DateTime> days;
+    DateTime startDate;
+    DateTime currentMonth;
+
+    string mutedClass = "d-none d-lg-inline-block bg-light text-muted";
+
+    protected async override Task OnInitAsync()
     {
-        MDate = "08";
-        YDate = "2019";
+        var year = PikDate.Value.Year;
+        var month = PikDate.Value.Month;
+
+        await GetCalendarAsync(month, year);
+    }
+
+
+    async Task GetCalendarAsync(int month, int year)
+    {
+        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
+
+        daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
+            .Cast<DayOfWeek>()
+            .OrderBy(day => day < DayOfWeek.Monday)
+            .Select(d => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(d)).ToList();
+
+        currentMonth = new DateTime(year, month, 1);
+        // Start calendar from one week earlier
+        // TODO: need to simplify. Too hacky
+        startDate = currentMonth.AddDays(-6 -(int)currentMonth.DayOfWeek);
+        days = Enumerable.Range(0, 42).Select(i => startDate.AddDays(i)).ToList();
     }
 }
