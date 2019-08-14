@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PetrpkuWeb.Shared.Models
 {
-    public class RssNewsItem
+    public class RssMil
     {
         public string Title { get; set; }
         public string Link { get; set; }

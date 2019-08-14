@@ -28,9 +28,9 @@
 
 @code {
 
-    async Task<List<RssNewsItem>> LoadRssFeed()
+    async Task<List<RssMil>> LoadRssFeed()
     {
-        return await HttpClient.GetJsonAsync<List<RssNewsItem>>("api/rssfeed/cachedrss");
+        return await HttpClient.GetJsonAsync<List<RssMil>>("api/rssfeed/mil");
     }
 
 }
