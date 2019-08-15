@@ -2,53 +2,129 @@
 
 @inject HttpClient HttpClient
 
+
 <h3>CreateDutyList</h3>
 
-<div>
-    <label>Extra Toppings:</label>
-    @if (users == null)
-    {
-        <select class="custom-select" disabled>
-            <option>(loading...)</option>
-        </select>
-    }
-    else if (duty.AssignedTo != null)
-    {
-        <div>(maximum reached)</div>
-    }
-    else
-    {
-        <select class="custom-select" @onchange="@UserSelected">
-            <option value="-1" disabled selected>(select)</option>
-            @for (var i = 0; i < users.Count; i++)
+<MatDialog @bind-IsOpen="@dialogIsOpen">
+    <MatDialogTitle>Назначить дежурного</MatDialogTitle>
+    <MatDialogContent>
+        <label>@Day</label>
+        <MatSelect Label="Выберете дату" @bind-Value="Day">
+            @if (days == null)
             {
-                <option value="@i">@users[i].LastName - @users[i].WorkingPosition</option>
+                <MatOption Value="">(loading...)</MatOption>
             }
-        </select>
-    }
+            else
+            {
+                @foreach (var day in days)
+                {
+                    <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
+                }
+            }
+        </MatSelect>
+        <label>@User</label>
+        <MatSelect Label="Выберете дежурного" @bind-Value="User">
+            @if (users == null)
+            {
+                <MatOption Value="">(loading...)</MatOption>
+            }
+            else
+            {
+                @foreach (var user in users)
+                {
+                    <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
+                }
+            }
+        </MatSelect>
+    </MatDialogContent>
+    <MatDialogActions>
+        <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
+        <MatButton OnClick="OkClick">OK</MatButton>
+    </MatDialogActions>
+</MatDialog>
+
+<MatButton OnClick="@OpenDialog" Raised="true">Назначить дежурного</MatButton>
+
+@if (listOfDuty.Any())
+{
+    <table class="table">
+        @foreach (var dutyUser in listOfDuty)
+        {
+            <tr>
+                <td>@dutyUser.DayOfDuty</td>
+                <td>@dutyUser.AssignedTo.LastName</td>
+            </tr>
+        }
+    </table>
+}
+
+<div class="row">
+    <div class="col-2">
+        <div class="mb-2">
+            <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate"></MatDatePicker>
+        </div>
+        <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))"></MatButton>
+    </div>
 </div>
+
 
 
 @code {
 
+    public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
+    public List<Duty> listOfDuty { get; set; } = new List<Duty>();
+    public string Day { get; set; }
+    public string User { get; set; }
+
     List<UserInfo> users;
+    List<DateTime> days;
     Duty duty;
+
+    bool dialogIsOpen = false;
+
 
     protected async override Task OnInitializedAsync()
     {
+        var year = PikDate.Value.Year;
+        var month = PikDate.Value.Month;
+
+        await GetCalendarAsync(month, year);
+
         users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
     }
 
-    void UserSelected(UIChangeEventArgs e)
+    async Task GetCalendarAsync(int month, int year)
     {
-        if (int.TryParse((string)e.Value, out var index) && index >= 0)
-        {
-            AddUser(users[index]);
-        }
+        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
+
+
+        days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
+            .ToList();
     }
 
-    void AddUser(UserInfo user)
+    void OpenDialog()
     {
-        duty.AssignedTo.UserInfoId = user.UserInfoId;
+        dialogIsOpen = true;
     }
+
+    void OkClick()
+    {
+        var year = PikDate.Value.Year;
+        var month = PikDate.Value.Month;
+        var day = Int32.Parse(Day);
+        var user = Int32.Parse(User);
+        var date = new DateTime(year, month, day);
+        var findUser = users.Where(u => u.UserInfoId == user).FirstOrDefault();
+
+        duty = new Duty()
+        {
+            DayOfDuty = date,
+            AssignedTo = findUser
+            
+        };
+        listOfDuty.Add(duty);
+        duty = null;
+        dialogIsOpen = false;
+    }
+
 }
