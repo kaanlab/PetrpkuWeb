@@ -3,67 +3,99 @@
 @inject HttpClient HttpClient
 
 
-<h3>CreateDutyList</h3>
+    <h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @PikDate.Value.ToString("dd MMMM yyyy").ToLower() г.</h2>
 
-<MatDialog @bind-IsOpen="@dialogIsOpen">
-    <MatDialogTitle>Назначить дежурного</MatDialogTitle>
-    <MatDialogContent>
-        <label>@Day</label>
-        <MatSelect Label="Выберете дату" @bind-Value="Day">
-            @if (days == null)
+<div class="row">
+    <MatSelect Label="Выберете дату" @bind-Value="DutyDay">
+        @if (days == null)
+        {
+            <MatOption Value="">(loading...)</MatOption>
+        }
+        else
+        {
+            <MatOption Value="-1" Disabled="true" />
+            @foreach (var day in days)
             {
-                <MatOption Value="">(loading...)</MatOption>
+                <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
             }
-            else
-            {
-                @foreach (var day in days)
-                {
-                    <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
-                }
-            }
-        </MatSelect>
-        <label>@User</label>
-        <MatSelect Label="Выберете дежурного" @bind-Value="User">
-            @if (users == null)
-            {
-                <MatOption Value="">(loading...)</MatOption>
-            }
-            else
-            {
-                @foreach (var user in users)
-                {
-                    <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
-                }
-            }
-        </MatSelect>
-    </MatDialogContent>
-    <MatDialogActions>
-        <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-        <MatButton OnClick="OkClick">OK</MatButton>
-    </MatDialogActions>
-</MatDialog>
+        }
+    </MatSelect>
 
-<MatButton OnClick="@OpenDialog" Raised="true">Назначить дежурного</MatButton>
+    <MatSelect Label="Выберете дежурного" @bind-Value="DutyUser">
+        @if (users == null)
+        {
+            <MatOption Value="">(loading...)</MatOption>
+        }
+        else
+        {
+            <MatOption Value="-1" Disabled="true" />
+            @foreach (var user in users)
+            {
+                <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
+            }
+        }
+    </MatSelect>
+</div>
+<div class="row">
+    @if (listOfDuty != null && DutyDay != null)
+    {
 
-@if (listOfDuty.Any())
-{
-    <table class="table">
         @foreach (var dutyUser in listOfDuty)
         {
-            <tr>
-                <td>@dutyUser.DayOfDuty</td>
-                <td>@dutyUser.AssignedTo.LastName</td>
-            </tr>
+            if (dutyUser.DayOfDuty.Day == Int32.Parse(DutyDay))
+            {
+                <p>На это число уже назначен:</p>
+                <table class="table">
+                    <tr>
+                        <td>@dutyUser.DayOfDuty.Day</td>
+                        <td>@dutyUser.AssignedTo.LastName</td>
+                        <td><MatButton OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                    </tr>
+                </table>
+            }
         }
-    </table>
-}
+
+    }
+</div>
+
+<MatButton OnClick="@(() => AddDutyUser(DutyDay,DutyUser))" Label="Добавить" />
+
+<div class="row">
+
+    @if (listOfDuty != null)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+
+                    <th>
+                        <span @onclick="@(() => SortTable("DayOfDuty"))">Дата</span>
+                        <MatIcon Icon="@(GetSortStyle("DayOfDuty"))"></MatIcon>
+                    </th>
+                    <th>
+                        <span>Дежурный</span>
+
+                    </th>
+                </tr>
+            </thead>
+            @foreach (var dutyUser in listOfDuty)
+            {
+                <tr>
+                    <td>@dutyUser.DayOfDuty.Day</td>
+                    <td>@dutyUser.AssignedTo.LastName</td>
+                </tr>
+            }
+        </table>
+    }
+
+</div>
 
 <div class="row">
     <div class="col-2">
         <div class="mb-2">
-            <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate"></MatDatePicker>
+            <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" />
         </div>
-        <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))"></MatButton>
+        <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" />
     </div>
 </div>
 
@@ -73,14 +105,14 @@
 
     public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
     public List<Duty> listOfDuty { get; set; } = new List<Duty>();
-    public string Day { get; set; }
-    public string User { get; set; }
+    public string DutyDay { get; set; }
+    public string DutyUser { get; set; }
 
     List<UserInfo> users;
     List<DateTime> days;
     Duty duty;
-
-    bool dialogIsOpen = false;
+    bool IsSortedAscending;
+    string CurrentSortColumn;
 
 
     protected async override Task OnInitializedAsync()
@@ -97,34 +129,86 @@
     {
         listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
 
-
         days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
             .ToList();
     }
 
-    void OpenDialog()
+    async Task RemoveDutyUser(Duty dutyUser)
     {
-        dialogIsOpen = true;
+        if (dutyUser.DutyId > 0)
+        {
+            var deleteDutyUser = listOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
+            await HttpClient.DeleteAsync($"/api/duty/delete/{deleteDutyUser.DutyId}");
+        }
+
+        listOfDuty.Remove(dutyUser);
     }
 
-    void OkClick()
+    async Task AddDutyUser(string dutyDay, string dutyUser)
     {
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
-        var day = Int32.Parse(Day);
-        var user = Int32.Parse(User);
+        var day = Int32.Parse(dutyDay);
+        var user = Int32.Parse(dutyUser);
         var date = new DateTime(year, month, day);
         var findUser = users.Where(u => u.UserInfoId == user).FirstOrDefault();
 
         duty = new Duty()
         {
             DayOfDuty = date,
-            AssignedTo = findUser
-            
+            UserInfoId = findUser.UserInfoId
+
         };
-        listOfDuty.Add(duty);
-        duty = null;
-        dialogIsOpen = false;
+
+        listOfDuty.Add(new Duty
+        {
+            DayOfDuty = date,
+            AssignedTo = findUser
+        });
+
+        await HttpClient.PostJsonAsync<Duty>("/api/duty/create", duty);
+
     }
 
+    void SortTable(string columnName)
+    {
+        if (listOfDuty.Any())
+        {
+            
+            if(columnName != CurrentSortColumn)
+            {
+                //We need to force order by descending on the new column
+                listOfDuty = listOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+                CurrentSortColumn = columnName;
+                IsSortedAscending = true;
+
+            }
+            if (IsSortedAscending)
+            {
+                listOfDuty = listOfDuty.OrderByDescending(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+            }
+            else
+            {
+                listOfDuty = listOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+            }
+
+            IsSortedAscending = !IsSortedAscending;
+        }
+    }
+
+    string GetSortStyle(string columnName)
+    {
+        if(CurrentSortColumn != columnName)
+        {
+            return "sort";
+        }
+        if(IsSortedAscending)
+        {
+            return "keyboard_arrow_up";
+        }
+        else
+        {
+            return "keyboard_arrow_down";
+        }
+    }
 }

@@ -22,7 +22,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpGet("today")]
-        public async Task<ActionResult<Duty>> GetWhoIsDutyToday()
+        public async Task<ActionResult<Duty>> GetWhoIsDutyTodayAsync()
         {
             return await _db.Duties
                 .Where(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear)
@@ -31,20 +31,58 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpGet("month/{selectedMonth}/{selectedYear}")]
-        public async Task<ActionResult<List<Duty>>> GetDutyMonth([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
+        public async Task<ActionResult<List<Duty>>> GetDutyMonthAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
             return await _db.Duties
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
+                .OrderBy(d => d.DayOfDuty)
                 .ToListAsync();
         }
 
         [HttpPost("createdutylist")]
-        public async Task<ActionResult> PostDutyAsync([FromBody] List<Duty> dutyList)
+        public async Task<ActionResult> PostDutyListAsync([FromBody] List<Duty> dutyList)
         {
             await _db.Duties.AddRangeAsync(dutyList);
             await _db.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpPost("create")]
+        public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
+        {
+            _db.Duties.Add(duty);
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut("update/{dutyId}")]
+        public async Task<IActionResult> PutDutyAsync(int dutyId, Duty duty)
+        {
+            if (dutyId != duty.DutyId)
+            {
+                return BadRequest();
+            }
+
+            _db.Entry(duty).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("delete/{dutyUserId}")]
+        public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyUserId)
+        {
+            var dutyUser = await _db.Duties.FindAsync(dutyUserId);
+
+            if (dutyUser == null)
+            {
+                return NotFound();
+            }
+
+            _db.Duties.Remove(dutyUser);
+            await _db.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
