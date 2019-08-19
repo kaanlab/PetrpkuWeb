@@ -49,7 +49,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
+        public async Task<ActionResult<Duty>> PostDutyAsync([FromBody]Duty duty)
         {
             _db.Duties.Add(duty);
             await _db.SaveChangesAsync();

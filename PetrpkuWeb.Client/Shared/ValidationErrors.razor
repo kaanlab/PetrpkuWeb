@@ -1,0 +1,24 @@
+@using System.ComponentModel.DataAnnotations;
+
+@if (Errors != null)
+{
+    <div class="validationerror">
+        <ul>
+            @foreach (var error in Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IValidatableObject Model { get; set; }
+
+    protected ValidationContext Context => new ValidationContext(Model);
+
+    protected IEnumerable<ValidationResult> Errors => Model.Validate(Context);
+
+
+}
