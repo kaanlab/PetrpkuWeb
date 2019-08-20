@@ -1,13 +1,19 @@
 @page "/createdutylist"
 
+@using PetrpkuWeb.Client.Extensions
+
 @inject HttpClient HttpClient
+@inject IJSRuntime JS
 
 
-<h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @PikDate.Value.ToString("dd MMMM yyyy").ToLower() г.</h2>
+<h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @PikDate.Value.ToString("MMMM yyyy").ToLower() г.</h2>
 
 <div class="row">
-    <EditForm Model="@dutyVM" OnValidSubmit="@AddDuty">
-
+    <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
+        <div class="row">
+            <DataAnnotationsValidator />
+            <ValidationErrors Model="@dutyVM" />
+        </div>
         <div class="row">
             <MatSelect Label="Выберете дату" @bind-Value="dutyVM.Day">
                 @if (days == null)
@@ -24,7 +30,6 @@
                 }
             </MatSelect>
 
-
             <MatSelect Label="Выберете дежурного" @bind-Value="dutyVM.User">
                 @if (users == null)
                 {
@@ -39,30 +44,9 @@
                     }
                 }
             </MatSelect>
-            <ValidationErrors Model="@dutyVM" />
         </div>
-        <div class="row">
-            @if (listOfDuty != null && dutyVM.Day != null)
-            {
 
-                @foreach (var dutyUser in listOfDuty)
-                {
-                    if (dutyUser.DayOfDuty.Day == Int32.Parse(dutyVM.Day))
-                    {
-                        <p>На это число уже назначен:</p>
-                        <table class="table">
-                            <tr>
-                                <td>@dutyUser.DayOfDuty.Day</td>
-                                <td>@dutyUser.AssignedTo.LastName</td>
-
-                            </tr>
-                        </table>
-                    }
-                }
-
-            }
-        </div>
-        <MatButton Type="submit" Disabled="isSubmitting" Label="Добавить" />
+        <MatButton Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
     </EditForm>
 </div>
 <div class="row">
@@ -104,23 +88,72 @@
         <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" />
     </div>
 </div>
-
+<div class="row">
+    <MatButton OnClick="@DownloadFile" Label="Скачать" />
+</div>
 
 
 @code {
 
     public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
     public List<Duty> listOfDuty { get; set; } = new List<Duty>();
-
-
-    protected DutyVM dutyVM { get; set; } = new DutyVM();
-    public bool isSubmitting { get; set; }
-
     List<UserInfo> users;
-    List<DateTime> days;
+    List<DateTime> days { get; set; }
+
+
+    #region Sort table prop
 
     bool IsSortedAscending;
     string CurrentSortColumn;
+
+    #endregion
+
+
+    #region Validation prop
+
+    private EditContext EditContext;
+    protected DutyVM dutyVM { get; set; } = new DutyVM();
+    protected bool DisabledOnValidation { get; set; } = true;
+
+    #endregion
+
+
+    #region Validation methods
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(dutyVM);
+        EditContext.OnFieldChanged += OnFieldChanged;
+
+        base.OnInitialized();
+    }
+
+    protected override void OnAfterRender()
+    {
+        base.OnAfterRender();
+
+        DisabledSubmitButton();
+    }
+
+
+    private void OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        DisabledSubmitButton();
+    }
+
+    private void DisabledSubmitButton()
+    {
+        if (EditContext.Validate())
+        {
+            DisabledOnValidation = false;
+        }
+        else
+        {
+            DisabledOnValidation = true;
+        }
+    }
+
+
+    #endregion
 
 
     protected async override Task OnInitializedAsync()
@@ -140,6 +173,8 @@
 
         days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
             .ToList();
+
+        days.RemoveAll(r => listOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
     }
 
     async Task RemoveDutyUser(Duty dutyUser)
@@ -151,9 +186,77 @@
         }
 
         listOfDuty.Remove(dutyUser);
+        days.Add(dutyUser.DayOfDuty);
 
     }
 
+    async Task AddDuty()
+    {
+
+        var year = PikDate.Value.Year;
+        var month = PikDate.Value.Month;
+        var day = Int32.Parse(dutyVM.Day);
+        var user = Int32.Parse(dutyVM.User);
+        var date = new DateTime(year, month, day);
+        var findUser = users.Where(u => u.UserInfoId == user).FirstOrDefault();
+
+        var duty = new Duty()
+        {
+            DayOfDuty = date,
+            UserInfoId = findUser.UserInfoId
+
+        };
+
+        listOfDuty.Add(new Duty
+        {
+            DayOfDuty = date,
+            AssignedTo = findUser
+        });
+
+        days.Remove(duty.DayOfDuty);
+
+        await HttpClient.PostJsonAsync<Duty>("/api/duty/create", duty);
+
+    }
+
+    void DownloadFile()
+    {
+        XWPFDocument doc = new XWPFDocument();
+        XWPFParagraph para = doc.CreateParagraph();
+        XWPFRun r0 = para.CreateRun();
+        r0.SetText("Title1");
+        para.BorderTop = Borders.Thick;
+        para.FillBackgroundColor = "EEEEEE";
+        para.FillPattern = NPOI.OpenXmlFormats.Wordprocessing.ST_Shd.diagStripe;
+
+        XWPFTable table = doc.CreateTable(3, 3);
+
+        table.GetRow(1).GetCell(1).SetText("EXAMPLE OF TABLE");
+
+        XWPFTableCell c1 = table.GetRow(0).GetCell(0);
+        XWPFParagraph p1 = c1.AddParagraph();   //don't use doc.CreateParagraph
+        XWPFRun r1 = p1.CreateRun();
+        r1.SetText("The quick brown fox");
+        r1.IsBold = true;
+
+        r1.FontFamily = "Courier";
+        r1.SetUnderline(UnderlinePatterns.DotDotDash);
+        r1.SetTextPosition(100);
+        c1.SetColor("FF0000");
+
+
+        table.GetRow(2).GetCell(2).SetText("only text");
+
+        MemoryStream out1 = new MemoryStream();
+        doc.Write(out1);
+        out1.Close();
+        byte[] bytes = out1.ToArray();
+
+        JS.SaveAs("forecasts.xlsx", bytes);
+
+    }
+
+    #region Sort tabe methods
     void SortTable(string columnName)
     {
         if (listOfDuty.Any())
@@ -196,35 +299,6 @@
         }
     }
 
-    async Task AddDuty()
-    {
-        isSubmitting = true;
-        try {
-            var year = PikDate.Value.Year;
-            var month = PikDate.Value.Month;
-            var day = Int32.Parse(dutyVM.Day);
-            var user = Int32.Parse(dutyVM.User);
-            var date = new DateTime(year, month, day);
-            var findUser = users.Where(u => u.UserInfoId == user).FirstOrDefault();
+    #endregion
 
-            var duty = new Duty()
-            {
-                DayOfDuty = date,
-                UserInfoId = findUser.UserInfoId
-
-            };
-
-            listOfDuty.Add(new Duty
-            {
-                DayOfDuty = date,
-                AssignedTo = findUser
-            });
-
-            await HttpClient.PostJsonAsync<Duty>("/api/duty/create", duty);
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
 }
