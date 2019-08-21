@@ -3,93 +3,95 @@
 @using PetrpkuWeb.Client.Extensions
 
 @inject HttpClient HttpClient
-@inject IJSRuntime JS
+@inject IJSRuntime JSRuntime
 
 
 <h2 class="col-12 mb-2 text-center">График дежурства руководящего состава ППКУ на @PikDate.Value.ToString("MMMM yyyy").ToLower() г.</h2>
 
 <div class="row">
-    <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
-        <div class="row">
-            <DataAnnotationsValidator />
-            <ValidationErrors Model="@dutyVM" />
-        </div>
-        <div class="row">
-            <MatSelect Label="Выберете дату" @bind-Value="dutyVM.Day">
-                @if (days == null)
+    <div class="col-6">
+        @if (listOfDuty != null)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <span @onclick="@(() => SortTable("DayOfDuty"))">Дата</span>
+                            <MatIcon Icon="@(GetSortStyle("DayOfDuty"))"></MatIcon>
+                        </th>
+                        <th>
+                            Дежурный
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                @foreach (var dutyUser in listOfDuty)
                 {
-                    <MatOption Value="">(loading...)</MatOption>
+                    <tr>
+                        <td>@dutyUser.DayOfDuty.Day</td>
+                        <td>@dutyUser.AssignedTo.LastName</td>
+                        <td><MatButton OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                    </tr>
                 }
-                else
-                {
-                    <MatOption Value="-1" Disabled="true" />
-                    @foreach (var day in days)
-                    {
-                        <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
-                    }
-                }
-            </MatSelect>
+            </table>
+        }
+    </div>
+    <div class="col-6">
+        <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
+            <div class="row">
+                <div class="col-12">
+                    <DataAnnotationsValidator />
+                    <ValidationErrors Model="@dutyVM" />
+                </div>
+                <div class="col-4">
+                    <MatSelect Label="Выберете дату" @bind-Value="dutyVM.Day">
+                        @if (days == null)
+                        {
+                            <MatOption Value="">(loading...)</MatOption>
+                        }
+                        else
+                        {
+                            <MatOption Value="-1" Disabled="true" />
+                            @foreach (var day in days)
+                            {
+                                <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
+                            }
+                        }
+                    </MatSelect>
+                </div>
+                <div class="col-8">
+                    <MatSelect Label="Выберете дежурного" @bind-Value="dutyVM.User">
+                        @if (users == null)
+                        {
+                            <MatOption Value="">(loading...)</MatOption>
+                        }
+                        else
+                        {
+                            <MatOption Value="-1" Disabled="true" />
+                            @foreach (var user in users)
+                            {
+                                <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
+                            }
+                        }
+                    </MatSelect>
+                </div>
+            </div>
+            <div class="row md-2">
+                <MatButton Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
+            </div>
+        </EditForm>
 
-            <MatSelect Label="Выберете дежурного" @bind-Value="dutyVM.User">
-                @if (users == null)
-                {
-                    <MatOption Value="">(loading...)</MatOption>
-                }
-                else
-                {
-                    <MatOption Value="-1" Disabled="true" />
-                    @foreach (var user in users)
-                    {
-                        <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
-                    }
-                }
-            </MatSelect>
-        </div>
-
-        <MatButton Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
-    </EditForm>
-</div>
-<div class="row">
-
-    @if (listOfDuty != null)
-    {
-        <table class="table">
-            <thead>
-                <tr>
-
-                    <th>
-                        <span @onclick="@(() => SortTable("DayOfDuty"))">Дата</span>
-                        <MatIcon Icon="@(GetSortStyle("DayOfDuty"))"></MatIcon>
-                    </th>
-                    <th>
-                        Дежурный
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            @foreach (var dutyUser in listOfDuty)
-            {
-                <tr>
-                    <td>@dutyUser.DayOfDuty.Day</td>
-                    <td>@dutyUser.AssignedTo.LastName</td>
-                    <td><MatButton OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
-                </tr>
-            }
-        </table>
-    }
-
-</div>
-
-<div class="row">
-    <div class="col-2">
-        <div class="mb-2">
+        <div class="row md-2">
             <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" />
         </div>
-        <MatButton Raised="true" Icon="calendar_today" Label="Применить" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" />
+        <div class="row md-2">
+            <MatButton Raised="true" Icon="calendar_today" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" Label="Применить" />
+        </div>
+        <div class="row md-2">
+            <MatButton Raised="true" Icon="save_alt" OnClick="@(() => DownloadFile(PikDate.Value.Month, PikDate.Value.Year))" Label="Скачать" />
+        </div>
     </div>
-</div>
-<div class="row">
-    <MatButton OnClick="@DownloadFile" Label="Скачать" />
 </div>
 
 
@@ -169,6 +171,7 @@
 
     async Task GetCalendarAsync(int month, int year)
     {
+        listOfDuty = null;
         listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
 
         days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
@@ -219,41 +222,11 @@
 
     }
 
-    void DownloadFile()
+    async Task DownloadFile(int month, int year)
     {
-        XWPFDocument doc = new XWPFDocument();
-        XWPFParagraph para = doc.CreateParagraph();
-        XWPFRun r0 = para.CreateRun();
-        r0.SetText("Title1");
-        para.BorderTop = Borders.Thick;
-        para.FillBackgroundColor = "EEEEEE";
-        para.FillPattern = NPOI.OpenXmlFormats.Wordprocessing.ST_Shd.diagStripe;
+        var file = await HttpClient.GetByteArrayAsync($"/api/duty/getfile/{month}/{year}");
 
-        XWPFTable table = doc.CreateTable(3, 3);
-
-        table.GetRow(1).GetCell(1).SetText("EXAMPLE OF TABLE");
-
-        XWPFTableCell c1 = table.GetRow(0).GetCell(0);
-        XWPFParagraph p1 = c1.AddParagraph();   //don't use doc.CreateParagraph
-        XWPFRun r1 = p1.CreateRun();
-        r1.SetText("The quick brown fox");
-        r1.IsBold = true;
-
-        r1.FontFamily = "Courier";
-        r1.SetUnderline(UnderlinePatterns.DotDotDash);
-        r1.SetTextPosition(100);
-        c1.SetColor("FF0000");
-
-
-        table.GetRow(2).GetCell(2).SetText("only text");
-
-        MemoryStream out1 = new MemoryStream();
-        doc.Write(out1);
-        out1.Close();
-        byte[] bytes = out1.ToArray();
-
-        JS.SaveAs("forecasts.xlsx", bytes);
-
+        await JSRuntime.SaveAs($"Дежурные_на_{month}-{year}_{DateTime.Now.ToString("HH-mm-ss")}.docx", file);
     }
 
     #region Sort tabe methods
