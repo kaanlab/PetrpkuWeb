@@ -17,10 +17,10 @@ namespace PetrpkuWeb.Shared.Models
             var results = new List<ValidationResult>();
 
             if (string.IsNullOrEmpty(Day))
-                results.Add(new ValidationResult($"{nameof(Day)} cannot be -1, empty or consist of whitespace only", new[] { nameof(Day) }));
+                results.Add(new ValidationResult("Поле \"Дата\" не может быть пустым", new[] { nameof(Day) }));
 
             if (string.IsNullOrEmpty(User))
-                results.Add(new ValidationResult($"{nameof(User)} cannot be null, empty or consist of whitespace only", new[] { nameof(User) }));
+                results.Add(new ValidationResult("Поле \"Дежурный\" не может быть пустым", new[] { nameof(User) }));
 
             return results;
         }

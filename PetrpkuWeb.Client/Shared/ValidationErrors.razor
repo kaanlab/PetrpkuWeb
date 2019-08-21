@@ -1,14 +1,13 @@
 @using System.ComponentModel.DataAnnotations;
 
-@if (Errors != null)
+
+@if (Errors.Any())
 {
-    <div class="validationerror">
-        <ul>
-            @foreach (var error in Errors)
-            {
-                <li>@error</li>
-            }
-        </ul>
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in Errors)
+        {
+            <p class="mb-0">@error</p>
+        }
     </div>
 }
 
@@ -19,6 +18,4 @@
     protected ValidationContext Context => new ValidationContext(Model);
 
     protected IEnumerable<ValidationResult> Errors => Model.Validate(Context);
-
-
 }
