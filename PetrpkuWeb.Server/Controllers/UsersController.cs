@@ -42,5 +42,19 @@ namespace PetrpkuWeb.Server.Controllers
                 .OrderBy(o => o.Birthday.DayOfYear)
                 .ToListAsync();
         }
+
+        [HttpPut("updatebirthday/{userInfoId}")]
+        public async Task<IActionResult> PutDutyAsync(int userInfoId, UserInfo user)
+        {
+            if (userInfoId != user.UserInfoId)
+            {
+                return BadRequest();
+            }
+
+            _db.Entry(user).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

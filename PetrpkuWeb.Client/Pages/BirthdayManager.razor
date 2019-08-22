@@ -1,0 +1,94 @@
+@page "/birthdaymanager"
+
+@inject HttpClient HttpClient
+
+
+<h2 class="col-12 mb-4 text-center"> Дни рождения пользователей</h2>
+
+@if (users == null)
+{
+    <div class="spinner-border text-primary text-center" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+}
+else if (users.Count == 0)
+{
+    <div class="card border-danger mb-3">
+        <div class="card-body">
+            <p class="card-text">No users...</p>
+        </div>
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Фамилия</th>
+                <th scope="col">Должность</th>
+                <th scope="col">День рождения</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        @foreach (var user in users)
+        {
+            var id = user.UserInfoId;
+            <tr>
+                <td>@user.LastName</td>
+                <td>@user.WorkingPosition</td>
+                <td>@user.Birthday.ToShortDateString()</td>
+                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(id))" Label="Редактировать" /></td>
+            </tr>
+        }
+    </table>
+}
+
+@if (editUser != null)
+{
+    <EditForm Model="@editUser">
+        <MatDialog @bind-IsOpen="@dialogIsOpen">
+            <MatDialogTitle>День рождения @editUser.LastName</MatDialogTitle>
+            <MatDialogContent>
+                <p>Выберите дату и нажмите сохранить</p>
+                <InputDate @bind-Value="@BirthDate"></InputDate>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
+
+@code {
+
+    List<UserInfo> users { get; set; }
+    UserInfo editUser { get; set; }
+    protected int UserInfoId { get; set; } = 0;
+    protected DateTime? BirthDate { get; set; }
+
+    bool dialogIsOpen = false;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+    }
+
+    void OpenDialog(int id)
+    {
+        dialogIsOpen = true;
+        editUser = null;
+        UserInfoId = id;
+        editUser = users.Where(u => u.UserInfoId == UserInfoId).FirstOrDefault();
+        BirthDate = editUser.Birthday;
+    }
+
+    async Task OkClick()
+    {
+        dialogIsOpen = false;
+        editUser.Birthday = BirthDate.Value;
+        await HttpClient.PutJsonAsync<UserInfo>($"/api/users/updatebirthday/{editUser.UserInfoId}", editUser);
+    }
+
+}
