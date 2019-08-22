@@ -3,6 +3,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Server.LdapAuth;
 
 namespace PetrpkuWeb.Server
 {
@@ -33,6 +35,13 @@ namespace PetrpkuWeb.Server
             });
 
             services.AddDbContext<DbStorageContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            
+            services.Configure<LdapAuthenticationOptions>(Configuration.GetSection("LdapAuth"));
+            services.AddIdentity<AuthUser, IdentityRole>()
+                .AddUserManager<LdapUserManager<AuthUser>>()
+                .AddEntityFrameworkStores<IdentityDataContext>()
+                .AddDefaultTokenProviders();
+
 
             services.AddResponseCompression(options =>
             {
