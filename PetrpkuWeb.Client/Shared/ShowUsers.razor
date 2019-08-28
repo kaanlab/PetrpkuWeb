@@ -26,7 +26,6 @@
             </EmptyContent>
             <ItemContent Context="item">
                 <tr>
-                    <td>@item.LoginName</td>
                     <td>@item.LastName</td>
                     <td>@item.FirstName</td>
                 </tr>
@@ -38,8 +37,8 @@
 
 @code {
 
-    async Task<List<UserInfo>> LoadUsers()
+    async Task<List<AppUser>> LoadUsers()
     {
-        return await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+        return await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
     }
 }

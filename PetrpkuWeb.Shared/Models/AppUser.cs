@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace PetrpkuWeb.Shared.Models
 {
-    public class UserInfo
+    public class AppUser
     {
-        public int UserInfoId { get; set; }
-        public string LoginName { get; set; }
+        public int AppUserId { get; set; }
+        public string DisplayName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MidleName { get; set; }
@@ -17,6 +17,7 @@ namespace PetrpkuWeb.Shared.Models
         public DateTime Birthday { get; set; }
 
         // relationship
+        public AppUserIdentity AuthIdentity { get; set; }
         public IEnumerable<Duty> DaysOfDuty { get; set; }
         public IEnumerable<Article> Articles { get; set; }
 

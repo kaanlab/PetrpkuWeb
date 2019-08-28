@@ -14,9 +14,9 @@ namespace PetrpkuWeb.Server.Controllers
     [ApiController]
     public class ArticlesController : ControllerBase
     {
-        private readonly DbStorageContext _db;
+        private readonly AppDbContext _db;
 
-        public ArticlesController(DbStorageContext db)
+        public ArticlesController(AppDbContext db)
         {
             _db = db;
         }

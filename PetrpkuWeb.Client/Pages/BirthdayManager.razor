@@ -32,7 +32,7 @@ else
         </thead>
         @foreach (var user in users)
         {
-            var id = user.UserInfoId;
+            var id = user.AppUserId;
             <tr>
                 <td>@user.LastName</td>
                 <td>@user.WorkingPosition</td>
@@ -62,25 +62,33 @@ else
 
 @code {
 
-    List<UserInfo> users { get; set; }
-    UserInfo editUser { get; set; }
-    protected int UserInfoId { get; set; } = 0;
+    List<AppUser> users { get; set; }
+    AppUser editUser { get; set; }
+    protected int AppUserId { get; set; } = 0;
     protected DateTime? BirthDate { get; set; }
 
     bool dialogIsOpen = false;
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private async Task DoSomething()
+    {
+        var user = (await authenticationStateTask).User;
+        user.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault();
+    }
 
     protected async override Task OnInitializedAsync()
     {
-        users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
     }
 
     void OpenDialog(int id)
     {
         dialogIsOpen = true;
         editUser = null;
-        UserInfoId = id;
-        editUser = users.Where(u => u.UserInfoId == UserInfoId).FirstOrDefault();
+        AppUserId = id;
+        editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
         BirthDate = editUser.Birthday;
     }
 
@@ -88,7 +96,7 @@ else
     {
         dialogIsOpen = false;
         editUser.Birthday = BirthDate.Value;
-        await HttpClient.PutJsonAsync<UserInfo>($"/api/users/updatebirthday/{editUser.UserInfoId}", editUser);
+        await HttpClient.PutJsonAsync<AppUser>($"/api/users/updatebirthday/{editUser.AppUserId}", editUser);
     }
 
 }

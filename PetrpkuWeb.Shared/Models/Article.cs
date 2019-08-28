@@ -12,7 +12,7 @@ namespace PetrpkuWeb.Shared.Models
         public DateTime PublishDate { get; set; }
 
         // relationship
-        public int UserInfoId { get; set; }
-        public UserInfo Author { get; set; }
+        public int AppUserId { get; set; }
+        public AppUser Author { get; set; }
     }
 }

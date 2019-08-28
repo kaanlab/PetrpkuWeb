@@ -10,13 +10,17 @@
         <MatIcon id="toggler-button">apps</MatIcon>
     </button>
     <div class="@NavMenuCssClass navbar-collapse">
-        <ul class="navbar-nav">
+        <ul class="navbar-nav mr-auto">
             <li class="nav-item">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Главная</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="dutylist">Дежурные</NavLink>
+                <NavLink class="nav-link" href="dutylist" Match="NavLinkMatch.All">Дежурные</NavLink>
             </li>
+            <ManagerDisplay />
+        </ul>
+        <ul class="navbar-nav">
+            <LoginDisplay />
         </ul>
     </div>
 </nav>

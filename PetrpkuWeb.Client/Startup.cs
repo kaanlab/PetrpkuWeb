@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using PetrpkuWeb.Client.Extensions;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Components;
 
 namespace PetrpkuWeb.Client
 {
@@ -12,6 +13,9 @@ namespace PetrpkuWeb.Client
         {
             services.AddBlazoredLocalStorage();
             services.AddTransient<IAppVersionService, AppVersionService>();
+            services.AddAuthorizationCore();
+            services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+            services.AddScoped<IAuthService, AuthService>();
         }
 
         public void Configure(IComponentsApplicationBuilder app)
