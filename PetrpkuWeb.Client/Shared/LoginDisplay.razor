@@ -1,0 +1,13 @@
+<AuthorizeView>
+    <Authorized>
+        <span class="badge badge-secondary">@context.User.Identity.Name</span>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="Logout" Match="NavLinkMatch.All">LogOut</NavLink>
+        </li>
+    </Authorized>
+    <NotAuthorized>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="Login" Match="NavLinkMatch.All">LogIn</NavLink>
+        </li>
+    </NotAuthorized>
+</AuthorizeView>
