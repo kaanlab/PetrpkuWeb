@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,13 +29,13 @@ namespace PetrpkuWeb.Server.Controllers
         public AccountController(
             IConfiguration configuration,
             SignInManager<AppUserIdentity> signInManager,
-            IAppAuthenticationService appAuthenticationLdapService,
+            IAppAuthenticationService appAuthenticationService,
             UserManager<AppUserIdentity> userManager
         )
         {
             _configuration = configuration;
             _signInManager = signInManager;
-            _appAuthenticationService = appAuthenticationLdapService;
+            _appAuthenticationService = appAuthenticationService;
             _userManager = userManager;
 
         }
@@ -74,6 +75,7 @@ namespace PetrpkuWeb.Server.Controllers
                     {
                         new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
                         new Claim(ClaimTypes.Name, appUserIdentity.UserName),
+                        new Claim(ClaimTypes.UserData, appUserIdentity.AssosiateUser.AppUserId.ToString())
                     };
 
                     foreach (var role in ldapUser.Roles)
@@ -96,12 +98,12 @@ namespace PetrpkuWeb.Server.Controllers
                     return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
                 }
 
-                return Unauthorized(new { message = $"User {model.Username} not found" });
+                return Unauthorized(new LoginResult { Successful = false, Error = $"User {model.Username} not found" });
 
             }
             catch (Exception e)
             {
-                return Unauthorized(new {message = $"Something went wrong: {e.Message}"});
+                return StatusCode((int)HttpStatusCode.InternalServerError, new LoginResult { Successful = false, Error = $"Something went wrong: {e.Message}"});
             }
         }
     

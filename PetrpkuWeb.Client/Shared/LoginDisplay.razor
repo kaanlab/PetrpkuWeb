@@ -1,13 +1,18 @@
 <AuthorizeView>
     <Authorized>
-        <span class="badge badge-secondary">@context.User.Identity.Name</span>
+        <MatChip Label="@context.User.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault()" LeadingIcon="face"></MatChip>
         <li class="nav-item">
-            <NavLink class="nav-link" href="Logout" Match="NavLinkMatch.All">LogOut</NavLink>
+            <NavLink class="nav-link" href="logout" Match="NavLinkMatch.All">
+                <MatIcon Icon="exit_to_app" />
+            </NavLink>
         </li>
     </Authorized>
     <NotAuthorized>
         <li class="nav-item">
-            <NavLink class="nav-link" href="Login" Match="NavLinkMatch.All">LogIn</NavLink>
+            <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
+                <MatIcon Icon="input" />
+            </NavLink>
         </li>
     </NotAuthorized>
 </AuthorizeView>
+

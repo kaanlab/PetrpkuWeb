@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.Server", "Petrpk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.Shared", "PetrpkuWeb.Shared\PetrpkuWeb.Shared.csproj", "{AEA75AA5-6795-4F03-9252-16195F88C577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetrpkuWeb.NovellDirectoryLdap", "PetrpkuWeb.NovellDirectoryLdap\PetrpkuWeb.NovellDirectoryLdap.csproj", "{857A45B9-AF38-4F62-B25E-EEDF1BC11D03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetrpkuWeb.NovellDirectoryLdap", "PetrpkuWeb.NovellDirectoryLdap\PetrpkuWeb.NovellDirectoryLdap.csproj", "{857A45B9-AF38-4F62-B25E-EEDF1BC11D03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

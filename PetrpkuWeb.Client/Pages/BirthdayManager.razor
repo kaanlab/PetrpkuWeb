@@ -69,6 +69,14 @@ else
 
     bool dialogIsOpen = false;
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private async Task DoSomething()
+    {
+        var user = (await authenticationStateTask).User;
+        user.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault();
+    }
 
     protected async override Task OnInitializedAsync()
     {
