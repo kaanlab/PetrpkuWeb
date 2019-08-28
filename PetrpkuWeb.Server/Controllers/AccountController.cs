@@ -49,6 +49,7 @@ namespace PetrpkuWeb.Server.Controllers
 
             try
             {
+
                 var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
 
                 if (ldapUser != null)

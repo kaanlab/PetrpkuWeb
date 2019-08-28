@@ -5,7 +5,7 @@
 
 <h1>Вход</h1>
 
-@if (ShowErrors)
+@if (ShowErrors )
 {
     <div class="alert alert-danger" role="alert">
         <p>@Error</p>
@@ -19,15 +19,15 @@
             <DataAnnotationsValidator />
             <ValidationErrors Model="loginModel" />
             <div class="form-group">
-                <label for="email">Имя пользователя</label>
+                <label for="username">Имя пользователя</label>
                 <InputText Id="username" Class="form-control" @bind-Value="loginModel.Username" />
-                
+
             </div>
             <div class="form-group">
                 <label for="password">Пароль</label>
-                <InputText Id="password" type="password" Class="form-control" @bind-Value="loginModel.Password" />                
+                <InputText Id="password" type="password" Class="form-control" @bind-Value="loginModel.Password" />
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <MatButton Type="submit" Raised="true" Label="Отправить" Icon="done" />
         </EditForm>
     </div>
 </div>
@@ -37,22 +37,26 @@
     private LoginViewModel loginModel = new LoginViewModel();
     private bool ShowErrors;
     private string Error = "";
+    
 
     private async Task HandleLogin()
     {
-        ShowErrors = false;
-
-        var result = await AuthService.Login(loginModel);
-
-        if (result.Successful)
+        try
         {
-            UriHelper.NavigateTo("/");
+            ShowErrors = false;
+
+            var result = await AuthService.Login(loginModel);
+
+            if (result.Successful)
+                UriHelper.NavigateTo("/");
+
         }
-        else
+        catch
         {
-            Error = result.Error;
+            Error = "Ошибка";
             ShowErrors = true;
         }
+
     }
 
 }

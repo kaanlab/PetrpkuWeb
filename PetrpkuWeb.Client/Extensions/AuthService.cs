@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Client.Extensions
     {
         private readonly HttpClient _httpClient;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
-        private readonly ILocalStorageService _localStorage;
+        private readonly ILocalStorageService _localStorage;        
 
         public AuthService(HttpClient httpClient,
             AuthenticationStateProvider authenticationStateProvider,
