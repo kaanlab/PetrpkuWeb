@@ -1,25 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PetrpkuWeb.Shared.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server.Data
 {
-    public class DbStorageContext : DbContext
+    public class AppDbContext : IdentityDbContext<AppUserIdentity>
     {
-        public DbStorageContext()
-        {
-        }
-
-        public DbStorageContext(DbContextOptions options) : base(options)
+        public AppDbContext(DbContextOptions options)
+            : base(options)
         {
         }
 
         public DbSet<Article> Articles { get; set; }
-        public DbSet<UserInfo> Users { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Duty> Duties { get; set; }
-        
     }
+    
 }

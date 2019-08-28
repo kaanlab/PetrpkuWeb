@@ -21,7 +21,7 @@ namespace PetrpkuWeb.Server
             var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
             using (var scope = scopeFactory.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<DbStorageContext>();
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 if (db.Database.EnsureCreated())
                 {
                     SeedData.Initialize(db);

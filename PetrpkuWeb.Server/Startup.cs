@@ -1,19 +1,19 @@
 using System.Linq;
 using System.Net.Mime;
-using System.Threading.Tasks;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
-using PetrpkuWeb.Server.LdapAuth;
+using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server
 {
@@ -34,16 +34,32 @@ namespace PetrpkuWeb.Server
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
-            services.AddDbContext<DbStorageContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-            
-            services.Configure<LdapAuthenticationOptions>(Configuration.GetSection("LdapAuth"));
-            services.AddIdentity<AuthUser, IdentityRole>()
-                .AddUserManager<LdapUserManager<AuthUser>>()
-                .AddEntityFrameworkStores<IdentityDataContext>()
-                .AddDefaultTokenProviders();
+            services.AddDbContext<AppDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddDefaultIdentity<AppUserIdentity>()
+                .AddEntityFrameworkStores<AppDbContext>();
 
-            services.AddResponseCompression(options =>
+            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
+
+            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
+            //services.AddScoped<IAuthenticationService, FakeAuthenticationService>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    };
+                });
+
+           services.AddResponseCompression(options =>
             {
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] { MediaTypeNames.Application.Octet });
@@ -51,6 +67,8 @@ namespace PetrpkuWeb.Server
 
             //services.AddCors();
             services.AddMemoryCache();
+
+           
 
         }
 
@@ -70,7 +88,9 @@ namespace PetrpkuWeb.Server
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseClientSideBlazorFiles<Client.Startup>();
 
             app.UseEndpoints(endpoints =>

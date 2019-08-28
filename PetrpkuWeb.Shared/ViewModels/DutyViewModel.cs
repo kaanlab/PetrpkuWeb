@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace PetrpkuWeb.Shared.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class DutyVM : IValidatableObject
+    public class DutyViewModel : IValidatableObject
     {
         
         public string Day { get; set; }

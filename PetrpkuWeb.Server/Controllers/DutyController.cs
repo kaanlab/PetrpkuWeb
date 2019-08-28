@@ -19,9 +19,9 @@ namespace PetrpkuWeb.Server.Controllers
     [ApiController]
     public class DutyController : ControllerBase
     {
-        private readonly DbStorageContext _db;
+        private readonly AppDbContext _db;
 
-        public DutyController(DbStorageContext db)
+        public DutyController(AppDbContext db)
         {
             _db = db;
         }

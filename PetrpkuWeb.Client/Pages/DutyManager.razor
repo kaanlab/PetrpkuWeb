@@ -81,7 +81,7 @@
                             <MatOption Value="-1" Disabled="true" />
                             @foreach (var user in users)
                             {
-                                <MatOption Value="@user.UserInfoId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
+                                <MatOption Value="@user.AppUserId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
                             }
                         }
                     </MatSelect>
@@ -104,7 +104,7 @@
     public DateTime? PikDate { get; set; } = DateTime.Now;
     public List<Duty> listOfDuty { get; set; } = new List<Duty>();
     List<DateTime> days { get; set; }
-    List<UserInfo> users;
+    List<AppUser> users;
 
     DateTime title = DateTime.Now;
 
@@ -120,7 +120,7 @@
     #region Validation prop
 
     private EditContext EditContext;
-    protected DutyVM dutyVM { get; set; } = new DutyVM();
+    protected DutyViewModel dutyVM { get; set; } = new DutyViewModel();
     protected bool DisabledOnValidation { get; set; } = true;
 
     #endregion
@@ -171,7 +171,7 @@
 
         await GetCalendarAsync(month, year);
 
-        users = await HttpClient.GetJsonAsync<List<UserInfo>>("api/users/all");
+        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
 
     }
 
@@ -208,12 +208,12 @@
         var day = Int32.Parse(dutyVM.Day);
         var user = Int32.Parse(dutyVM.User);
         var date = new DateTime(year, month, day);
-        var findUser = users.Where(u => u.UserInfoId == user).FirstOrDefault();
+        var findUser = users.Where(u => u.AppUserId == user).FirstOrDefault();
 
         var duty = new Duty()
         {
             DayOfDuty = date,
-            UserInfoId = findUser.UserInfoId
+            AppUserId = findUser.AppUserId
 
         };
 
