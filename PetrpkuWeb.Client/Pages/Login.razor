@@ -5,13 +5,6 @@
 
 <h1>Вход</h1>
 
-@if (ShowErrors )
-{
-    <div class="alert alert-danger" role="alert">
-        <p>@Error</p>
-    </div>
-}
-
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Пожалуйста, введите свои учетные данные</h5>
@@ -35,27 +28,15 @@
 @code {
 
     private LoginViewModel loginModel = new LoginViewModel();
-    private bool ShowErrors;
-    private string Error = "";
-    
+
 
     private async Task HandleLogin()
     {
-        try
-        {
-            ShowErrors = false;
 
-            var result = await AuthService.Login(loginModel);
+        var result = await AuthService.Login(loginModel);
 
-            if (result.Successful)
-                UriHelper.NavigateTo("/");
-
-        }
-        catch
-        {
-            Error = "Ошибка";
-            ShowErrors = true;
-        }
+        if (result.Successful)
+            UriHelper.NavigateTo("/");
 
     }
 

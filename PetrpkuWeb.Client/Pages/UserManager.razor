@@ -1,9 +1,10 @@
-@page "/birthdaymanager"
+@page "/usermanager"
 
+@attribute [Authorize(Roles = "pku_admins")]
 @inject HttpClient HttpClient
 
 
-<h2 class="col-12 mb-4 text-center"> Дни рождения пользователей</h2>
+<h2 class="col-12 mb-4 text-center"> Редактирование пользователей</h2>
 
 @if (users == null)
 {
@@ -24,7 +25,7 @@ else
     <table class="table">
         <thead class="thead-dark">
             <tr>
-                <th scope="col">Фамилия</th>
+                <th scope="col">Ф.И.О</th>
                 <th scope="col">Должность</th>
                 <th scope="col">День рождения</th>
                 <th scope="col"></th>
@@ -34,7 +35,7 @@ else
         {
             var id = user.AppUserId;
             <tr>
-                <td>@user.LastName</td>
+                <td>@user.DisplayName</td>
                 <td>@user.WorkingPosition</td>
                 <td>@user.Birthday.ToShortDateString()</td>
                 <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(id))" Label="Редактировать" /></td>
@@ -47,9 +48,11 @@ else
 {
     <EditForm Model="@editUser">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>День рождения @editUser.LastName</MatDialogTitle>
+            <MatDialogTitle>День рождения @editUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <p>Выберите дату и нажмите сохранить</p>
+                <p>Укажите должность</p>
+                <InputText @bind-Value="@WorkingPosition"></InputText>
+                <p>Выберите дату</p>
                 <InputDate @bind-Value="@BirthDate"></InputDate>
             </MatDialogContent>
             <MatDialogActions>
@@ -66,6 +69,7 @@ else
     AppUser editUser { get; set; }
     protected int AppUserId { get; set; } = 0;
     protected DateTime? BirthDate { get; set; }
+    protected string WorkingPosition { get; set; }
 
     bool dialogIsOpen = false;
 
@@ -90,13 +94,15 @@ else
         AppUserId = id;
         editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
         BirthDate = editUser.Birthday;
+        WorkingPosition = editUser.WorkingPosition;
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
         editUser.Birthday = BirthDate.Value;
-        await HttpClient.PutJsonAsync<AppUser>($"/api/users/updatebirthday/{editUser.AppUserId}", editUser);
+        editUser.WorkingPosition = WorkingPosition;
+        await HttpClient.PutJsonAsync<AppUser>($"/api/users/updateuser/{editUser.AppUserId}", editUser);
     }
 
 }

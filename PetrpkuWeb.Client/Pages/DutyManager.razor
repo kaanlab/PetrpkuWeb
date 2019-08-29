@@ -1,5 +1,5 @@
 @page "/dutymanager"
-@attribute [Authorize(Roles = "admin")]
+@attribute [Authorize(Roles = "pku_admins")]
 
 @using PetrpkuWeb.Client.Extensions
 
@@ -30,7 +30,7 @@
                     {
                         <tr>
                             <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                            <td>@dutyUser.AssignedTo.LastName</td>
+                            <td>@dutyUser.AssignedTo.DisplayName</td>
                             <td>@dutyUser.AssignedTo.WorkingPosition</td>
                             <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
                         </tr>
@@ -81,7 +81,7 @@
                                 <MatOption Value="-1" Disabled="true" />
                                 @foreach (var user in users)
                                 {
-                                    <MatOption Value="@user.AppUserId.ToString()">@user.LastName - @user.WorkingPosition</MatOption>
+                                    <MatOption Value="@user.AppUserId.ToString()">@user.DisplayName - @user.WorkingPosition</MatOption>
                                 }
                             }
                         </MatSelect>

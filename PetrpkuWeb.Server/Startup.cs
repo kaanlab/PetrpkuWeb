@@ -79,6 +79,7 @@ namespace PetrpkuWeb.Server
 
             if (env.IsDevelopment())
             {
+                app.UseBlazorDebugging();
                 app.UseDeveloperExceptionPage();
             }
 
