@@ -9,7 +9,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             return new FakeUser()
             {
                 DisplayName = "Иванов И.И.",
-                Username = "fakeuser2",
+                Username = "fakeuser3",
                 Roles = new [] {"admin"}
             };
         }

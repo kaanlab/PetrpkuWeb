@@ -45,67 +45,57 @@ namespace PetrpkuWeb.Server.Controllers
         {
 
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
-                return Unauthorized(new {message = "Username or password can't be null"});
+                return Unauthorized(new { message = "Username or password can't be null" });
 
-            try
+            var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
+            if (ldapUser == null)
             {
+                return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
+            }
 
-                var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
-
-                if (ldapUser != null)
+            var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.Username);
+            if (appUserIdentity == null)
+            {
+                appUserIdentity = new AppUserIdentity()
                 {
-                    var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.Username);
-                    if (appUserIdentity == null)
+                    UserName = ldapUser.Username,
+                    DisplayName = ldapUser.DisplayName,
+                    AssosiateUser = new AppUser()
                     {
-                        appUserIdentity = new AppUserIdentity()
-                        {
-                            UserName = ldapUser.Username,
-                            DisplayName = ldapUser.DisplayName,
-                            AssosiateUser = new AppUser()
-                            {
-                                DisplayName = ldapUser.DisplayName
-                            }
-                        };
-
-                        await _userManager.CreateAsync(appUserIdentity);
+                        DisplayName = ldapUser.DisplayName
                     }
+                };
 
-                    await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
+                await _userManager.CreateAsync(appUserIdentity);
+            }
 
-                    var claims = new List<Claim>
+           await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
+
+            var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
                         new Claim(ClaimTypes.Name, appUserIdentity.UserName),
-                        new Claim(ClaimTypes.UserData, appUserIdentity.AssosiateUser.AppUserId.ToString())
+                        new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
                     };
 
-                    foreach (var role in ldapUser.Roles)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
-                    }
-
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt")["Key"]));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                    var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration.GetSection("Jwt")["ExpireDays"]));
-
-                    var token = new JwtSecurityToken(
-                        _configuration.GetSection("Jwt")["Issuer"],
-                        _configuration.GetSection("Jwt")["Audience"],
-                        claims,
-                        expires: expiry,
-                        signingCredentials: creds
-                    );
-
-                    return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
-                }
-
-                return Unauthorized(new LoginResult { Successful = false, Error = $"User {model.Username} not found" });
-
-            }
-            catch (Exception e)
+            foreach (var role in ldapUser.Roles)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new LoginResult { Successful = false, Error = $"Something went wrong: {e.Message}"});
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt")["Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration.GetSection("Jwt")["ExpireDays"]));
+
+            var token = new JwtSecurityToken(
+                _configuration.GetSection("Jwt")["Issuer"],
+                _configuration.GetSection("Jwt")["Audience"],
+                claims,
+                expires: expiry,
+                signingCredentials: creds
+            );
+
+            return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
     
     

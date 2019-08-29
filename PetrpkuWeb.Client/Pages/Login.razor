@@ -1,5 +1,6 @@
 @page "/login"
 
+@using System.Net.Http
 @inject IAuthService AuthService
 @inject IUriHelper UriHelper
 
@@ -25,18 +26,33 @@
     </div>
 </div>
 
+<MatSnackbar @bind-IsOpen="@showError">
+    <MatSnackbarContent>@message</MatSnackbarContent>
+</MatSnackbar>
+
 @code {
 
     private LoginViewModel loginModel = new LoginViewModel();
+    private bool showError = false;
+    private string message;
 
 
     private async Task HandleLogin()
     {
+        try
+        {
+  
+            await AuthService.Login(loginModel);
+        }
+        catch (HttpRequestException e)
+        {
+            showError = true;
+            message = e.Message;
+            this.StateHasChanged();
+            return;
+        }
 
-        var result = await AuthService.Login(loginModel);
-
-        if (result.Successful)
-            UriHelper.NavigateTo("/");
+        UriHelper.NavigateTo("/");
 
     }
 

@@ -43,7 +43,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [HttpPut("updateuser/{appUserId}")]
+        [HttpPut("update/{appUserId}")]
         public async Task<IActionResult> PutUserAsync(int appUserId, AppUser user)
         {
             if (appUserId != user.AppUserId)

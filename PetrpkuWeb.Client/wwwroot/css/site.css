@@ -30,6 +30,7 @@
     background-position: 50% 75%;
     background-repeat: no-repeat;
     color: #fff;
+    z-index: 6;
 }
 
 /* The sticky class is added to the navbar with JS when it reaches its scroll position */

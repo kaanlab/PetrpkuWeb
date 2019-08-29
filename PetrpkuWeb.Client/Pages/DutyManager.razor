@@ -6,97 +6,97 @@
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
 
-    <h2 class="col-12 mb-4 text-center">График дежурства руководящего состава ППКУ на @title.ToString("MMMM yyyy").ToLower() г.</h2>
+<h2 class="col-12 mb-4 text-center">График дежурства руководящего состава ППКУ на @title.ToString("MMMM yyyy").ToLower() г.</h2>
 
-    <div class="row mb-2">
-        <div class="col-8 border-right">
-            @if (listOfDuty != null)
-            {
-                <table class="table">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">
-                                <MatTooltip Tooltip="Сортировать по дате" TargetId="SpanTooltip">
-                                    <span id="SpanTooltip" @onclick="@(() => SortTable("DayOfDuty"))">Дата</span>
-                                    <MatIcon Icon="@(GetSortStyle("DayOfDuty"))" />
-                                </MatTooltip>
-                            </th>
-                            <th scope="col">Фамилия</th>
-                            <th scope="col">Должность</th>
-                            <th scope="col"></th>
-                        </tr>
-                    </thead>
-                    @foreach (var dutyUser in listOfDuty)
-                    {
-                        <tr>
-                            <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                            <td>@dutyUser.AssignedTo.DisplayName</td>
-                            <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                            <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
-                        </tr>
-                    }
-                </table>
-            }
-            <div class="col-12 md-2">
-                <MatButton Raised="true" Icon="save_alt" OnClick="@(() => DownloadFile(PikDate.Value.Month, PikDate.Value.Year))" Label="Скачать" />
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="row mb-2">
-                <div class="col-12">
-                    <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" DateFormat="d-m-Y" />
-                </div>
-            </div>
-            <div class="row mb-4 border-bottom">
-                <div class="col-12 mb-4">
-                    <MatButton Raised="true" Icon="calendar_today" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" Label="Применить" />
-                </div>
-            </div>
-            <div class="row">
-                <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
-                    <div class="col-12 mb-2">
-                        <MatSelect Label="Дата" @bind-Value="dutyVM.Day" Outlined="true">
-                            @if (days == null)
-                            {
-                                <MatOption Value="">(loading...)</MatOption>
-                            }
-                            else
-                            {
-                                <MatOption Value="-1" Disabled="true" />
-                                @foreach (var day in days)
-                                {
-                                    <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
-                                }
-                            }
-                        </MatSelect>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <MatSelect Label="Дежурный" @bind-Value="dutyVM.User" Outlined="true">
-                            @if (users == null)
-                            {
-                                <MatOption Value="">(loading...)</MatOption>
-                            }
-                            else
-                            {
-                                <MatOption Value="-1" Disabled="true" />
-                                @foreach (var user in users)
-                                {
-                                    <MatOption Value="@user.AppUserId.ToString()">@user.DisplayName - @user.WorkingPosition</MatOption>
-                                }
-                            }
-                        </MatSelect>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <MatButton Raised="true" Icon="add" Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
-                    </div>
-                    <div class="col-12">
-                        <DataAnnotationsValidator />
-                        <ValidationErrors Model="@dutyVM" />
-                    </div>
-                </EditForm>
-            </div>
+<div class="row mb-2">
+    <div class="col-8 border-right">
+        @if (listOfDuty != null)
+        {
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">
+                            <MatTooltip Tooltip="Сортировать по дате" TargetId="SpanTooltip">
+                                <span id="SpanTooltip" @onclick="@(() => SortTable("DayOfDuty"))">Дата</span>
+                                <MatIcon Icon="@(GetSortStyle("DayOfDuty"))" />
+                            </MatTooltip>
+                        </th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Должность</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                @foreach (var dutyUser in listOfDuty)
+                {
+                    <tr>
+                        <th scope="row">@dutyUser.DayOfDuty.Day</th>
+                        <td>@dutyUser.AssignedTo.DisplayName</td>
+                        <td>@dutyUser.AssignedTo.WorkingPosition</td>
+                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                    </tr>
+                }
+            </table>
+        }
+        <div class="col-12 md-2">
+            <MatButton Raised="true" Icon="save_alt" OnClick="@(() => DownloadFile(PikDate.Value.Month, PikDate.Value.Year))" Label="Скачать" />
         </div>
     </div>
+    <div class="col-4">
+        <div class="row mb-2">
+            <div class="col-12">
+                <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" DateFormat="d-m-Y" />
+            </div>
+        </div>
+        <div class="row mb-4 border-bottom">
+            <div class="col-12 mb-4">
+                <MatButton Raised="true" Icon="calendar_today" OnClick="@(() => GetCalendarAsync(PikDate.Value.Month, PikDate.Value.Year))" Label="Применить" />
+            </div>
+        </div>
+        <div class="row">
+            <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
+                <div class="col-12 mb-2">
+                    <MatSelect Label="Дата" @bind-Value="dutyVM.Day" Outlined="true">
+                        @if (days == null)
+                        {
+                            <MatOption Value="">(loading...)</MatOption>
+                        }
+                        else
+                        {
+                            <MatOption Value="-1" Disabled="true" />
+                            @foreach (var day in days)
+                            {
+                                <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
+                            }
+                        }
+                    </MatSelect>
+                </div>
+                <div class="col-12 mb-2">
+                    <MatSelect Label="Дежурный" @bind-Value="dutyVM.User" Outlined="true">
+                        @if (users == null)
+                        {
+                            <MatOption Value="">(loading...)</MatOption>
+                        }
+                        else
+                        {
+                            <MatOption Value="-1" Disabled="true" />
+                            @foreach (var user in users)
+                            {
+                                <MatOption Value="@user.AppUserId.ToString()">@user.DisplayName - @user.WorkingPosition</MatOption>
+                            }
+                        }
+                    </MatSelect>
+                </div>
+                <div class="col-12 mb-2">
+                    <MatButton Raised="true" Icon="add" Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
+                </div>
+                <div class="col-12">
+                    <DataAnnotationsValidator />
+                    <ValidationErrors Model="@dutyVM" />
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
 
 
 @code {
@@ -215,11 +215,12 @@
 
         };
 
-        listOfDuty.Add(new Duty
-        {
-            DayOfDuty = date,
-            AssignedTo = findUser
-        });
+        listOfDuty.Add(
+            new Duty
+            {
+                DayOfDuty = date,
+                AssignedTo = findUser
+            });
 
         days.Remove(duty.DayOfDuty);
 
