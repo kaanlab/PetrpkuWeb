@@ -2,25 +2,59 @@
 @inject IAppVersionService AppVersionService
 
 
-<header class="shadow-lg">
-    <!-- Main foto  -->
-    <div class="main-bgfoto">
-    </div>
-    <NavMenu />
-</header>
-<main class="container mt-3 mb-5">
-    <CalendRss />
-    @Body
-</main>
-<footer class="footer fixed-bottom footer-bgfoto">
-    <div class="container">
-        <div class="row mt-2">
-            <div class="col-6">
-                <p class="text-left">Лаборатория ИОТ &copy; 2019</p>
+<div class="d-flex @SidebarCssClass" id="wrapper">
+    <AuthorizeView>       
+            <MatFAB Icon="menu" OnClick="() => ToggleSidebarMenu()" Id="toggle-sidebar-fab" Style="@SidebarCssStyle"></MatFAB>
+            <!-- Sidebar -->
+            <div class="bg-light border-right" id="sidebar-wrapper">
+                <div class="sidebar-heading">@context.User.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault()</div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Добавить новость</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Редактировать профиль</a>
+                    <KadryMenu />
+                    <AdminMenu />
+                    <a href="logout" class="list-group-item list-group-item-action bg-light">Выход</a>                    
+                </div>
             </div>
-            <div class="col-6">
-                <p class="text-right">v: @AppVersionService.Version</p>
+    </AuthorizeView>
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <header class="shadow-lg">
+            <!-- Main foto  -->
+            <div class="main-bgfoto">
             </div>
-        </div>
+            <NavMenu />
+        </header>
+        <main class="container mt-3 mb-5">
+            <CalendRss />
+            @Body
+        </main>
+        <footer class="footer fixed-bottom footer-bgfoto">
+            <div class="container">
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <p class="text-left">Лаборатория ИОТ &copy; 2019</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="text-right">v: @AppVersionService.Version</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
-</footer>
+    <!-- /#page-content-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+@code {
+
+    bool collapseSidebarMenu = true;
+
+    string SidebarCssClass => collapseSidebarMenu ? "toggled " : null;
+    string SidebarCssStyle => collapseSidebarMenu ? "left: 2rem" : "left: 13rem";
+
+    void ToggleSidebarMenu()
+    {
+        collapseSidebarMenu = !collapseSidebarMenu;
+    }
+}
