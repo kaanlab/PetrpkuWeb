@@ -102,7 +102,7 @@ else
         dialogIsOpen = false;
         editUser.Birthday = BirthDate.Value;
         editUser.WorkingPosition = WorkingPosition;
-        await HttpClient.PutJsonAsync<AppUser>($"/api/users/update/{editUser.AppUserId}", editUser);
+        await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{editUser.AppUserId}", editUser);
     }
 
 }

@@ -29,6 +29,15 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.AppUsers.ToListAsync();
         }
 
+        [HttpGet("{appUserId:int}")]
+        public  ActionResult<AppUser> GetUser(int appUserId)
+        {
+            return _db.AppUsers
+                .Where(u => u.AppUserId == appUserId)
+                .Include(a => a.AuthIdentity)
+                .FirstOrDefault();
+        }
+
         [HttpGet("birthdaysweek")]
         public async Task<ActionResult<List<AppUser>>> GetUsersBirthdaysForWeek()
         {
@@ -43,7 +52,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [HttpPut("update/{appUserId}")]
+        [HttpPut("update/{appUserId:int}")]
         public async Task<IActionResult> PutUserAsync(int appUserId, AppUser user)
         {
             if (appUserId != user.AppUserId)

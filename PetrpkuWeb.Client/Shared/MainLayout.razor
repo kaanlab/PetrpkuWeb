@@ -10,7 +10,7 @@
                 <div class="sidebar-heading">@context.User.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault()</div>
                 <div class="list-group list-group-flush">
                     <a href="#" class="list-group-item list-group-item-action bg-light">Добавить новость</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Редактировать профиль</a>
+                    <a href="/user/@context.User.Claims.Where(c => c.Type == ClaimTypes.UserData).Select(c => c.Value).FirstOrDefault()" class="list-group-item list-group-item-action bg-light">Редактировать профиль</a>
                     <KadryMenu />
                     <AdminMenu />
                     <a href="logout" class="list-group-item list-group-item-action bg-light">Выход</a>                    

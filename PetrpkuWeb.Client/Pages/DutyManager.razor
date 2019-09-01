@@ -176,7 +176,7 @@
     async Task GetCalendarAsync(int month, int year)
     {
         listOfDuty = null;
-        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
+        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
 
         days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
             .ToList();
@@ -190,7 +190,7 @@
         if (dutyUser.DutyId > 0)
         {
             var deleteDutyUser = listOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
-            await HttpClient.DeleteAsync($"/api/duty/delete/{deleteDutyUser.DutyId}");
+            await HttpClient.DeleteAsync($"api/duty/delete/{deleteDutyUser.DutyId}");
         }
 
         listOfDuty.Remove(dutyUser);
@@ -224,13 +224,13 @@
 
         days.Remove(duty.DayOfDuty);
 
-        await HttpClient.PostJsonAsync<Duty>("/api/duty/create", duty);
+        await HttpClient.PostJsonAsync<Duty>("api/duty/create", duty);
 
     }
 
     async Task DownloadFile(int month, int year)
     {
-        var file = await HttpClient.GetByteArrayAsync($"/api/duty/getfile/{month}/{year}");
+        var file = await HttpClient.GetByteArrayAsync($"api/duty/getfile/{month}/{year}");
 
         await JSRuntime.SaveAs($"Дежурные_на_{month}-{year}_{DateTime.Now.ToString("HH-mm-ss")}.docx", file);
     }
