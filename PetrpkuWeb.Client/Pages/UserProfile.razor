@@ -1,0 +1,73 @@
+@page "/user/{appUserId}"
+
+@inject HttpClient HttpClient
+
+
+@if(user != null)
+{ 
+<div class="col-4">
+    <MatCard class="demo-mat-card">
+        <MatCardContent>
+            <MatCardMedia Wide="true" ImageUrl="https://material-components.github.io/material-components-web-catalog/static/media/photos/3x2/2.jpg"></MatCardMedia>
+            <div class="demo-mat-card-content">
+                <MatHeadline6 class="demo-mat-card-clean-margin">
+                    @user.DisplayName
+                </MatHeadline6>
+                <MatSubtitle2 class="demo-mat-card-clean-margin">
+                    @user.LastName
+                </MatSubtitle2>
+            </div>
+
+            <MatBody2 class="demo-mat-card-content demo-mat-card-clean-margin">
+                @user.WorkingPosition
+            </MatBody2>
+        </MatCardContent>
+        <MatCardActions>
+            <MatCardActionButtons>
+                <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; })" Label="Редактировать" />
+            </MatCardActionButtons>
+        </MatCardActions>
+    </MatCard>
+</div>
+
+<EditForm Model="@user">
+    <MatDialog @bind-IsOpen="@dialogIsOpen">
+        <MatDialogTitle>День рождения @user.DisplayName</MatDialogTitle>
+        <MatDialogContent>
+            <p>Укажите должность</p>
+            <InputText @bind-Value="@user.FirstName"></InputText>
+            <InputText @bind-Value="@user.LastName"></InputText>
+            <InputText @bind-Value="@user.MidleName"></InputText>
+            <InputText @bind-Value="@user.WorkingPosition"></InputText>
+            <p>Выберите дату</p>
+            <InputDate @bind-Value="@user.Birthday"></InputDate>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+}
+
+
+@code {
+
+    [Parameter]
+    public string AppUserId { get; set; }
+
+    private AppUser user;
+    bool dialogIsOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
+    }
+
+    async Task OkClick()
+    {
+        dialogIsOpen = false;
+        await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
+        
+    }
+}

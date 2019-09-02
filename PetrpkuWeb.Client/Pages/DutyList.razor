@@ -85,7 +85,7 @@
 
     async Task GetCalendarAsync(int month, int year)
     {
-        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"/api/duty/month/{month}/{year}");
+        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
 
         daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
             .Cast<DayOfWeek>()
