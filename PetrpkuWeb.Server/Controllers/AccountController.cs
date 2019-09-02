@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PetrpkuWeb.NovellDirectoryLdap;
@@ -45,12 +46,12 @@ namespace PetrpkuWeb.Server.Controllers
         {
 
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
-                return Unauthorized(new { message = "Username or password can't be null" });
+                return Unauthorized(new {message = "Username or password can't be null"});
 
             var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
             if (ldapUser == null)
             {
-                return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
+                return BadRequest(new LoginResult {Successful = false, Error = "Bad username or password"});
             }
 
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.Username);
@@ -69,14 +70,14 @@ namespace PetrpkuWeb.Server.Controllers
                 await _userManager.CreateAsync(appUserIdentity);
             }
 
-           await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
+            await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
 
             var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
-                        new Claim(ClaimTypes.Name, appUserIdentity.UserName),
-                        new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
-                    };
+            {
+                new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
+                new Claim(ClaimTypes.Name, appUserIdentity.UserName),
+                new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
+            };
 
             foreach (var role in ldapUser.Roles)
             {
@@ -95,9 +96,30 @@ namespace PetrpkuWeb.Server.Controllers
                 signingCredentials: creds
             );
 
-            return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
+            return Ok(new LoginResult {Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token)});
         }
-    
-    
+
+
+        [HttpGet("search/{userName}")]
+        public ActionResult<IAuthUser> SearchAccount(string userName)
+        {
+            var ldapUser = _appAuthenticationService.Search(userName);
+            if (ldapUser == null)
+            {
+                return BadRequest(new LoginResult { Successful = false, Error = "Bad username" });
+            }
+            return Ok(ldapUser);
+        }
+
+        [HttpGet("searchallfromldap")]
+        public ActionResult<List<LdapUser>> SearchAllFromLdap()
+        {
+            var ldapUser = _appAuthenticationService.SearchAll();
+            if (ldapUser.Count > 0)
+            {
+                return Ok(ldapUser);
+            }
+            return BadRequest(new { Message = "Пользователи отсутствуют" });
+        }
     }
 }

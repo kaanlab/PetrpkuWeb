@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using Novell.Directory.Ldap;
+using PetrpkuWeb.Shared.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -46,7 +48,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             {
                 var user = result.Next();
                 if (user != null)
-                {                    
+                {
                     _connection.Bind(user.Dn, password);
                     if (_connection.Bound)
                     {
@@ -106,7 +108,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                 _config.SearchBase,
                 LdapConnection.ScopeSub,
                 searchFilter,
-                new[] {                    
+                new[] {
                     DisplayNameAttribute,
                     SAMAccountNameAttribute,
                     MailAttribute
@@ -118,7 +120,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             {
                 var user = result.Next();
                 if (user != null)
-                {    
+                {
                     if (_connection.Bound)
                     {
                         var accountNameAttr = user.GetAttribute(SAMAccountNameAttribute);
@@ -137,13 +139,13 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                         if (emailAttr == null)
                         {
                             throw new Exception("Your account is missing an email.");
-                        }                        
+                        }
 
                         return new LdapUser
                         {
                             DisplayName = displayNameAttr.StringValue,
                             Username = accountNameAttr.StringValue,
-                            Email = emailAttr.StringValue                            
+                            Email = emailAttr.StringValue
                         };
                     }
                 }
@@ -154,6 +156,54 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             }
 
             return null;
+        }
+
+
+        public List<IAuthUser> SearchAll()
+        {
+            _connection.Connect(_config.Url, LdapConnection.DefaultPort);
+            _connection.Bind(_config.Username, _config.Password);
+
+            var listOfLdapUsers = new List<IAuthUser>();
+
+            ILdapSearchResults lsc = _connection.Search(
+                _config.SearchBase,
+                LdapConnection.ScopeSub,
+                "(&(objectClass=user)(objectClass=person)(sAMAccountName=*)(!(ou=students)))",
+                new[] {
+                DisplayNameAttribute,
+                SAMAccountNameAttribute,
+                MailAttribute},
+                false);
+
+            while (lsc.HasMore())
+            {
+                LdapEntry nextEntry = null;
+                try
+                {
+                    nextEntry = lsc.Next();
+                }
+                catch (LdapException e)
+                {
+                    Console.WriteLine("Error: " + e.LdapErrorMessage);
+                    //Exception is thrown, go for next entry
+                    continue;
+                }
+
+                // Get the attribute set of the entry
+                LdapAttributeSet attributeSet = nextEntry.GetAttributeSet();
+
+                listOfLdapUsers.Add(
+                    new LdapUser
+                    {
+                        DisplayName = attributeSet.GetAttribute("displayName")?.StringValue,
+                        Username = attributeSet.GetAttribute("sAMAccountName")?.StringValue
+                    });
+            }
+
+            _connection.Disconnect();
+
+            return listOfLdapUsers;
         }
 
         private string GetGroup(string value)

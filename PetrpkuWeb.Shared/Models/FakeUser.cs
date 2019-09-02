@@ -1,5 +1,5 @@
 ﻿
-namespace PetrpkuWeb.NovellDirectoryLdap
+namespace PetrpkuWeb.Shared.Models
 {
     public class FakeUser : IAuthUser
         {

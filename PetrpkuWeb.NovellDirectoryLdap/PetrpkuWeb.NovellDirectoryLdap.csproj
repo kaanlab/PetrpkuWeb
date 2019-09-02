@@ -9,4 +9,8 @@
     <PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="3.0.0-beta5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PetrpkuWeb.Shared\PetrpkuWeb.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

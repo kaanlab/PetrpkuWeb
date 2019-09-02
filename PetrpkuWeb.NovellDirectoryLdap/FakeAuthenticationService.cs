@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PetrpkuWeb.Shared.Models;
+using System;
+using System.Collections.Generic;
 
 namespace PetrpkuWeb.NovellDirectoryLdap
 {
@@ -15,6 +17,11 @@ namespace PetrpkuWeb.NovellDirectoryLdap
         }
 
         public IAuthUser Search(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IAuthUser> SearchAll()
         {
             throw new NotImplementedException();
         }
