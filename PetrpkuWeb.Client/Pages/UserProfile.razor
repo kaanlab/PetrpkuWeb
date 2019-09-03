@@ -5,75 +5,77 @@
 <div class="row">
     @if (user != null)
     {
-        <div class="col-4">
-            <MatCard class="demo-mat-card">
-                <MatCardContent>
-                    <MatCardMedia Wide="true" ImageUrl=@user.PhotoUrl></MatCardMedia>
-                    <div class="demo-mat-card-content">
-                        <MatHeadline6 class="demo-mat-card-clean-margin">
-                            @user.DisplayName
-                        </MatHeadline6>
-                        <MatSubtitle2 class="demo-mat-card-clean-margin">
-                            @user.LastName
-                        </MatSubtitle2>
-                    </div>
-
-                    <MatBody2 class="demo-mat-card-content demo-mat-card-clean-margin">
-                        @user.WorkingPosition
-                    </MatBody2>
-                </MatCardContent>
-                <MatCardActions>
-                    <MatCardActionButtons>
-                        <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; })" Label="Редактировать" />
-                    </MatCardActionButtons>
-                </MatCardActions>
-            </MatCard>
-        </div>
-        <div class="col-4">
-            @if (user.IsDuty)
-            {
-
-                @foreach (var duty in user.DaysOfDuty)
+        @if (identityUserId == user.AppUserId)
+        {
+            <div class="col-4">
+                <MatCard class="demo-mat-card">
+                    <MatCardContent>
+                        <MatCardMedia Wide="true" ImageUrl=@user.PhotoUrl></MatCardMedia>
+                        <div class="demo-mat-card-content">
+                            <MatHeadline6 class="demo-mat-card-clean-margin">
+                                @user.DisplayName
+                            </MatHeadline6>
+                            <MatSubtitle2 class="demo-mat-card-clean-margin">
+                                @user.LastName
+                            </MatSubtitle2>
+                        </div>
+                        <MatBody2 class="demo-mat-card-content demo-mat-card-clean-margin">
+                            @user.WorkingPosition
+                        </MatBody2>
+                    </MatCardContent>
+                    <MatCardActions>
+                        <MatCardActionButtons>
+                            <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; })" Label="Редактировать" />
+                        </MatCardActionButtons>
+                    </MatCardActions>
+                </MatCard>
+            </div>
+            <div class="col-4">
+                @if (user.DaysOfDuty.Any())
                 {
-                    <h2>Мои дежурства</h2>
-                    <table class="table">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Ф.И.О</th>
-                                <th scope="col"></th>
-                            </tr>
-                        </thead>
-                        <tr>
-                            <td>@duty.DayOfDuty.ToShortDateString()</td>
-                        </tr>
-                    </table>
-                }
 
-            }
-        </div>
-        <div class="col-4">
-            @if (user.Articles.Any())
-            {
-                @foreach (var article in user.Articles)
-                {
-                    <h2>Мои новости</h2>
-                    <table class="table">
-                        <thead class="thead-dark">
+                    @foreach (var duty in user.DaysOfDuty)
+                    {
+                        <h2>Мои дежурства</h2>
+                        <table class="table table-striped">
                             <tr>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
+                                <td>@duty.DayOfDuty.ToShortDateString()</td>
                             </tr>
-                        </thead>
-                        <tr>
-                            <td>@article.Title</td>
-                            <td>@article.Content</td>
-                            <td>@article.PublishDate.ToShortDateString()</td>
-                        </tr>
-                    </table>
+                        </table>
+                    }
+
                 }
-            }
-        </div>
+            </div>
+            <div class="col-4">
+                @if (user.Articles.Any())
+                {
+                    @foreach (var article in user.Articles)
+                    {
+                        <h2>Мои новости</h2>
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td>@article.Title</td>
+                                <td>@article.Content</td>
+                                <td>@article.PublishDate.ToShortDateString()</td>
+                            </tr>
+                        </table>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <MatButton Outlined="true" Link="/" Label="На главную" Icon="home" />
+            </div>
+        }
     }
 </div>
 
@@ -81,14 +83,14 @@
 {
     <EditForm Model="@user">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>День рождения @user.DisplayName</MatDialogTitle>
+            <MatDialogTitle>@user.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <p>Укажите должность</p>
-                <InputText @bind-Value="@user.FirstName"></InputText>
-                <InputText @bind-Value="@user.LastName"></InputText>
-                <InputText @bind-Value="@user.MidleName"></InputText>
-                <InputText @bind-Value="@user.WorkingPosition"></InputText>
-                <p>Выберите дату</p>
+                <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
+                <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
+                <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
+                <MatTextField Label="Должность" @bind-Value="@user.WorkingPosition"></MatTextField>
+                <MatTextField Label="Телефон" @bind-Value="@user.Phone"></MatTextField>
+                <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
             <MatDialogActions>
@@ -108,7 +110,7 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private AppUser user;
-    //private int identityUserId = 0;
+    private int identityUserId;
     bool dialogIsOpen = false;
 
     protected override async Task OnInitializedAsync()
@@ -116,7 +118,7 @@
         user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
 
         var identityUser = (await authenticationStateTask).User;
-        //identityUserId = Int32.Parse(identityUser.Claims.Where(c => c.Type == ClaimTypes.UserData).Select(c => c.Value).FirstOrDefault());
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
 
     }
 

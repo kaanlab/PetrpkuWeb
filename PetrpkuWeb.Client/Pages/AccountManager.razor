@@ -4,7 +4,7 @@
 @inject HttpClient HttpClient
 
 
-<h2 class="col-12 mb-4 text-center">Добавление пользователей в систему</h2>
+<h2 class="col-12 mb-4 text-center">Пользователи</h2>
 
 <div class="row mb-5">
     <MatButton Outlined="true" Icon="add" OnClick="@(() => OpenNewUserDialog())" Label="Добавить пользователя" />
@@ -89,7 +89,7 @@
     <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
         <MatDialogTitle>Выберете пользователя</MatDialogTitle>
         <MatDialogContent>
-            <MatSelect Label="Пользователь" @bind-Value="@ldapUser.UserName" Outlined="true">
+            <MatSelect @bind-Value="@ldapUser.UserName" Outlined="true">
                 @if (ldapUsers == null)
                 {
                     <MatOption Value="">(loading...)</MatOption>

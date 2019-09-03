@@ -1,6 +1,6 @@
 @page "/usermanager"
 
-@attribute [Authorize(Roles = "pku_admins")]
+@attribute [Authorize(Roles = "pku_admins, admin")]
 @inject HttpClient HttpClient
 
 
@@ -60,12 +60,16 @@ else
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>День рождения @editUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <p>Укажите должность</p>
-                <InputText @bind-Value="@editUser.WorkingPosition"></InputText>
-                <p>Выберите дату</p>
+                <MatTextField Label="Фамилия" @bind-Value="@editUser.LastName"></MatTextField>
+                <MatTextField Label="Имя" @bind-Value="@editUser.FirstName"></MatTextField>
+                <MatTextField Label="Отчество" @bind-Value="@editUser.MidleName"></MatTextField>
+                <MatTextField Label="Должность" @bind-Value="@editUser.WorkingPosition"></MatTextField>
+                <MatTextField Label="Телефон" @bind-Value="@editUser.Phone"></MatTextField>
+                <p>День рождения</p>
                 <InputDate @bind-Value="@editUser.Birthday"></InputDate>
-                <p>Может быть дежурным?</p>
-                <InputCheckbox @bind-Value="@editUser.IsDuty"></InputCheckbox>
+                <hr />
+                <p>Дежурный</p>
+                <MatCheckbox @bind-Checked="@editUser.IsDuty"></MatCheckbox>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
@@ -80,8 +84,8 @@ else
     List<AppUser> users { get; set; }
     AppUser editUser { get; set; }
     protected int AppUserId { get; set; } = 0;
-    protected DateTime? BirthDate { get; set; }
-    protected string WorkingPosition { get; set; }
+    //protected DateTime? BirthDate { get; set; }
+    //protected string WorkingPosition { get; set; }
     string TrCssClass;
 
     bool dialogIsOpen = false;
