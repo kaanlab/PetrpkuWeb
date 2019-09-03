@@ -59,20 +59,23 @@ namespace PetrpkuWeb.Server.Controllers
             }
 
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
-            //if (appUserIdentity == null)
-            //{
-            //    appUserIdentity = new AppUserIdentity()
-            //    {
-            //        UserName = ldapUser.UserName,
-            //        DisplayName = ldapUser.DisplayName,
-            //        AssosiateUser = new AppUser()
-            //        {
-            //            DisplayName = ldapUser.DisplayName
-            //        }
-            //    };
+            if (appUserIdentity == null)
+            {
+                appUserIdentity = new AppUserIdentity()
+                {
+                    UserName = ldapUser.UserName,
+                    DisplayName = ldapUser.DisplayName,
+                    AssosiateUser = new AppUser()
+                    {
+                        DisplayName = ldapUser.DisplayName,
+                        PhotoUrl = @"/img/user/default_avatar.png",
+                        IsActive = true,
+                        IsDuty = false
+                    }
+                };
 
-            //    await _userManager.CreateAsync(appUserIdentity);
-            //}
+                await _userManager.CreateAsync(appUserIdentity);
+            }
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
 
@@ -103,7 +106,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
-        [HttpGet("search/{ldapUserName:string}")]
+        [HttpGet("search/{ldapUserName}")]
         public ActionResult<IAuthUser> SearchUser(string ldapUserName)
         {
             var ldapUser = _appAuthenticationService.Search(ldapUserName);
@@ -125,10 +128,9 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(new { Message = "Пользователи отсутствуют" });
         }
 
-        [HttpPost("add/identity")]
-        public async Task<ActionResult<bool>> AddAccount(IAuthUser authUser)
+        [HttpPost("identity/add")]
+        public async Task<ActionResult<bool>> AddAccount(LdapUser authUser)
         {
-
             if (authUser != null)
             {
                 var appUserIdentity = new AppUserIdentity()
@@ -137,7 +139,10 @@ namespace PetrpkuWeb.Server.Controllers
                     DisplayName = authUser.DisplayName,
                     AssosiateUser = new AppUser()
                     {
-                        DisplayName = authUser.DisplayName
+                        DisplayName = authUser.DisplayName,
+                        PhotoUrl = @"/img/user/default_avatar.png",
+                        IsActive = true,
+                        IsDuty = false
                     }
                 };
 
@@ -156,6 +161,29 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
             return await _db.Users.ToListAsync();
+        }
+
+        [HttpDelete("identity/delete/{appUserIdentityId}")]
+        public IActionResult Delete(string appUserIdentityId)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = _db.Users.Find(appUserIdentityId);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var appUser = _db.AppUsers.Find(user.AssosiateUser.AppUserId);
+                appUser.DisplayName = user.DisplayName + "(d)";
+                appUser.IsActive = false;
+
+                _db.Users.Remove(user);
+                _db.SaveChanges();
+                return NoContent();
+            }
+
+            return BadRequest(ModelState);
         }
     }
 }

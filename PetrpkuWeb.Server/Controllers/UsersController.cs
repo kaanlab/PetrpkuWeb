@@ -23,10 +23,23 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [HttpGet("all")]
-        public async Task<ActionResult<List<AppUser>>> GetUsers()
+        [HttpGet("all/active")]
+        public async Task<ActionResult<List<AppUser>>> GetActiveUsers()
         {
-            return await _db.AppUsers.ToListAsync();
+            return await _db.AppUsers.Where(u => u.IsActive).ToListAsync();
+        }
+
+        [HttpGet("duty/active")]
+        public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
+        {
+            return await _db.AppUsers.Where(u => u.IsActive && u.IsDuty).ToListAsync();
+        }
+
+
+        [HttpGet("all/disabled")]
+        public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
+        {
+            return await _db.AppUsers.Where(u => u.IsActive == false).ToListAsync();
         }
 
         [HttpGet("{appUserId:int}")]
@@ -34,7 +47,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return _db.AppUsers
                 .Where(u => u.AppUserId == appUserId)
-                .Include(a => a.AuthIdentity)
+                .Include(d => d.DaysOfDuty)
+                .Include(a => a.Articles)
                 .FirstOrDefault();
         }
 
@@ -65,7 +79,5 @@ namespace PetrpkuWeb.Server.Controllers
 
             return NoContent();
         }
-
-       
     }
 }
