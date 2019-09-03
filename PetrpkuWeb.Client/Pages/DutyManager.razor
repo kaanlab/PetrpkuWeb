@@ -170,7 +170,7 @@
 
         await GetCalendarAsync(month, year);
 
-        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
+        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/duty/active");
     }
 
     async Task GetCalendarAsync(int month, int year)

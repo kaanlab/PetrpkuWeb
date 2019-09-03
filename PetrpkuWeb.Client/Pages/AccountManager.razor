@@ -6,56 +6,122 @@
 
 <h2 class="col-12 mb-4 text-center">Добавление пользователей в систему</h2>
 
-@if (usersIdentity == null)
-{
-    <div class="spinner-border text-primary text-center" role="status">
-        <span class="sr-only">Loading...</span>
-    </div>
-}
-else if (usersIdentity.Count == 0)
-{
-    <div class="card border-danger mb-3">
-        <div class="card-body">
-            <p class="card-text">No users...</p>
-        </div>
-    </div>
-}
-else
-{
-    <table class="table">
-        <thead class="thead-dark">
-        <tr>
-            <th scope="col">Ф.И.О</th>
-            <th scope="col">Должность</th>
-            <th scope="col"></th>
-        </tr>
-        </thead>
-        @foreach (var user in usersIdentity)
+<div class="row mb-5">
+    <MatButton Outlined="true" Icon="add" OnClick="@(() => OpenNewUserDialog())" Label="Добавить пользователя" />
+</div>
+<div class="row">
+    <div class="col-6">
+        <h2>Активные учетные записи</h2>
+        @if (usersIdentity == null)
         {
-            <tr>
-                <td>@user.DisplayName</td>
-                <td>@user.UserName</td>
-                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(user.Id))" Label="Редактировать" /></td>
-            </tr>
+            <div class="spinner-border text-primary text-center" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
         }
-    </table>
-}
+        else if (usersIdentity.Count == 0)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">No users...</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Логин</th>
+                        <th scope="col">Ф.И.О.</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                @foreach (var user in usersIdentity)
+                {
+                    var id = user.Id;
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.DisplayName</td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(id))" Label="Удалить" /></td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    <div class="col-6">
+        <h2>Архивные учетные записи</h2>
+        @if (disabledUsers == null)
+        {
+            <div class="spinner-border text-primary text-center" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        }
+        else if (disabledUsers.Count == 0)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">No users...</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Должность</th>
 
-@if (user != null)
-{
-    <EditForm Model="@user">
-        <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>День рождения @user.DisplayName</MatDialogTitle>
-            <MatDialogContent>
-                <p>Укажите должность</p>
-                <InputText @bind-Value="@user.UserName"></InputText>
-            </MatDialogContent>
-            <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="save" Type="submit" OnClick="@Delete" Label="Сохранить" />
-            </MatDialogActions>
-        </MatDialog>
-    </EditForm>
+                    </tr>
+                </thead>
+                @foreach (var user in disabledUsers)
+                {
+
+                    <tr>
+                        <td>@user.DisplayName</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+</div>
+
+<EditForm Model="@ldapUser">
+    <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
+        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogContent>
+            <MatSelect Label="Пользователь" @bind-Value="@ldapUser.UserName" Outlined="true">
+                @if (ldapUsers == null)
+                {
+                    <MatOption Value="">(loading...)</MatOption>
+                }
+                else
+                {
+                    <MatOption Value="-1" Disabled="true" />
+                    @foreach (var user in ldapUsers)
+                    {
+                        <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
+                    }
+                }
+            </MatSelect>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newUserDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@(() =>AddAccount(ldapUser.UserName))" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+@if(user != null)
+{ 
+<EditForm Model="@user">
+    <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
+        <MatDialogTitle>Удалить пользователя @user.DisplayName?</MatDialogTitle>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(user.Id))" Label="Да" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
 }
 
 @code {
@@ -63,32 +129,59 @@ else
     List<LdapUser> ldapUsers { get; set; }
     List<AppUserIdentity> usersIdentity { get; set; }
     AppUserIdentity user { get; set; }
-    LdapUser ldapUser { get; set; }
+    List<AppUser> appUsers;
+    List<AppUser> disabledUsers;
+    LdapUser ldapUser { get; set; } = new LdapUser();
 
-    bool dialogIsOpen = false;
+    bool editUserDialogIsOpen = false;
+    bool newUserDialogIsOpen = false;
 
 
     protected async override Task OnInitializedAsync()
     {
-        usersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
+        await GetIdentity();
+        await GetAppUsers();
         ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
+
     }
 
-    async Task AddAccount()
+    async Task GetIdentity()
     {
-        await HttpClient.PostJsonAsync<LdapUser>("api/account/add/identity", ldapUser);
+        usersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
     }
 
-    void OpenDialog(string userId)
+    async Task GetAppUsers()
     {
-        dialogIsOpen = true;
+        appUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
+        disabledUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/disabled");
+    }
+
+    void OpenNewUserDialog()
+    {
+        newUserDialogIsOpen = true;
+    }
+
+    async Task AddAccount(string userName)
+    {
+        newUserDialogIsOpen = false;
+        var newUser = ldapUsers.Where(u => u.UserName == userName).FirstOrDefault();
+        await HttpClient.PostJsonAsync<LdapUser>("api/account/identity/add", newUser);
+        await GetIdentity();
+
+    }
+
+    void OpenEditUserDialog(string userId)
+    {
+        editUserDialogIsOpen = true;
         user = usersIdentity.Where(ui => ui.Id == userId).FirstOrDefault();
     }
 
-    async Task Delete()
+    async Task Delete(string userId)
     {
-        dialogIsOpen = false;
-        await HttpClient.PostJsonAsync<LdapUser>("api/account/add", ldapUser);
+        editUserDialogIsOpen = false;
+        await HttpClient.DeleteAsync($"api/account/identity/delete/{userId}");
+        await GetIdentity();
+        await GetAppUsers();
     }
 
 }

@@ -79,7 +79,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                         return new LdapUser
                         {
                             DisplayName = displayNameAttr.StringValue,
-                            Username = accountNameAttr.StringValue,
+                            UserName = accountNameAttr.StringValue,
                             Email = emailAttr.StringValue,
                             Roles = memberAttr.StringValueArray
                                 .Select(x => GetGroup(x))
@@ -144,7 +144,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                         return new LdapUser
                         {
                             DisplayName = displayNameAttr.StringValue,
-                            Username = accountNameAttr.StringValue,
+                            UserName = accountNameAttr.StringValue,
                             Email = emailAttr.StringValue
                         };
                     }
@@ -197,7 +197,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                     new LdapUser
                     {
                         DisplayName = attributeSet.GetAttribute("displayName")?.StringValue,
-                        Username = attributeSet.GetAttribute("sAMAccountName")?.StringValue
+                        UserName = attributeSet.GetAttribute("sAMAccountName")?.StringValue
                     });
             }
 

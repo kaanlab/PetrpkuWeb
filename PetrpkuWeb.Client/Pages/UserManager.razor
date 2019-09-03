@@ -34,7 +34,17 @@ else
         @foreach (var user in users)
         {
             var id = user.AppUserId;
-            <tr>
+
+            @if (user.IsDuty)
+            {
+                TrCssClass = "table-danger";
+            }
+            else
+            {
+                TrCssClass = null;
+            }
+
+            <tr class="@TrCssClass">
                 <td>@user.DisplayName</td>
                 <td>@user.WorkingPosition</td>
                 <td>@user.Birthday.ToShortDateString()</td>
@@ -51,9 +61,11 @@ else
             <MatDialogTitle>День рождения @editUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <p>Укажите должность</p>
-                <InputText @bind-Value="@WorkingPosition"></InputText>
+                <InputText @bind-Value="@editUser.WorkingPosition"></InputText>
                 <p>Выберите дату</p>
-                <InputDate @bind-Value="@BirthDate"></InputDate>
+                <InputDate @bind-Value="@editUser.Birthday"></InputDate>
+                <p>Может быть дежурным?</p>
+                <InputCheckbox @bind-Value="@editUser.IsDuty"></InputCheckbox>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
@@ -70,38 +82,35 @@ else
     protected int AppUserId { get; set; } = 0;
     protected DateTime? BirthDate { get; set; }
     protected string WorkingPosition { get; set; }
+    string TrCssClass;
 
     bool dialogIsOpen = false;
 
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-
-    private async Task DoSomething()
-    {
-        var user = (await authenticationStateTask).User;
-        user.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault();
-    }
-
     protected async override Task OnInitializedAsync()
     {
-        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
+        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
     }
 
     void OpenDialog(int id)
     {
         dialogIsOpen = true;
-        editUser = null;
+        //editUser = null;
         AppUserId = id;
         editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
-        BirthDate = editUser.Birthday;
-        WorkingPosition = editUser.WorkingPosition;
+        //BirthDate = editUser.Birthday;
+        //WorkingPosition = editUser.WorkingPosition;
+    }
+
+    void IsDuty()
+    {
+
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        editUser.Birthday = BirthDate.Value;
-        editUser.WorkingPosition = WorkingPosition;
+        //editUser.Birthday = BirthDate.Value;
+        //editUser.WorkingPosition = WorkingPosition;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{editUser.AppUserId}", editUser);
     }
 
