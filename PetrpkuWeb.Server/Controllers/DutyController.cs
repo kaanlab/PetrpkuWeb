@@ -35,7 +35,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .FirstOrDefaultAsync();
         }
 
-        [HttpGet("month/{selectedMonth}/{selectedYear}")]
+        [HttpGet("month/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult<List<Duty>>> GetDutyMonthAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
             return await _db.Duties
@@ -45,7 +45,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [HttpGet("getfile/{selectedMonth}/{selectedYear}")]
+        [HttpGet("getfile/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult> GetFileAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
             string filePath = $"UploadFiles/{selectedMonth}-{selectedYear}.docx";
@@ -80,7 +80,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok();
         }
 
-        [HttpPut("update/{dutyId}")]
+        [HttpPut("update/{dutyId:int}")]
         public async Task<IActionResult> PutDutyAsync(int dutyId, Duty duty)
         {
             if (dutyId != duty.DutyId)
@@ -94,10 +94,10 @@ namespace PetrpkuWeb.Server.Controllers
             return NoContent();
         }
 
-        [HttpDelete("delete/{dutyUserId}")]
-        public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyUserId)
+        [HttpDelete("delete/{dutyId:int}")]
+        public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyId)
         {
-            var dutyUser = await _db.Duties.FindAsync(dutyUserId);
+            var dutyUser = await _db.Duties.FindAsync(dutyId);
 
             if (dutyUser == null)
             {

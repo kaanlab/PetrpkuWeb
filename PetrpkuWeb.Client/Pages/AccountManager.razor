@@ -1,18 +1,18 @@
 @page "/accountmanager"
 
-@attribute [Authorize(Roles = "pku_admins")]
+
 @inject HttpClient HttpClient
 
 
 <h2 class="col-12 mb-4 text-center">Добавление пользователей в систему</h2>
 
-@if (users == null)
+@if (usersIdentity == null)
 {
     <div class="spinner-border text-primary text-center" role="status">
         <span class="sr-only">Loading...</span>
     </div>
 }
-else if (users.Count == 0)
+else if (usersIdentity.Count == 0)
 {
     <div class="card border-danger mb-3">
         <div class="card-body">
@@ -27,37 +27,32 @@ else
         <tr>
             <th scope="col">Ф.И.О</th>
             <th scope="col">Должность</th>
-            <th scope="col">День рождения</th>
             <th scope="col"></th>
         </tr>
         </thead>
-        @foreach (var user in users)
+        @foreach (var user in usersIdentity)
         {
-            var id = user.AppUserId;
             <tr>
                 <td>@user.DisplayName</td>
-                <td>@user.WorkingPosition</td>
-                <td>@user.Birthday.ToShortDateString()</td>
-                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(id))" Label="Редактировать" /></td>
+                <td>@user.UserName</td>
+                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(user.Id))" Label="Редактировать" /></td>
             </tr>
         }
     </table>
 }
 
-@if (editUser != null)
+@if (user != null)
 {
-    <EditForm Model="@editUser">
+    <EditForm Model="@user">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>День рождения @editUser.DisplayName</MatDialogTitle>
+            <MatDialogTitle>День рождения @user.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <p>Укажите должность</p>
-                <InputText @bind-Value="@WorkingPosition"></InputText>
-                <p>Выберите дату</p>
-                <InputDate @bind-Value="@BirthDate"></InputDate>
+                <InputText @bind-Value="@user.UserName"></InputText>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
+                <MatButton Icon="save" Type="submit" OnClick="@Delete" Label="Сохранить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -66,36 +61,34 @@ else
 @code {
 
     List<LdapUser> ldapUsers { get; set; }
-    List<AppUser> users { get; set; }
-    AppUser editUser { get; set; }
-    protected int AppUserId { get; set; } = 0;
-    protected DateTime? BirthDate { get; set; }
-    protected string WorkingPosition { get; set; }
+    List<AppUserIdentity> usersIdentity { get; set; }
+    AppUserIdentity user { get; set; }
+    LdapUser ldapUser { get; set; }
 
     bool dialogIsOpen = false;
 
+
     protected async override Task OnInitializedAsync()
     {
-        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
-        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/users/searchallfromldap");
+        usersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
+        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
 
-    void OpenDialog(int id)
+    async Task AddAccount()
+    {
+        await HttpClient.PostJsonAsync<LdapUser>("api/account/add/identity", ldapUser);
+    }
+
+    void OpenDialog(string userId)
     {
         dialogIsOpen = true;
-        editUser = null;
-        AppUserId = id;
-        editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
-        BirthDate = editUser.Birthday;
-        WorkingPosition = editUser.WorkingPosition;
+        user = usersIdentity.Where(ui => ui.Id == userId).FirstOrDefault();
     }
 
-    async Task OkClick()
+    async Task Delete()
     {
         dialogIsOpen = false;
-        editUser.Birthday = BirthDate.Value;
-        editUser.WorkingPosition = WorkingPosition;
-        await HttpClient.PutJsonAsync<AppUser>($"/api/users/update/{editUser.AppUserId}", editUser);
+        await HttpClient.PostJsonAsync<LdapUser>("api/account/add", ldapUser);
     }
 
 }

@@ -11,8 +11,8 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             return new FakeUser()
             {
                 DisplayName = "Иванов И.И.",
-                Username = "fakeuser3",
-                Roles = new [] {"admin"}
+                UserName = "fakeuser3",
+                Roles = new[] { "admin" }
             };
         }
 
@@ -23,7 +23,26 @@ namespace PetrpkuWeb.NovellDirectoryLdap
 
         public List<IAuthUser> SearchAll()
         {
-            throw new NotImplementedException();
+            var list = new List<IAuthUser>()
+            {
+                new FakeUser() {
+                    DisplayName = "Васечкин В.В.",
+                    UserName = "vasechkin",
+                    Roles = new[] { "admin" }
+                },
+                new FakeUser() {
+                    DisplayName = "Петров П.П.",
+                    UserName = "petrov",
+                    Roles = new[] { "admin" }
+                },
+                new FakeUser()
+                {
+                    DisplayName = "Иванов И.И.",
+                    UserName = "fakeuser3",
+                    Roles = new[] { "admin" }
+                }
+            };
+            return list;
         }
     }
 }
