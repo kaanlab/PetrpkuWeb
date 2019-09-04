@@ -13,27 +13,23 @@
         @if (identityUserId == user.AppUserId)
         {
             <div class="col-4">
-                <MatCard class="demo-mat-card">
-                    <MatCardContent>
-                        <MatCardMedia Wide="true" ImageUrl=~@user.PhotoUrl></MatCardMedia>
-                        <div class="demo-mat-card-content">
-                            <MatHeadline6 class="demo-mat-card-clean-margin">
-                                @user.DisplayName
-                            </MatHeadline6>
-                            <MatSubtitle2 class="demo-mat-card-clean-margin">
-                                @user.LastName
-                            </MatSubtitle2>
-                        </div>
-                        <MatBody2 class="demo-mat-card-content demo-mat-card-clean-margin">
-                            @user.WorkingPosition
-                        </MatBody2>
-                    </MatCardContent>
-                    <MatCardActions>
-                        <MatCardActionButtons>
-                            <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; uploadFilePath = user.PhotoUrl;})" Label="Редактировать" />
-                        </MatCardActionButtons>
-                    </MatCardActions>
-                </MatCard>
+                <div class="card" style="width: 18rem;">
+                    <img src="@user.PhotoUrl" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">@user.DisplayName</h5>
+                        <p class="card-text">@user.WorkingPosition</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">@user.LastName</li>
+                        <li class="list-group-item">@user.FirstName</li>
+                        <li class="list-group-item">@user.MidleName</li>
+                        <li class="list-group-item"><MatIcon Icon="phone" />@user.Phone</li>
+                        <li class="list-group-item"><MatIcon Icon="room" />@user.Office</li>
+                    </ul>
+                    <div class="card-body">
+                        <MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" />
+                    </div>
+                </div>
             </div>
             <div class="col-4">
                 @if (user.DaysOfDuty.Any())
@@ -95,9 +91,9 @@
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
                 <MatTextField Label="Должность" @bind-Value="@user.WorkingPosition"></MatTextField>
                 <MatTextField Label="Телефон" @bind-Value="@user.Phone"></MatTextField>
-                <MatTextField Label="Фото" @bind-Value="@uploadFilePath"></MatTextField>
+                <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
+                <MatTextField Label="Фото" Disabled="true" @bind-Value="@uploadFilePath"></MatTextField>
                 <input type="file" @ref=inputElement @ref:suppressField />
-                <button @onclick=UploadFile class="btn btn-primary">Read file</button>
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -121,7 +117,7 @@
     private int identityUserId;
     bool dialogIsOpen = false;
 
-   
+
     //string imageData = String.Empty;
     ElementReference inputElement;
     string uploadFilePath = String.Empty;
@@ -134,6 +130,12 @@
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
 
+    }
+
+    void OpenDialog()
+    {
+        dialogIsOpen = true; 
+        uploadFilePath = user.PhotoUrl;
     }
 
     async Task OkClick()
