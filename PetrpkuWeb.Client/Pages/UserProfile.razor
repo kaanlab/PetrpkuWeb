@@ -1,6 +1,11 @@
 @page "/user/{appUserId}"
 
+@using Blazor.FileReader
+@using System.IO;
+
 @inject HttpClient HttpClient
+@inject IFileReaderService fileReaderService
+
 
 <div class="row">
     @if (user != null)
@@ -10,7 +15,7 @@
             <div class="col-4">
                 <MatCard class="demo-mat-card">
                     <MatCardContent>
-                        <MatCardMedia Wide="true" ImageUrl=@user.PhotoUrl></MatCardMedia>
+                        <MatCardMedia Wide="true" ImageUrl=~@user.PhotoUrl></MatCardMedia>
                         <div class="demo-mat-card-content">
                             <MatHeadline6 class="demo-mat-card-clean-margin">
                                 @user.DisplayName
@@ -25,7 +30,7 @@
                     </MatCardContent>
                     <MatCardActions>
                         <MatCardActionButtons>
-                            <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; })" Label="Редактировать" />
+                            <MatButton Outlined="true" Icon="edit" OnClick="@(e => { dialogIsOpen = true; uploadFilePath = user.PhotoUrl;})" Label="Редактировать" />
                         </MatCardActionButtons>
                     </MatCardActions>
                 </MatCard>
@@ -90,6 +95,9 @@
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
                 <MatTextField Label="Должность" @bind-Value="@user.WorkingPosition"></MatTextField>
                 <MatTextField Label="Телефон" @bind-Value="@user.Phone"></MatTextField>
+                <MatTextField Label="Фото" @bind-Value="@uploadFilePath"></MatTextField>
+                <input type="file" @ref=inputElement @ref:suppressField />
+                <button @onclick=UploadFile class="btn btn-primary">Read file</button>
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -113,6 +121,12 @@
     private int identityUserId;
     bool dialogIsOpen = false;
 
+   
+    //string imageData = String.Empty;
+    ElementReference inputElement;
+    string uploadFilePath = String.Empty;
+
+
     protected override async Task OnInitializedAsync()
     {
         user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
@@ -125,7 +139,22 @@
     async Task OkClick()
     {
         dialogIsOpen = false;
+        user.PhotoUrl = uploadFilePath;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
 
+    }
+
+    async Task UploadFile()
+    {
+        var files = await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync();
+
+        using (MemoryStream memoryStream = await files.First().CreateMemoryStreamAsync())
+        {
+            byte[] bytes = memoryStream.ToArray();
+
+            //var imageData = $"data:image/jpg;base64,{Convert.ToBase64String(bytes)}";
+            var response = await HttpClient.PostAsync(requestUri: "api/upload/file", content: new ByteArrayContent(bytes));
+            uploadFilePath = await response.Content.ReadAsStringAsync();
+        }
     }
 }

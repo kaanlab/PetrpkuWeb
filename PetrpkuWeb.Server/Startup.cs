@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -41,8 +43,8 @@ namespace PetrpkuWeb.Server
 
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
 
-            //services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
+            //services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -86,6 +88,12 @@ namespace PetrpkuWeb.Server
             //app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "UploadFiles")),
+                RequestPath = "/UploadFiles"
+            });
 
             app.UseRouting();
 

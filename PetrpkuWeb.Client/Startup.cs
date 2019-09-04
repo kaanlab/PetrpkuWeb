@@ -1,3 +1,4 @@
+using Blazor.FileReader;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
@@ -16,6 +17,7 @@ namespace PetrpkuWeb.Client
             services.AddAuthorizationCore();
             services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
         }
 
         public void Configure(IComponentsApplicationBuilder app)
