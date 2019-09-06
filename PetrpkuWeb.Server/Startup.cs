@@ -43,8 +43,8 @@ namespace PetrpkuWeb.Server
 
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
 
-            //services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
+            //services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -88,11 +88,17 @@ namespace PetrpkuWeb.Server
             //app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseStaticFiles();
+            //app.UseStaticFiles(new StaticFileOptions
+            //{
+            //    FileProvider = new PhysicalFileProvider(
+            //        Path.Combine(Directory.GetCurrentDirectory(), "UploadFiles")),
+            //    RequestPath = "/UploadFiles"
+            //});
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "UploadFiles")),
-                RequestPath = "/UploadFiles"
+                    Path.Combine(Directory.GetCurrentDirectory(), "uploadfolder")),
+                RequestPath = "/uploadfolder"
             });
 
             app.UseRouting();

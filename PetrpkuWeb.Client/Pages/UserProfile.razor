@@ -93,7 +93,7 @@
                 <MatTextField Label="Телефон" @bind-Value="@user.Phone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
                 <MatTextField Label="Фото" Disabled="true" @bind-Value="@uploadFilePath"></MatTextField>
-                <input type="file" @ref=inputElement @ref:suppressField />
+                <input type="file" @ref=inputElement @onchange="UploadFile" />
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -134,7 +134,7 @@
 
     void OpenDialog()
     {
-        dialogIsOpen = true; 
+        dialogIsOpen = true;
         uploadFilePath = user.PhotoUrl;
     }
 

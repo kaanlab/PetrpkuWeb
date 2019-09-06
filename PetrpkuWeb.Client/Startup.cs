@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using PetrpkuWeb.Client.Extensions;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PetrpkuWeb.Client
 {

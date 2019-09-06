@@ -8,11 +8,12 @@ namespace PetrpkuWeb.Client.Extensions
 {
     public static class FileUtilites
     {
-        public static Task SaveAs(this IJSRuntime js, string filename, byte[] data)
-            => js.InvokeAsync<object>(
+        public static async ValueTask<object> SaveAs(this IJSRuntime js, string filename, byte[] data)
+        { 
+            return await js.InvokeAsync<ValueTask<object>>(
                 "saveAsFile",
                 filename,
                 Convert.ToBase64String(data));
-
+        }
     }
 }

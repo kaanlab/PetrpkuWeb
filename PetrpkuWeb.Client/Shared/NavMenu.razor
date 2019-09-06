@@ -29,9 +29,9 @@
 
     string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    protected async override Task OnAfterRenderAsync()
+    protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        await JSRuntime.InvokeAsync<object>("stickyNav");
+        await JSRuntime.InvokeAsync<ValueTask<object>>("stickyNav");
 
     }
 

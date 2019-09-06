@@ -2,7 +2,7 @@
 
 @using System.Net.Http
 @inject IAuthService AuthService
-@inject IUriHelper UriHelper
+@inject NavigationManager NavigationManager
 
 <h1>Вход</h1>
 
@@ -52,7 +52,7 @@
             return;
         }
 
-        UriHelper.NavigateTo("/");
+        NavigationManager.NavigateTo("/");
 
     }
 
