@@ -61,19 +61,7 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
             if (appUserIdentity == null)
             {
-                appUserIdentity = new AppUserIdentity()
-                {
-                    UserName = ldapUser.UserName,
-                    DisplayName = ldapUser.DisplayName,
-                    AssosiateUser = new AppUser()
-                    {
-                        DisplayName = ldapUser.DisplayName,
-                        PhotoUrl = @"/img/user/default_avatar.png",
-                        IsActive = true,
-                        IsDuty = false
-                    }
-                };
-
+                appUserIdentity = AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
             }
 
@@ -133,18 +121,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (authUser != null)
             {
-                var appUserIdentity = new AppUserIdentity()
-                {
-                    UserName = authUser.UserName,
-                    DisplayName = authUser.DisplayName,
-                    AssosiateUser = new AppUser()
-                    {
-                        DisplayName = authUser.DisplayName,
-                        PhotoUrl = @"/img/user/default_avatar.png",
-                        IsActive = true,
-                        IsDuty = false
-                    }
-                };
+                var appUserIdentity = AddIdentityUser(authUser);
 
                 var result = await _userManager.CreateAsync(appUserIdentity);
 
@@ -184,6 +161,25 @@ namespace PetrpkuWeb.Server.Controllers
             }
 
             return BadRequest(ModelState);
+        }
+
+
+        private AppUserIdentity AddIdentityUser(IAuthUser authUser)
+        {
+            var appUserIdentity = new AppUserIdentity()
+            {
+                UserName = authUser.UserName,
+                DisplayName = authUser.DisplayName,
+                AssosiateUser = new AppUser()
+                {
+                    DisplayName = authUser.DisplayName,
+                    PhotoUrl = @"/img/user/default_avatar.png",
+                    IsActive = true,
+                    IsDuty = false
+                }
+            };
+
+            return appUserIdentity;
         }
     }
 }

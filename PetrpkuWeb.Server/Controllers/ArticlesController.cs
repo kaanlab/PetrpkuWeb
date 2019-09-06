@@ -24,7 +24,12 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<List<Article>>> GetArticles()
         {
-            return await _db.Articles.Include(a => a.Author).ToListAsync();
+            return await _db.Articles
+                .Include(a => a.Author)
+                .OrderBy(d => d.PublishDate)
+                .ToListAsync();
         }
+
+
     }
 }

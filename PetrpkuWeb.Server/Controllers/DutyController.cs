@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
@@ -48,7 +46,7 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("getfile/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult> GetFileAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
-            string filePath = $"UploadFiles/{selectedMonth}-{selectedYear}.docx";
+            var tempFileName = Path.GetTempFileName();
 
             var listOfDuty = await _db.Duties
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
@@ -59,7 +57,7 @@ namespace PetrpkuWeb.Server.Controllers
             var days = Enumerable.Range(1, DateTime.DaysInMonth(selectedYear, selectedMonth)).Select(day => new DateTime(selectedYear, selectedMonth, day))
                 .ToList();
 
-            var file = GenerateDocFile(filePath, listOfDuty, days);
+            var file = GenerateDocFile(tempFileName, listOfDuty, days);
 
             return File(file, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"API_{DateTime.Now.ToString("dd-MM-yyyy")}.docx");
         }
@@ -148,21 +146,26 @@ namespace PetrpkuWeb.Server.Controllers
                     TableCell tc1 = new TableCell(new Paragraph(new Run(new Text(day.Day.ToString()))));
                     TableCell tc2 = new TableCell();
                     TableCell tc3 = new TableCell();
+                    TableCell tc4 = new TableCell();
 
 
                     if (listOfDuty.Find(d => d.DayOfDuty.Day == day.Day) != null)
                     {
-                        tc2 = new TableCell(new Paragraph(new Run(new Text(listOfDuty.Find(d => d.DayOfDuty.Day == day.Day).AssignedTo.LastName))));
-                        tc3 = new TableCell(new Paragraph(new Run(new Text(listOfDuty.Find(d => d.DayOfDuty.Day == day.Day).AssignedTo.WorkingPosition))));
+
+                        var duty = listOfDuty.Find(d => d.DayOfDuty.Day == day.Day);
+                        tc2 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.WorkingPosition))));
+                        tc3 = new TableCell(new Paragraph(new Run(new Text($"{duty.AssignedTo.LastName} {duty.AssignedTo.FirstName} {duty.AssignedTo.MidleName}"))));
+                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.Phone))));
                     }
                     else
                     {
                         tc2 = new TableCell(new Paragraph(new Run(new Text(""))));
                         tc3 = new TableCell(new Paragraph(new Run(new Text(""))));
+                        tc4 = new TableCell(new Paragraph(new Run(new Text(""))));
                     }
 
                     // Add a cell to each column in the row.
-                    tr1.Append(tc1, tc2, tc3);
+                    tr1.Append(tc1, tc2, tc3, tc4);
 
                     // Add row to the table.
                     tbl.AppendChild(tr1);

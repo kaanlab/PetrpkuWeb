@@ -7,9 +7,11 @@
 @inject IJSRuntime JSRuntime
 
 <h2 class="col-12 mb-4 text-center">График дежурства руководящего состава ППКУ на @title.ToString("MMMM yyyy").ToLower() г.</h2>
-
+<div class="alert alert-danger" role="alert">
+   Для печатную форму попадают следующие поля: фамилия, имя, отчество, должность, моб.телефон 
+</div>
 <div class="row mb-2">
-    <div class="col-8 border-right">
+    <div class="col-9 border-right">
         @if (listOfDuty != null)
         {
             <table class="table">
@@ -21,19 +23,23 @@
                                 <MatIcon Icon="@(GetSortStyle("DayOfDuty"))" />
                             </MatTooltip>
                         </th>
-                        <th scope="col">Фамилия</th>
+                        <th scope="col"></th>
                         <th scope="col">Должность</th>
+                        <th scope="col">Ф.И.О.</th>
+                        <th scope="col">Телефон</th>
                         <th scope="col"></th>
                     </tr>
                 </thead>
                 @foreach (var dutyUser in listOfDuty)
                 {
-                    <tr>
-                        <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                        <td>@dutyUser.AssignedTo.DisplayName</td>
-                        <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
-                    </tr>
+            <tr>
+                <th scope="row">@dutyUser.DayOfDuty.Day</th>
+                <td>@dutyUser.AssignedTo.DisplayName</td>
+                <td>@dutyUser.AssignedTo.WorkingPosition</td>
+                <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
+                <td>@dutyUser.AssignedTo.Phone</td>
+                <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+            </tr>
                 }
             </table>
         }
@@ -41,7 +47,7 @@
             <MatButton Raised="true" Icon="save_alt" OnClick="@(() => DownloadFile(PikDate.Value.Month, PikDate.Value.Year))" Label="Скачать" />
         </div>
     </div>
-    <div class="col-4">
+    <div class="col-3">
         <div class="row mb-2">
             <div class="col-12">
                 <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" DateFormat="d-m-Y" />
