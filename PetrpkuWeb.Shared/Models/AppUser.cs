@@ -11,7 +11,9 @@ namespace PetrpkuWeb.Shared.Models
         public string LastName { get; set; }
         public string MidleName { get; set; }
         public string WorkingPosition { get; set; }
-        public string Phone { get; set; }
+        public string MobPhone { get; set; }
+        public string IntPhone { get; set; }
+        public string ExtPhone { get; set; }
         public string Office { get; set; }
         public string PhotoUrl { get; set; }
         public DateTime Birthday { get; set; }

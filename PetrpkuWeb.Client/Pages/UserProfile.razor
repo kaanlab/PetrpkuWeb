@@ -1,7 +1,6 @@
 @page "/user/{appUserId}"
 
-@using Blazor.FileReader
-@using System.IO;
+@using System.IO
 
 @inject HttpClient HttpClient
 @inject IFileReaderService fileReaderService
@@ -23,9 +22,9 @@
                         <li class="list-group-item">@user.LastName</li>
                         <li class="list-group-item">@user.FirstName</li>
                         <li class="list-group-item">@user.MidleName</li>
-                        <li class="list-group-item"><MatIcon Icon="contact_phone" />@user.Phone</li>
-                        <li class="list-group-item"><MatIcon Icon="phone_iphone" />@user.Phone</li>
-                        <li class="list-group-item"><MatIcon Icon="phone" />@user.Phone</li>
+                        <li class="list-group-item"><MatIcon Icon="contact_phone" />@user.IntPhone</li>
+                        <li class="list-group-item"><MatIcon Icon="phone_iphone" />@user.MobPhone</li>
+                        <li class="list-group-item"><MatIcon Icon="phone" />@user.ExtPhone</li>
                         <li class="list-group-item"><MatIcon Icon="room" />@user.Office</li>
                     </ul>
                     <div class="card-body">
@@ -93,15 +92,15 @@
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
                 <MatTextField Label="Должность" @bind-Value="@user.WorkingPosition"></MatTextField>
-                <MatTextField Label="Мобильный телефон" @bind-Value="@user.Phone"></MatTextField>
-                <MatTextField Label="Городской телефон" @bind-Value="@user.Phone"></MatTextField>
-                <MatTextField Label="Внутренний телефон" @bind-Value="@user.Phone"></MatTextField>
+                <MatTextField Label="Внутренний телефон" @bind-Value="@user.IntPhone"></MatTextField>
+                <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
+                <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
                 <MatTextField Label="Фото" Disabled="true" @bind-Value="@uploadFilePath"></MatTextField>
                 <div class="alert alert-danger" role="alert">
                     Для профиля желательно квадратное изображение размером 400х400!
                 </div>
-                <input type="file" @ref=inputElement @onchange="UploadFile" />
+                <input type="file" accept="image/x-png, image/jpg, image/jpeg" @ref=inputElement @onchange="UploadFile" />
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -163,7 +162,7 @@
             byte[] bytes = memoryStream.ToArray();
 
             //var imageData = $"data:image/jpg;base64,{Convert.ToBase64String(bytes)}";
-            var response = await HttpClient.PostAsync(requestUri: "api/upload/file", content: new ByteArrayContent(bytes));
+            var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: new ByteArrayContent(bytes));
             uploadFilePath = await response.Content.ReadAsStringAsync();
         }
     }

@@ -30,6 +30,14 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [HttpPost("create")]
+        public async Task<ActionResult<Article>> CreateArticle(Article article)
+        {
+            _db.Articles.Add(article);
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
 
     }
 }

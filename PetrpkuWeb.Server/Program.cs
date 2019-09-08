@@ -18,15 +18,15 @@ namespace PetrpkuWeb.Server
             var host = CreateHostBuilder(args).Build();
 
             // Initialize the database
-            var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-            using (var scope = scopeFactory.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                if (db.Database.EnsureCreated())
-                {
-                    SeedData.Initialize(db);
-                }
-            }
+            //var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
+            //using (var scope = scopeFactory.CreateScope())
+            //{
+            //    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            //    if (db.Database.EnsureCreated())
+            //    {
+            //        SeedData.Initialize(db);
+            //    }
+            //}
 
             host.Run();
         }

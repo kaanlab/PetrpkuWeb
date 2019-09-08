@@ -155,7 +155,7 @@ namespace PetrpkuWeb.Server.Controllers
                         var duty = listOfDuty.Find(d => d.DayOfDuty.Day == day.Day);
                         tc2 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.WorkingPosition))));
                         tc3 = new TableCell(new Paragraph(new Run(new Text($"{duty.AssignedTo.LastName} {duty.AssignedTo.FirstName} {duty.AssignedTo.MidleName}"))));
-                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.Phone))));
+                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.MobPhone))));
                     }
                     else
                     {

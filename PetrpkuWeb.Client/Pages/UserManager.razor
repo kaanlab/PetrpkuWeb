@@ -64,7 +64,7 @@ else
                 <MatTextField Label="Имя" @bind-Value="@editUser.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@editUser.MidleName"></MatTextField>
                 <MatTextField Label="Должность" @bind-Value="@editUser.WorkingPosition"></MatTextField>
-                <MatTextField Label="Телефон" @bind-Value="@editUser.Phone"></MatTextField>
+                <MatTextField Label="Телефон" @bind-Value="@editUser.IntPhone"></MatTextField>
                 <p>День рождения</p>
                 <InputDate @bind-Value="@editUser.Birthday"></InputDate>
                 <hr />
@@ -84,10 +84,8 @@ else
     List<AppUser> users { get; set; }
     AppUser editUser { get; set; }
     protected int AppUserId { get; set; } = 0;
-    //protected DateTime? BirthDate { get; set; }
-    //protected string WorkingPosition { get; set; }
-    string TrCssClass;
 
+    string TrCssClass;
     bool dialogIsOpen = false;
 
     protected async override Task OnInitializedAsync()
@@ -98,24 +96,13 @@ else
     void OpenDialog(int id)
     {
         dialogIsOpen = true;
-        //editUser = null;
         AppUserId = id;
         editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
-        //BirthDate = editUser.Birthday;
-        //WorkingPosition = editUser.WorkingPosition;
-    }
-
-    void IsDuty()
-    {
-
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        //editUser.Birthday = BirthDate.Value;
-        //editUser.WorkingPosition = WorkingPosition;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{editUser.AppUserId}", editUser);
     }
-
 }

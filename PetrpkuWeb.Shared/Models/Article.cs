@@ -10,6 +10,7 @@ namespace PetrpkuWeb.Shared.Models
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime PublishDate { get; set; }
+        public List<string> FilesUrl { get; set; }
 
         // relationship
         public int AppUserId { get; set; }

@@ -21,7 +21,7 @@ namespace PetrpkuWeb.Server.Data
                     MidleName = "Петрович",
                     WorkingPosition = "Начальник спортивного центра",
                     Office = "130",
-                    Phone = "+79114000333",
+                    MobPhone = "+79114000333",
                     PhotoUrl = "img/user/bart.png"
                 },
                 new AppUser()
@@ -33,7 +33,7 @@ namespace PetrpkuWeb.Server.Data
                     MidleName = "Андреевна",
                     WorkingPosition = "Начальник ФЭО",
                     Office = "100",
-                    Phone = "+79114001234",
+                    MobPhone = "+79114001234",
                     PhotoUrl = "img/user/marge.png"
                 },
                 new AppUser()
@@ -45,7 +45,7 @@ namespace PetrpkuWeb.Server.Data
                     MidleName = "Владимировна",
                     WorkingPosition = "Начальник ОКиС",
                     Office = "120",
-                    Phone = "+79114000666",
+                    MobPhone = "+79114000666",
                     PhotoUrl = "img/user/liza.png"
                 },
                 new AppUser()
@@ -57,7 +57,7 @@ namespace PetrpkuWeb.Server.Data
                     MidleName = "Иванович",
                     WorkingPosition = "Начальник отдела МТО",
                     Office = "130",
-                    Phone = "+79115004040",
+                    MobPhone = "+79115004040",
                     PhotoUrl = "img/user/gomer.png"
                 }
             };

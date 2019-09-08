@@ -43,8 +43,8 @@ namespace PetrpkuWeb.Server
 
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
 
-            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-            //services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+            //services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
+            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

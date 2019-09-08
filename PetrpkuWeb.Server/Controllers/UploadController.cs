@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Controllers
 {
@@ -16,17 +17,17 @@ namespace PetrpkuWeb.Server.Controllers
     [ApiController]
     public class UploadController : ControllerBase
     {
-        
-        [HttpPost("file"), DisableRequestSizeLimit]
+
+        [HttpPost("avatar"), DisableRequestSizeLimit]
         public async Task<IActionResult> UploadFile()
         {
             var tempFileName = Path.GetTempFileName();
-            string fileName = Path.GetRandomFileName().Substring(0,8) + ".jpg";
-            string fullPath = $@"uploadfolder/{fileName}";
+            var fileName = Path.GetRandomFileName().Substring(0, 8) + ".jpg";
+            var path = Path.Combine("uploadfolder/avatars", fileName);
 
             await using (var writer = System.IO.File.OpenWrite(tempFileName))
             {
-                await Request.Body.CopyToAsync(writer);               
+                await Request.Body.CopyToAsync(writer);
             }
 
             using (Image image = Image.Load(tempFileName))
@@ -56,10 +57,66 @@ namespace PetrpkuWeb.Server.Controllers
                     image.Mutate(x => x.Resize(image.Width / 20, image.Height / 20));
                 }
 
-                image.Save(fullPath);
+                image.Save(path);
             }
 
-            return Ok(fullPath);
+            return Ok(path);
+        }
+
+        [HttpPost("files"), DisableRequestSizeLimit]
+        public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+        {
+            try
+            {
+                var result = new List<FileUploadViewModel>();
+                var dirPath = CreateRandomNameDirectory();
+
+                foreach (var file in files)
+                {
+                    var extension = Path.GetExtension(file.FileName);
+                    var path = Path.Combine(dirPath, file.FileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    };
+
+                    if (extension.StartsWith(".jp"))
+                    {
+                        using (Image image = Image.Load(path))
+                        {
+                            if (image.Width > 1400 && image.Width < 3000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
+                            }
+                            else if (image.Width > 3000 && image.Width < 5000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 4, image.Height / 4));
+                            }
+                            else if (image.Width > 5000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 6, image.Height / 6));
+                            }
+
+                            image.Save(path);
+                        }
+                    }
+
+                    result.Add(new FileUploadViewModel() { Name = file.FileName, Length = file.Length, Path = path, Extension = extension });
+                }
+                return Ok(result);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+        private string CreateRandomNameDirectory()
+        {
+            var uniqueDir = Path.Combine("uploadfolder/articles", Path.GetRandomFileName().Substring(0, 6));
+            Directory.CreateDirectory(uniqueDir);
+            return uniqueDir;
         }
     }
 }
+
