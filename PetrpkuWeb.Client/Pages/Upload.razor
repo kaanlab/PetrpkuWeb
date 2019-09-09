@@ -43,6 +43,7 @@ This demo reads files that was dropped in without doing anything particular with
 <button @onclick="UploadFiles" class="btn btn-primary">Upload</button>
 
 
+
 @code {
     ElementReference dropTargetElement;
     IFileReaderRef dropReference;
@@ -121,5 +122,9 @@ This demo reads files that was dropped in without doing anything particular with
         }
 
         await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+    }
+
+    
+
     }
 }

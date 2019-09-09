@@ -14,12 +14,17 @@
             <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
             @if (FileUploadVM.Any())
             {
-                @foreach (var file in FileUploadVM)
-                {
-                    <div class="portrait">
-                        <img src="@file.Path" class="img-fluid img-thumbnail" />
-                    </div>
-                }
+        <div class="img-container">
+            
+            @foreach (var file in FileUploadVM)
+            {
+                var rand = new Random();
+                int index = rand.Next(imgCssClass.Length);
+                <div class="@imgCssClass[index]">
+                    <img src="@file.Path" />
+                </div>
+            }
+        </div>
             }
         </div>
         <div class="col-12 mb-2">
@@ -72,17 +77,22 @@ This demo reads files that was dropped in without doing anything particular with
 
 @code {
 
-    Article NewArticle { get; set; } = new Article();
-    List<FileUploadViewModel> FileUploadVM { get; set; } = new List<FileUploadViewModel>();
+        Article NewArticle { get; set; } = new Article();
+        List<FileUploadViewModel> FileUploadVM { get; set; } = new List<FileUploadViewModel>();
 
-    ElementReference dropTargetElement;
-    IFileReaderRef dropReference;
+        ElementReference dropTargetElement;
+        IFileReaderRef dropReference;
 
-    const string dropTargetDragClass = "droptarget-drag";
-    const string dropTargetClass = "droptarget";
+        const string dropTargetDragClass = "droptarget-drag";
+        const string dropTargetClass = "droptarget";
 
-    private List<string>
-    _dropClasses = new List<string>() { dropTargetClass };
+        string[] imgCssClass = { "big", "vertical", "" };
+        
+
+
+
+
+    private List<string> _dropClasses = new List<string>() { dropTargetClass };
 
     string DropClass => string.Join(" ", _dropClasses);
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();

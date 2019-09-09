@@ -17,6 +17,7 @@
     <div class="col-12 mb-2">
         <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="AddToList" />
         <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="UploadFiles" />
+        <button @onclick="ReadFile" class="btn btn-primary">read</button>
     </div>
 </div>
 
@@ -37,12 +38,15 @@
     }
 </div>
 
+<textarea style="max-width: 100%;" cols="50" rows="20">@Output</textarea>
+
 @code {
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
     string Description;
+    string Output { get; set; }
 
     //FileDataViewModel FileData { get; set; } = new FileDataViewModel();
     List<FileViewModel> ListFileData { get; set; } = new List<FileViewModel>();
@@ -53,7 +57,7 @@
 
         var fileData = new FileViewModel();
 
-        
+
         fileReaderReference = fileReaderService.CreateReference(inputElement);
         await fileReaderReference.RegisterDropEventsAsync();
 
@@ -68,36 +72,65 @@
         fileData.Description = Description;
         fileData.Size = fileInfo.Size;
         fileData.Name = fileInfo.Name;
-        
+
         //fileData.Extension = Path.GetExtension(fileInfo.Name);
 
         ListFileData.Add(fileData);
 
-        //this.StateHasChanged();
+        this.StateHasChanged();
 
     }
 
     public async Task UploadFiles()
     {
         var multipartFormDataContent = new MultipartFormDataContent();
-       
-            
-            foreach (var file in await fileReaderReference.EnumerateFilesAsync())
-            {
-                var fileInfo = await file.ReadFileInfoAsync();
-                var fileData = ListFileData.Where(n => n.Name == fileInfo.Name).FirstOrDefault();
 
-                using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync())
-                {
-                    byte[] bytes = memoryStream.ToArray();
-                    var fileContent = new ByteArrayContent(bytes);
-                    multipartFormDataContent.Add(fileContent, fileData.Description, fileData.Name);
-                }
+
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+            var fileData = ListFileData.Where(n => n.Name == fileInfo.Name).FirstOrDefault();
+
+            using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync())
+            {
+                byte[] bytes = memoryStream.ToArray();
+                var fileContent = new ByteArrayContent(bytes);
+                multipartFormDataContent.Add(fileContent, "file", "file.doc");
             }
-       
+        }
+
 
         await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
     }
 
+    public async Task ReadFile()
+    {
+        Output = string.Empty;
+        this.StateHasChanged();
+        var nl = Environment.NewLine;
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+            Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Name)}: {fileInfo.Name}{nl}";
+            Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Size)}: {fileInfo.Size}{nl}";
+            Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Type)}: {fileInfo.Type}{nl}";
+            Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.LastModifiedDate)}: {fileInfo.LastModifiedDate?.ToString() ?? "(N/A)"}{nl}";
+            Output += $"Reading file...";
+            this.StateHasChanged();
 
+            using (var fs = await file.OpenReadAsync())
+            {
+                var bufferSize = 4096;
+                var buffer = new byte[bufferSize];
+                int count;
+                while ((count = await fs.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                {
+                    Output += $"Read {count} bytes. {fs.Position} / {fs.Length}{nl}";
+                    this.StateHasChanged();
+                }
+                Output += $"Done reading file {fileInfo.Name}{nl}.";
+            }
+            this.StateHasChanged();
+        }
+    }
 }
