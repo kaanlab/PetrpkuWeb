@@ -1,0 +1,103 @@
+@page "/upload2"
+
+@using System.IO
+@using PetrpkuWeb.Client.ViewModels
+@inject HttpClient HttpClient
+@inject IFileReaderService fileReaderService
+
+
+<h3>Upload2</h3>
+<div class="row">
+    <div class="col-12 mb-2">
+        <MatTextField Label="Заголовок" @bind-Value="@Description"></MatTextField>
+    </div>
+    <div>
+        <input type="file" accept="pdf,doc,docx,xls,xlsx" @ref=inputElement />
+    </div>
+    <div class="col-12 mb-2">
+        <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="AddToList" />
+        <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="UploadFiles" />
+    </div>
+</div>
+
+<div class="row">
+    @if (ListFileData.Any())
+    {
+        foreach (var file in ListFileData)
+        {
+            <table class="table">
+                <tr>
+                    <td>@file.Name</td>
+                    <td>@file.Description</td>
+                    <td>@file.Size</td>
+ 
+                </tr>
+            </table>
+        }
+    }
+</div>
+
+@code {
+
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
+
+    string Description;
+
+    //FileDataViewModel FileData { get; set; } = new FileDataViewModel();
+    List<FileViewModel> ListFileData { get; set; } = new List<FileViewModel>();
+
+    public async Task AddToList()
+    {
+        //fileReaderReference = fileReaderService.CreateReference(inputElement);
+
+        var fileData = new FileViewModel();
+
+        
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+        await fileReaderReference.RegisterDropEventsAsync();
+
+        //using (MemoryStream memoryStream = await fileRef.CreateMemoryStreamAsync())
+        //{
+        //    fileData.Bytes = memoryStream.ToArray();
+        //}
+        var enumirateFileRef = await fileReaderReference.EnumerateFilesAsync();
+
+        var fileInfo = await enumirateFileRef.First().ReadFileInfoAsync();
+
+        fileData.Description = Description;
+        fileData.Size = fileInfo.Size;
+        fileData.Name = fileInfo.Name;
+        
+        //fileData.Extension = Path.GetExtension(fileInfo.Name);
+
+        ListFileData.Add(fileData);
+
+        //this.StateHasChanged();
+
+    }
+
+    public async Task UploadFiles()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+       
+            
+            foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+            {
+                var fileInfo = await file.ReadFileInfoAsync();
+                var fileData = ListFileData.Where(n => n.Name == fileInfo.Name).FirstOrDefault();
+
+                using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync())
+                {
+                    byte[] bytes = memoryStream.ToArray();
+                    var fileContent = new ByteArrayContent(bytes);
+                    multipartFormDataContent.Add(fileContent, fileData.Description, fileData.Name);
+                }
+            }
+       
+
+        await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+    }
+
+
+}

@@ -10,8 +10,8 @@
 <div class="row">
     <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
         <div class="col-12 mb-2">
-            <MatTextField Label="Фамилия" @bind-Value="@NewArticle.Title"></MatTextField>
-            <MatTextField Label="Имя" @bind-Value="@NewArticle.Content"></MatTextField>
+            <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
+            <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
             @if (FileUploadVM.Any())
             {
                 @foreach (var file in FileUploadVM)
@@ -74,7 +74,6 @@ This demo reads files that was dropped in without doing anything particular with
 
     Article NewArticle { get; set; } = new Article();
     List<FileUploadViewModel> FileUploadVM { get; set; } = new List<FileUploadViewModel>();
-
 
     ElementReference dropTargetElement;
     IFileReaderRef dropReference;
@@ -150,8 +149,6 @@ This demo reads files that was dropped in without doing anything particular with
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
         FileUploadVM = JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content);
-
-
     }
 
     public async Task AddArticle()
