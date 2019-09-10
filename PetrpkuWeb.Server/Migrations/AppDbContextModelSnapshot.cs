@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-preview8.19405.11");
+                .HasAnnotation("ProductVersion", "3.0.0-preview9.19423.6");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -160,7 +160,13 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExtPhone")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FirstName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IntPhone")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -175,10 +181,10 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<string>("MidleName")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Office")
+                    b.Property<string>("MobPhone")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("Office")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhotoUrl")
@@ -290,6 +296,34 @@ namespace PetrpkuWeb.Server.Migrations
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.Attachment", b =>
+                {
+                    b.Property<int>("AttachmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Extension")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Length")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AttachmentId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.ToTable("Attachments");
+                });
+
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Duty", b =>
                 {
                     b.Property<int>("DutyId")
@@ -374,6 +408,15 @@ namespace PetrpkuWeb.Server.Migrations
                     b.HasOne("PetrpkuWeb.Shared.Models.AppUser", "Author")
                         .WithMany("Articles")
                         .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.Attachment", b =>
+                {
+                    b.HasOne("PetrpkuWeb.Shared.Models.Article", "Article")
+                        .WithMany("Attachments")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

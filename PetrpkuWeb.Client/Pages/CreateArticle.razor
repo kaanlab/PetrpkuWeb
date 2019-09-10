@@ -2,42 +2,13 @@
 
 @using Newtonsoft.Json
 @using System.IO
+@using AutoMapper
+
 @inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
 @inject IFileReaderService fileReaderService
+@inject IMapper mapper
 
-<h1>Создать объявление</h1>
-
-<div class="row">
-    <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
-        <div class="col-12 mb-2">
-            <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
-            <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
-            @if (FileUploadVM.Any())
-            {
-        <div class="img-container">
-            
-            @foreach (var file in FileUploadVM)
-            {
-                var rand = new Random();
-                int index = rand.Next(imgCssClass.Length);
-                <div class="@imgCssClass[index]">
-                    <img src="@file.Path" />
-                </div>
-            }
-        </div>
-            }
-        </div>
-        <div class="col-12 mb-2">
-            <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
-        </div>
-    </EditForm>
-</div>
-
-Welcome to your new filestreaming app.
-<br />
-This demo reads files that was dropped in without doing anything particular with it.
-<br />
-<br />
 <style>
     .@dropTargetClass {
         display:block;
@@ -51,51 +22,104 @@ This demo reads files that was dropped in without doing anything particular with
         font-weight: bold;
     }
     .portrait {
-    height: 200px;
-    width: 200px;
-}
-
+        height: 200px;
+        width: 200px;
+    }
 </style>
 
-<div class="@DropClass"
-     @ref=dropTargetElement
-     @ondrop=OnDrop
-     @ondragenter=OnDragEnter
-     @ondragleave=OnDragLeave>
-    Drop Files here.
-    @foreach (var fileInfo in FileList)
-    {
-        <br />@fileInfo.Name
-    }
+<h1>Создать объявление</h1>
+
+<div class="row">
+    <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
+        <div class="col-12 mb-2">
+            <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
+        </div>
+        <div class="col-12 mb-2">
+            <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
+        </div>
+        <div class="col-12 mb-2">
+            @if (ListFileUploadVM.Any())
+            {
+                var rand = new Random();
+                <div class="img-container">
+                    @foreach (var file in ListFileUploadVM)
+                    {
+                        @if (file.Extension.StartsWith(".jp") || file.Extension.StartsWith(".pn"))
+                        {
+                            int index = rand.Next(imgCssClass.Length);
+                            <div class="@imgCssClass[index]">
+                                <img src="@file.Path" />
+                            </div>
+                        }
+                    }
+                </div>
+                <table class="table">
+                    @foreach (var file in ListFileUploadVM)
+                    {
+                        @if (file.Extension.StartsWith(".doc") || file.Extension.StartsWith(".xls") || file.Extension.StartsWith(".rtf") || file.Extension.StartsWith(".pdf"))
+                        {
+                            <tr>
+                                <td><img class="img-fluid" src="@ShowImg(file.Extension)" /></td>
+                                <td>@file.Name</td>
+                                <td>@file.Length</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            }
+        </div>
+        <div class="col-12 mb-2">
+            <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
+        </div>
+    </EditForm>
 </div>
-<br />
 
+<div class="alert alert-danger" role="alert">
+    Загрузите изображения и файлы!
+</div>
 
-<button @onclick="ClearFile" class="btn btn-primary">Clear</button>
-<button @onclick="UploadFiles" class="btn btn-primary">Upload</button>
+<div class="col-12 mb-2">
+    <div class="@DropClass"
+         @ref=dropTargetElement
+         @ondrop=OnDrop
+         @ondragenter=OnDragEnter
+         @ondragleave=OnDragLeave>
+        Drop Files here.
+        @foreach (var fileInfo in FileList)
+        {
+            <br />@fileInfo.Name
+        }
+    </div>
+    <br />
 
+    <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
+    <button @onclick="UploadFiles" class="btn btn-primary">Загрузить</button>
+</div>
 
 @code {
 
-        Article NewArticle { get; set; } = new Article();
-        List<FileUploadViewModel> FileUploadVM { get; set; } = new List<FileUploadViewModel>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private int identityUserId;
 
-        ElementReference dropTargetElement;
-        IFileReaderRef dropReference;
-
-        const string dropTargetDragClass = "droptarget-drag";
-        const string dropTargetClass = "droptarget";
-
-        string[] imgCssClass = { "big", "vertical", "" };
-        
-
-
-
-
-    private List<string> _dropClasses = new List<string>() { dropTargetClass };
-
-    string DropClass => string.Join(" ", _dropClasses);
+    Article NewArticle { get; set; } = new Article();
+    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();
+
+    ElementReference dropTargetElement;
+    IFileReaderRef dropReference;
+
+    const string dropTargetDragClass = "droptarget-drag";
+    const string dropTargetClass = "droptarget";
+    private List<string> _dropClasses = new List<string>() { dropTargetClass };
+    string DropClass => string.Join(" ", _dropClasses);
+    string[] imgCssClass = { "big", "vertical", String.Empty };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var identityUser = (await authenticationStateTask).User;
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+    }
 
     protected override async Task OnAfterRenderAsync(bool isFirstRender)
     {
@@ -105,8 +129,8 @@ This demo reads files that was dropped in without doing anything particular with
 
     public async Task ClearFile()
     {
+        ListFileUploadVM.Clear();
         await dropReference.ClearValue();
-        await this.RefreshFileList();
     }
 
     public void OnDragEnter(EventArgs e)
@@ -139,7 +163,7 @@ This demo reads files that was dropped in without doing anything particular with
 
     public async Task UploadFiles()
     {
-
+        this.FileList.Clear();
         var multipartFormDataContent = new MultipartFormDataContent();
 
         foreach (var file in await dropReference.EnumerateFilesAsync())
@@ -158,11 +182,34 @@ This demo reads files that was dropped in without doing anything particular with
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        FileUploadVM = JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content);
+        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
     }
 
     public async Task AddArticle()
     {
+        NewArticle.Attachments = mapper.Map<List<Attachment>>(ListFileUploadVM);
+        NewArticle.AppUserId = identityUserId;
+        NewArticle.PublishDate = DateTime.Now;
+        await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
+        NavigationManager.NavigateTo("/");
+    }
 
+    public string ShowImg(string ext)
+    {
+        switch (ext)
+        {
+            case ".doc":
+            case ".docx":
+                return @"/img/site/word.png";
+            case ".xls":
+            case ".xlsx":
+                return @"/img/site/excel.png";
+            case ".pdf":
+                return @"/img/site/pdf.png";
+            case ".rtf":
+                return @"/img/site/rtf.png";
+        }
+
+        return String.Empty;
     }
 }

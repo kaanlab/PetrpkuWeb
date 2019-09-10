@@ -5,6 +5,7 @@ using Blazored.LocalStorage;
 using PetrpkuWeb.Client.Extensions;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
+using AutoMapper;
 
 namespace PetrpkuWeb.Client
 {
@@ -18,6 +19,7 @@ namespace PetrpkuWeb.Client
             services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
+            services.AddAutoMapper(typeof(Startup));
         }
 
         public void Configure(IComponentsApplicationBuilder app)

@@ -38,6 +38,16 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok();
         }
 
+        [HttpGet("article/{articleId:int}")]
+        public ActionResult<Article> GetArticle(int articleId)
+        {
+           var article = _db.Articles
+                .Where(u => u.ArticleId == articleId)
+                .Include(u => u.Author)
+                .Include(a => a.Attachments)
+                .FirstOrDefault();
 
+           return Ok(article);
+        }
     }
 }

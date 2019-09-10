@@ -81,7 +81,7 @@ namespace PetrpkuWeb.Server.Controllers
                         await file.CopyToAsync(stream);
                     };
 
-                    if (extension.StartsWith(".jp"))
+                    if (extension.StartsWith(".jp") || extension.StartsWith(".pn"))
                     {
                         using (Image image = Image.Load(path))
                         {

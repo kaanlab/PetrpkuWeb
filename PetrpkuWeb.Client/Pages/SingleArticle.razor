@@ -1,0 +1,86 @@
+@page "/article/{articleId}"
+
+@inject HttpClient HttpClient
+
+<h3>Article</h3>
+
+<div class="row">
+    @if (article != null)
+    {
+        <h3>@article.PublishDate.ToShortDateString()</h3>
+        <h3>@article.Author.FirstName @article.Author.LastName</h3>
+        <h1>@article.Title</h1>
+        <h2>@article.Content</h2>
+
+        <div class="col-12 mb-2">
+            @if (article.Attachments.Any())
+            {
+                var rand = new Random();
+                <div class="img-container">
+                    @foreach (var attachment in article.Attachments)
+                    {
+                        @if (attachment.Extension.StartsWith(".jp") || attachment.Extension.StartsWith(".pn"))
+                        {
+                            int index = rand.Next(imgCssClass.Length);
+                            <div class="@imgCssClass[index]">
+                                <img src="@attachment.Path" />
+                            </div>
+                        }
+                    }
+                </div>
+                <table class="table">
+                    @foreach (var attachment in article.Attachments)
+                    {
+                        @if (attachment.Extension.StartsWith(".doc") || attachment.Extension.StartsWith(".xls") || attachment.Extension.StartsWith(".rtf") || attachment.Extension.StartsWith(".pdf"))
+                        {
+                            <tr>
+                                <td><img class="img-fluid" src="@ShowImg(attachment.Extension)" /></td>
+                                <td>@attachment.Name</td>
+                                <td>@attachment.Length</td>
+                                <td>
+                                    <form method="get" action="@attachment.Path">
+                                        <MatButton Type="submit" Icon="cloud_download" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string ArticleId { get; set; }
+
+    private Article article;
+
+    string[] imgCssClass = { "big", "vertical", String.Empty };
+
+    protected override async Task OnInitializedAsync()
+    {
+        article = await HttpClient.GetJsonAsync<Article>($"api/articles/article/{ArticleId}");
+    }
+
+    public string ShowImg(string ext)
+    {
+        switch (ext)
+        {
+            case ".doc":
+            case ".docx":
+                return @"/img/site/word.png";
+            case ".xls":
+            case ".xlsx":
+                return @"/img/site/excel.png";
+            case ".pdf":
+                return @"/img/site/pdf.png";
+            case ".rtf":
+                return @"/img/site/rtf.png";
+        }
+
+        return String.Empty;
+    }
+
+}

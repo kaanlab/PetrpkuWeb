@@ -12,10 +12,10 @@
         <MatTextField Label="Заголовок" @bind-Value="@Description"></MatTextField>
     </div>
     <div>
-        <input type="file" accept="pdf,doc,docx,xls,xlsx" @ref=inputElement />
+        <input type="file" multiple @ref=inputElement />
     </div>
     <div class="col-12 mb-2">
-        <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="AddToList" />
+  
         <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" OnClick="UploadFiles" />
         <button @onclick="ReadFile" class="btn btn-primary">read</button>
     </div>
@@ -51,33 +51,35 @@
     //FileDataViewModel FileData { get; set; } = new FileDataViewModel();
     List<FileViewModel> ListFileData { get; set; } = new List<FileViewModel>();
 
-    public async Task AddToList()
+ 
+
+    protected override void OnAfterRender(bool isFirstRender)
     {
         //fileReaderReference = fileReaderService.CreateReference(inputElement);
 
-        var fileData = new FileViewModel();
+        //var fileData = new FileViewModel();
 
 
         fileReaderReference = fileReaderService.CreateReference(inputElement);
-        await fileReaderReference.RegisterDropEventsAsync();
+        //await fileReaderReference.RegisterDropEventsAsync();
 
         //using (MemoryStream memoryStream = await fileRef.CreateMemoryStreamAsync())
         //{
         //    fileData.Bytes = memoryStream.ToArray();
         //}
-        var enumirateFileRef = await fileReaderReference.EnumerateFilesAsync();
+        //var enumirateFileRef = await fileReaderReference.EnumerateFilesAsync();
 
-        var fileInfo = await enumirateFileRef.First().ReadFileInfoAsync();
+        //var fileInfo = await enumirateFileRef.First().ReadFileInfoAsync();
 
-        fileData.Description = Description;
-        fileData.Size = fileInfo.Size;
-        fileData.Name = fileInfo.Name;
+        //fileData.Description = Description;
+        //fileData.Size = fileInfo.Size;
+        //fileData.Name = fileInfo.Name;
 
         //fileData.Extension = Path.GetExtension(fileInfo.Name);
 
-        ListFileData.Add(fileData);
+        //ListFileData.Add(fileData);
 
-        this.StateHasChanged();
+        //this.StateHasChanged();
 
     }
 
@@ -89,13 +91,13 @@
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
             var fileInfo = await file.ReadFileInfoAsync();
-            var fileData = ListFileData.Where(n => n.Name == fileInfo.Name).FirstOrDefault();
+            //var fileData = ListFileData.Where(n => n.Name == fileInfo.Name).FirstOrDefault();
 
             using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync())
             {
                 byte[] bytes = memoryStream.ToArray();
                 var fileContent = new ByteArrayContent(bytes);
-                multipartFormDataContent.Add(fileContent, "file", "file.doc");
+                multipartFormDataContent.Add(fileContent, "file", fileInfo.Name);
             }
         }
 
