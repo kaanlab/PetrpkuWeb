@@ -9,23 +9,6 @@
 @inject IFileReaderService fileReaderService
 @inject IMapper mapper
 
-<style>
-    .@dropTargetClass {
-        display:block;
-        padding: 20px;
-        margin-bottom: 10px;
-        border: 1px dashed black;
-        border-radius: 5px;
-    }
-    .@dropTargetDragClass {
-        border-color: orangered;
-        font-weight: bold;
-    }
-    .portrait {
-        height: 200px;
-        width: 200px;
-    }
-</style>
 
 <h1>Создать объявление</h1>
 
@@ -74,22 +57,18 @@
     </EditForm>
 </div>
 
-<div class="alert alert-danger" role="alert">
-    Загрузите изображения и файлы!
-</div>
-
 <div class="col-12 mb-2">
-    <div class="@DropClass"
-         @ref=dropTargetElement
-         @ondrop=OnDrop
-         @ondragenter=OnDragEnter
-         @ondragleave=OnDragLeave>
-        Drop Files here.
-        @foreach (var fileInfo in FileList)
-        {
-            <br />@fileInfo.Name
-        }
+    <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
+
+    <div class="alert alert-danger" role="alert">
+        Список файлов для загрузки
     </div>
+    @foreach (var fileInfo in FileList)
+    {
+        <br />@fileInfo.Name
+        <br /> @fileInfo.Size
+    }
+
     <br />
 
     <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
@@ -106,13 +85,9 @@
     List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();
 
-    ElementReference dropTargetElement;
-    IFileReaderRef dropReference;
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
 
-    const string dropTargetDragClass = "droptarget-drag";
-    const string dropTargetClass = "droptarget";
-    private List<string> _dropClasses = new List<string>() { dropTargetClass };
-    string DropClass => string.Join(" ", _dropClasses);
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
     protected override async Task OnInitializedAsync()
@@ -121,68 +96,34 @@
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
     }
 
-    protected override async Task OnAfterRenderAsync(bool isFirstRender)
+    protected override void OnAfterRender(bool isFirstRender)
     {
-        dropReference = fileReaderService.CreateReference(dropTargetElement);
-        await dropReference.RegisterDropEventsAsync();
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+
     }
 
     public async Task ClearFile()
     {
         ListFileUploadVM.Clear();
-        await dropReference.ClearValue();
+        await fileReaderReference.ClearValue();
     }
 
-    public void OnDragEnter(EventArgs e)
-    {
-        _dropClasses.Add(dropTargetDragClass);
-    }
-
-    public void OnDragLeave(EventArgs e)
-    {
-        _dropClasses.Remove(dropTargetDragClass);
-    }
-
-    public async Task OnDrop(EventArgs e)
-    {
-        _dropClasses.Remove(dropTargetDragClass);
-        this.StateHasChanged();
-        await this.RefreshFileList();
-    }
-
-    private async Task RefreshFileList()
-    {
-        this.FileList.Clear();
-        foreach (var file in await dropReference.EnumerateFilesAsync())
-        {
-            var fileInfo = await file.ReadFileInfoAsync();
-            this.FileList.Add(fileInfo);
-        }
-        this.StateHasChanged();
-    }
 
     public async Task UploadFiles()
     {
         this.FileList.Clear();
+
         var multipartFormDataContent = new MultipartFormDataContent();
-
-        foreach (var file in await dropReference.EnumerateFilesAsync())
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
-
-            var fileInfo = await file.ReadFileInfoAsync();
-            var fileName = fileInfo.Name;
-
-            using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync())
-            {
-                byte[] bytes = memoryStream.ToArray();
-                var fileContent = new ByteArrayContent(bytes);
-                multipartFormDataContent.Add(fileContent, "files", fileName);
-            }
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
         }
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
         ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+        await fileReaderReference.ClearValue();
     }
 
     public async Task AddArticle()
@@ -190,8 +131,8 @@
         NewArticle.Attachments = mapper.Map<List<Attachment>>(ListFileUploadVM);
         NewArticle.AppUserId = identityUserId;
         NewArticle.PublishDate = DateTime.Now;
-        await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
-        NavigationManager.NavigateTo("/");
+        var res = await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
+        NavigationManager.NavigateTo($"article/{res.ArticleId}");
     }
 
     public string ShowImg(string ext)

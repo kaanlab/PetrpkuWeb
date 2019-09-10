@@ -19,7 +19,7 @@ namespace PetrpkuWeb.Server.Controllers
     {
 
         [HttpPost("avatar"), DisableRequestSizeLimit]
-        public async Task<IActionResult> UploadFile()
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
             var tempFileName = Path.GetTempFileName();
             var fileName = Path.GetRandomFileName().Substring(0, 8) + ".jpg";
@@ -85,17 +85,29 @@ namespace PetrpkuWeb.Server.Controllers
                     {
                         using (Image image = Image.Load(path))
                         {
-                            if (image.Width > 1400 && image.Width < 3000)
+                            if (image.Width > 400 && image.Width < 600)
                             {
                                 image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
                             }
-                            else if (image.Width > 3000 && image.Width < 5000)
+                            else if (image.Width > 600 && image.Width < 1000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 3, image.Height / 3));
+                            }
+                            else if (image.Width > 1000 && image.Width < 1400)
                             {
                                 image.Mutate(x => x.Resize(image.Width / 4, image.Height / 4));
                             }
-                            else if (image.Width > 5000)
+                            else if (image.Width > 1400 && image.Width < 3000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 5, image.Height / 5));
+                            }
+                            else if (image.Width > 3000 && image.Width < 5000)
                             {
                                 image.Mutate(x => x.Resize(image.Width / 6, image.Height / 6));
+                            }
+                            else if (image.Width > 5000)
+                            {
+                                image.Mutate(x => x.Resize(image.Width / 7, image.Height / 7));
                             }
 
                             image.Save(path);
@@ -113,7 +125,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
         private string CreateRandomNameDirectory()
         {
-            var uniqueDir = Path.Combine("uploadfolder/articles", Path.GetRandomFileName().Substring(0, 6));
+            var uniqueDir = Path.Combine("uploadfolder", Path.GetRandomFileName().Substring(0, 6));
             Directory.CreateDirectory(uniqueDir);
             return uniqueDir;
         }

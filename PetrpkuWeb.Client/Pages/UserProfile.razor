@@ -1,6 +1,7 @@
 @page "/user/{appUserId}"
 
 @using System.IO
+@using Newtonsoft.Json
 
 @inject HttpClient HttpClient
 @inject IFileReaderService fileReaderService
@@ -26,6 +27,7 @@
                         <li class="list-group-item"><MatIcon Icon="phone_iphone" />@user.MobPhone</li>
                         <li class="list-group-item"><MatIcon Icon="phone" />@user.ExtPhone</li>
                         <li class="list-group-item"><MatIcon Icon="room" />@user.Office</li>
+                        <li class="list-group-item"><MatIcon Icon="notification_important" />@user.Birthday.ToShortDateString()</li>
                     </ul>
                     <div class="card-body">
                         <MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" />
@@ -35,26 +37,25 @@
             <div class="col-4">
                 @if (user.DaysOfDuty.Any())
                 {
-
-                    @foreach (var duty in user.DaysOfDuty)
-                    {
-                        <h2>Мои дежурства</h2>
-                        <table class="table table-striped">
+                    <h2>Мои дежурства</h2>
+                    <table class="table table-striped">
+                        @foreach (var duty in user.DaysOfDuty)
+                        {
                             <tr>
                                 <td>@duty.DayOfDuty.ToShortDateString()</td>
                             </tr>
-                        </table>
-                    }
-
+                        }
+                    </table>
                 }
             </div>
             <div class="col-4">
                 @if (user.Articles.Any())
                 {
-                    @foreach (var article in user.Articles)
-                    {
-                        <h2>Мои новости</h2>
-                        <table class="table">
+                    <h2>Мои новости</h2>
+                    <table class="table">
+                        @foreach (var article in user.Articles)
+                        {
+
                             <thead class="thead-dark">
                                 <tr>
                                     <th scope="col"></th>
@@ -67,8 +68,9 @@
                                 <td>@article.Content</td>
                                 <td>@article.PublishDate.ToShortDateString()</td>
                             </tr>
-                        </table>
-                    }
+
+                        }
+                    </table>
                 }
             </div>
         }
@@ -96,11 +98,11 @@
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
                 <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
-                <MatTextField Label="Фото" Disabled="true" @bind-Value="@uploadFilePath"></MatTextField>
+                        <MatTextField Label="Фото" Disabled="true" @bind-Value="@avatarFilePath"></MatTextField>       
                 <div class="alert alert-danger" role="alert">
-                    Для профиля желательно квадратное изображение размером 400х400!
+                    Для профиля желательно изображение размером 400х400px!
                 </div>
-                <input type="file" accept="image/x-png, image/jpg, image/jpeg" @ref=inputElement @onchange="UploadFile" />
+                <input type="file" accept="image/png, image/jpg, image/jpeg" @ref=inputElement @onchange="UploadFile" />
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -120,6 +122,8 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
+
     private AppUser user;
     private int identityUserId;
     bool dialogIsOpen = false;
@@ -127,7 +131,9 @@
 
     //string imageData = String.Empty;
     ElementReference inputElement;
-    string uploadFilePath = String.Empty;
+    IFileReaderRef fileReaderReference;
+
+    string avatarFilePath = String.Empty;
 
 
     protected override async Task OnInitializedAsync()
@@ -139,31 +145,40 @@
 
     }
 
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+
+    }
+
     void OpenDialog()
     {
         dialogIsOpen = true;
-        uploadFilePath = user.PhotoUrl;
+        avatarFilePath = user.PhotoUrl;
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        user.PhotoUrl = uploadFilePath;
+        user.PhotoUrl = avatarFilePath;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
 
     }
 
     async Task UploadFile()
     {
-        var files = await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync();
 
-        using (MemoryStream memoryStream = await files.First().CreateMemoryStreamAsync())
-        {
-            byte[] bytes = memoryStream.ToArray();
+        //foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        //{
 
-            //var imageData = $"data:image/jpg;base64,{Convert.ToBase64String(bytes)}";
-            var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: new ByteArrayContent(bytes));
-            uploadFilePath = await response.Content.ReadAsStringAsync();
-        }
+        //       var v = new StreamContent(await file.OpenReadAsync(), 8192);
+        //}
+
+        //var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: v);
+        //var content = await response.Content.ReadAsStringAsync();
+        //ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+        //avatarFilePath = ListFileUploadVM.First().Path;
+        //this.StateHasChanged();
     }
+
 }
