@@ -13,7 +13,7 @@
 <h1>Создать объявление</h1>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-12">
         <EditForm Model="NewArticle">
             <div class="col-12 mb-2">
                 <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
@@ -57,18 +57,19 @@
                 }
             </div>
             <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить новость" OnClick="@AddArticle" />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Сохранить" OnClick="@AddArticle" />
             </div>
         </EditForm>
     </div>
 
-    <div class="col-6 mb-2">
-        <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
+    <br />
 
+    <div class="col-12 mb-2">
         <div class="alert alert-danger" role="alert">
-            Список файлов для загрузки
+            Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
         </div>
-
+        <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
+        
         <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
         <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
     </div>
@@ -178,8 +179,8 @@
     void UpdateFileUploadVM()
     {
         var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        ListFileUploadVM.Remove(vm);
-        ListFileUploadVM.Add(FileUploadVM);
+        var index = ListFileUploadVM.IndexOf(vm);
+        ListFileUploadVM[index] = FileUploadVM;
         dialogIsOpen = false;
     }
 
