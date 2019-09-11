@@ -14,7 +14,7 @@
 
 <div class="row">
     <div class="col-6">
-        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
+        <EditForm Model="NewArticle">
             <div class="col-12 mb-2">
                 <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
             </div>
@@ -42,13 +42,14 @@
                         {
                             @if (file.Extension.StartsWith(".doc") || file.Extension.StartsWith(".xls") || file.Extension.StartsWith(".rtf") || file.Extension.StartsWith(".pdf"))
                             {
-
+                                var index = ListFileUploadVM.IndexOf(file);
                                 <tr>
                                     <td>@(ListFileUploadVM.IndexOf(file) + 1)</td>
-                                    <td><img class="img-fluid" src="@ShowImg(file.Extension)" /></td>
+                                    <td><img src="@ShowImg(file.Extension)" /></td>
+                                    <td>@file.Description</td>
                                     <td>@file.Name</td>
                                     <td>@file.Length</td>
-                                    <td></td>
+                                    <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(index))" Label="Редактировать" /></td>
                                 </tr>
                             }
                         }
@@ -56,7 +57,7 @@
                 }
             </div>
             <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить новость" />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить новость" OnClick="@AddArticle" />
             </div>
         </EditForm>
     </div>
@@ -75,12 +76,13 @@
 
 <EditForm Model="@FileUploadVM">
     <MatDialog @bind-IsOpen="@dialogIsOpen">
-        <MatDialogTitle></MatDialogTitle>
+        <MatDialogTitle>"@FileUploadVM.Name</MatDialogTitle>
         <MatDialogContent>
             <MatTextField Label="Фамилия" @bind-Value="@FileUploadVM.Description"></MatTextField>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" OnClick="@DeleteFileUploadVM" Label="Удалить" />
             <MatButton Icon="save" Type="submit" OnClick="@UpdateFileUploadVM" Label="Сохранить" />
         </MatDialogActions>
     </MatDialog>
@@ -167,13 +169,24 @@
         return String.Empty;
     }
 
-    void OpenDialog()
+    void OpenDialog(int index)
     {
+        FileUploadVM = ListFileUploadVM[index];
         dialogIsOpen = true;
     }
 
-    async Task UpdateFileUploadVM()
+    void UpdateFileUploadVM()
     {
+        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
+        ListFileUploadVM.Remove(vm);
+        ListFileUploadVM.Add(FileUploadVM);
+        dialogIsOpen = false;
+    }
+
+    void DeleteFileUploadVM()
+    {
+        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
+        ListFileUploadVM.Remove(vm);
         dialogIsOpen = false;
     }
 
