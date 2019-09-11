@@ -53,22 +53,20 @@
                 {
                     <h2>Мои новости</h2>
                     <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
                         @foreach (var article in user.Articles)
                         {
-
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
                             <tr>
                                 <td>@article.Title</td>
                                 <td>@article.Content</td>
                                 <td>@article.PublishDate.ToShortDateString()</td>
                             </tr>
-
                         }
                     </table>
                 }
@@ -98,7 +96,7 @@
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
                 <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
-                        <MatTextField Label="Фото" Disabled="true" @bind-Value="@avatarFilePath"></MatTextField>       
+                <MatTextField Label="Фото" Disabled="true" @bind-Value="@avatarFilePath"></MatTextField>
                 <div class="alert alert-danger" role="alert">
                     Для профиля желательно изображение размером 400х400px!
                 </div>
@@ -128,10 +126,7 @@
     private int identityUserId;
     bool dialogIsOpen = false;
 
-
-    //string imageData = String.Empty;
     ElementReference inputElement;
-    IFileReaderRef fileReaderReference;
 
     string avatarFilePath = String.Empty;
 
@@ -142,13 +137,6 @@
 
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
-
-    }
-
-    protected override void OnAfterRender(bool isFirstRender)
-    {
-        fileReaderReference = fileReaderService.CreateReference(inputElement);
-
     }
 
     void OpenDialog()
@@ -162,22 +150,22 @@
         dialogIsOpen = false;
         user.PhotoUrl = avatarFilePath;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
-
     }
 
     async Task UploadFile()
     {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+        }
 
-        //foreach (var file in await fileReaderReference.EnumerateFilesAsync())
-        //{
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var content = await response.Content.ReadAsStringAsync();
+        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+        avatarFilePath = ListFileUploadVM.First().Path;
 
-        //       var v = new StreamContent(await file.OpenReadAsync(), 8192);
-        //}
-
-        //var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: v);
-        //var content = await response.Content.ReadAsStringAsync();
-        //ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        //avatarFilePath = ListFileUploadVM.First().Path;
         //this.StateHasChanged();
     }
 

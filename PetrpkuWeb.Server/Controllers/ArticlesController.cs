@@ -26,7 +26,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return await _db.Articles
                 .Include(a => a.Author)
-                .OrderBy(d => d.PublishDate)
+                .Include(a => a.Attachments)
+                .OrderByDescending(d => d.PublishDate)
                 .ToListAsync();
         }
 
@@ -35,19 +36,19 @@ namespace PetrpkuWeb.Server.Controllers
         {
             _db.Articles.Add(article);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(article);
         }
 
         [HttpGet("article/{articleId:int}")]
         public ActionResult<Article> GetArticle(int articleId)
         {
-           var article = _db.Articles
-                .Where(u => u.ArticleId == articleId)
-                .Include(u => u.Author)
-                .Include(a => a.Attachments)
-                .FirstOrDefault();
+            var article = _db.Articles
+                 .Where(u => u.ArticleId == articleId)
+                 .Include(u => u.Author)
+                 .Include(a => a.Attachments)
+                 .FirstOrDefault();
 
-           return Ok(article);
+            return Ok(article);
         }
     }
 }
