@@ -305,6 +305,9 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<int>("ArticleId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Extension")
                         .HasColumnType("TEXT");
 

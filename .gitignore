@@ -351,3 +351,9 @@ MigrationBackup/
 .idea/.idea.PetrpkuWeb/.idea/indexLayout.xml
 *.xml
 .idea/.idea.PetrpkuWeb/riderModule.iml
+
+# Database files
+*.db
+
+# Upload folder
+uploadfolder/

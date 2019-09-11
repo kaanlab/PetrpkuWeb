@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PetrpkuWeb.Server.Migrations
 {
-    public partial class InitialDb : Migration
+    public partial class InitDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -152,6 +152,7 @@ namespace PetrpkuWeb.Server.Migrations
                     Name = table.Column<string>(nullable: true),
                     Extension = table.Column<string>(nullable: true),
                     Path = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
                     ArticleId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

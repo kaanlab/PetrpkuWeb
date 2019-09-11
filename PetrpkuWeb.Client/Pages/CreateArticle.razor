@@ -13,67 +13,78 @@
 <h1>Создать объявление</h1>
 
 <div class="row">
-    <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
-        <div class="col-12 mb-2">
-            <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
-        </div>
-        <div class="col-12 mb-2">
-            <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
-        </div>
-        <div class="col-12 mb-2">
-            @if (ListFileUploadVM.Any())
-            {
-                var rand = new Random();
-                <div class="img-container">
-                    @foreach (var file in ListFileUploadVM)
-                    {
-                        @if (file.Extension.StartsWith(".jp") || file.Extension.StartsWith(".pn"))
+    <div class="col-6">
+        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle">
+            <div class="col-12 mb-2">
+                <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
+            </div>
+            <div class="col-12 mb-2">
+                <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
+            </div>
+            <div class="col-12 mb-2">
+                @if (ListFileUploadVM.Any())
+                {
+                    var rand = new Random();
+                    <div class="img-container">
+                        @foreach (var file in ListFileUploadVM)
                         {
-                            int index = rand.Next(imgCssClass.Length);
-                            <div class="@imgCssClass[index]">
-                                <img src="@file.Path" />
-                            </div>
+                            @if (file.Extension.StartsWith(".jp") || file.Extension.StartsWith(".pn"))
+                            {
+                                int index = rand.Next(imgCssClass.Length);
+                                <div class="@imgCssClass[index]">
+                                    <img src="@file.Path" />
+                                </div>
+                            }
                         }
-                    }
-                </div>
-                <table class="table">
-                    @foreach (var file in ListFileUploadVM)
-                    {
-                        @if (file.Extension.StartsWith(".doc") || file.Extension.StartsWith(".xls") || file.Extension.StartsWith(".rtf") || file.Extension.StartsWith(".pdf"))
+                    </div>
+                    <table class="table">
+                        @foreach (var file in ListFileUploadVM)
                         {
-                            <tr>
-                                <td><img class="img-fluid" src="@ShowImg(file.Extension)" /></td>
-                                <td>@file.Name</td>
-                                <td>@file.Length</td>
-                            </tr>
+                            @if (file.Extension.StartsWith(".doc") || file.Extension.StartsWith(".xls") || file.Extension.StartsWith(".rtf") || file.Extension.StartsWith(".pdf"))
+                            {
+
+                                <tr>
+                                    <td>@(ListFileUploadVM.IndexOf(file) + 1)</td>
+                                    <td><img class="img-fluid" src="@ShowImg(file.Extension)" /></td>
+                                    <td>@file.Name</td>
+                                    <td>@file.Length</td>
+                                    <td></td>
+                                </tr>
+                            }
                         }
-                    }
-                </table>
-            }
-        </div>
-        <div class="col-12 mb-2">
-            <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
-        </div>
-    </EditForm>
-</div>
-
-<div class="col-12 mb-2">
-    <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
-
-    <div class="alert alert-danger" role="alert">
-        Список файлов для загрузки
+                    </table>
+                }
+            </div>
+            <div class="col-12 mb-2">
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить новость" />
+            </div>
+        </EditForm>
     </div>
-    @foreach (var fileInfo in FileList)
-    {
-        <br />@fileInfo.Name
-        <br /> @fileInfo.Size
-    }
 
-    <br />
+    <div class="col-6 mb-2">
+        <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
 
-    <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
-    <button @onclick="UploadFiles" class="btn btn-primary">Загрузить</button>
+        <div class="alert alert-danger" role="alert">
+            Список файлов для загрузки
+        </div>
+
+        <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
+        <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+    </div>
 </div>
+
+<EditForm Model="@FileUploadVM">
+    <MatDialog @bind-IsOpen="@dialogIsOpen">
+        <MatDialogTitle></MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Фамилия" @bind-Value="@FileUploadVM.Description"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" Type="submit" OnClick="@UpdateFileUploadVM" Label="Сохранить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
 
 @code {
 
@@ -85,10 +96,14 @@
     List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();
 
+    FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
+    bool dialogIsOpen = false;
+
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
+    string Description = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,7 +114,6 @@
     protected override void OnAfterRender(bool isFirstRender)
     {
         fileReaderReference = fileReaderService.CreateReference(inputElement);
-
     }
 
     public async Task ClearFile()
@@ -107,7 +121,6 @@
         ListFileUploadVM.Clear();
         await fileReaderReference.ClearValue();
     }
-
 
     public async Task UploadFiles()
     {
@@ -153,4 +166,15 @@
 
         return String.Empty;
     }
+
+    void OpenDialog()
+    {
+        dialogIsOpen = true;
+    }
+
+    async Task UpdateFileUploadVM()
+    {
+        dialogIsOpen = false;
+    }
+
 }

@@ -11,6 +11,7 @@ namespace PetrpkuWeb.Shared.Models
         public string Name { get; set; }
         public string Extension { get; set; }
         public string Path { get; set; }
+        public string Description { get; set; }
 
         // rel
         public int ArticleId { get; set; }

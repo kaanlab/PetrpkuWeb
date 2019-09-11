@@ -9,8 +9,8 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190910134943_InitialDb")]
-    partial class InitialDb
+    [Migration("20190911125721_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -306,6 +306,9 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Extension")
                         .HasColumnType("TEXT");
