@@ -356,4 +356,5 @@ MigrationBackup/
 *.db
 
 # Upload folder
+!uploadfolder/
 uploadfolder/*
