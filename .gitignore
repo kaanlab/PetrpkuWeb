@@ -353,8 +353,8 @@ MigrationBackup/
 .idea/.idea.PetrpkuWeb/riderModule.iml
 
 # Database files
-*.db
+PetrpkuWeb.Server/app.db
 
 # Upload folder
-!uploadfolder/
-uploadfolder/*
+!PetrpkuWeb.Server/uploadfolder/
+PetrpkuWeb.Server/uploadfolder/*
