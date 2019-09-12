@@ -22,6 +22,14 @@
                 <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
             </div>
             <div class="col-12 mb-2">
+                <select @bind="NewArticle.Name">
+                    @foreach (var styleType in Enum.GetValues(typeof(Article.Style)))
+                    {
+                        <option>@styleType</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 mb-2">
                 @if (ListFileUploadVM.Any())
                 {
                     var rand = new Random();
@@ -69,7 +77,7 @@
             Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
         </div>
         <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
-        
+
         <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
         <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
     </div>
