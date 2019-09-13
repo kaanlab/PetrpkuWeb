@@ -5,14 +5,15 @@
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
+@inject IMatToaster Toaster
 
 <h2 class="col-12 mb-4 text-center">График дежурства руководящего состава ППКУ на @title.ToString("MMMM yyyy").ToLower() г.</h2>
 <div class="alert alert-danger" role="alert">
-   Для печатную форму попадают следующие поля: фамилия, имя, отчество, должность, моб.телефон 
+    В печатную форму попадают следующие поля: фамилия, имя, отчество, должность, моб.телефон
 </div>
 <div class="row mb-2">
     <div class="col-9 border-right">
-        @if (listOfDuty != null)
+        @if (ListOfDuty != null)
         {
             <table class="table">
                 <thead class="thead-dark">
@@ -30,16 +31,16 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var dutyUser in listOfDuty)
+                @foreach (var dutyUser in ListOfDuty)
                 {
-            <tr>
-                <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                <td>@dutyUser.AssignedTo.DisplayName</td>
-                <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
-                <td>@dutyUser.AssignedTo.MobPhone</td>
-                <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
-            </tr>
+                    <tr>
+                        <th scope="row">@dutyUser.DayOfDuty.Day</th>
+                        <td>@dutyUser.AssignedTo.DisplayName</td>
+                        <td>@dutyUser.AssignedTo.WorkingPosition</td>
+                        <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
+                        <td>@dutyUser.AssignedTo.MobPhone</td>
+                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                    </tr>
                 }
             </table>
         }
@@ -59,25 +60,29 @@
             </div>
         </div>
         <div class="row">
-            <EditForm EditContext="@EditContext" OnValidSubmit="@AddDuty">
+            <EditForm Model="@DutyVM" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберете дату и назначте на эту дату дежурного",MatToastType.Danger,"Ошибка!"))">
+                <div class="col-12">
+                    <DataAnnotationsValidator />
+                </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дата" @bind-Value="dutyVM.Day" Outlined="true">
-                        @if (days == null)
+                    <MatSelect Label="Дата" @bind-Value="DutyVM.Day" Outlined="true">
+                        @if (ListOfDays == null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
                         }
                         else
                         {
                             <MatOption Value="-1" Disabled="true" />
-                            @foreach (var day in days)
+                            @foreach (var day in ListOfDays)
                             {
                                 <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
                             }
                         }
                     </MatSelect>
+                    <ValidationMessage For="() => DutyVM.Day" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дежурный" @bind-Value="dutyVM.User" Outlined="true">
+                    <MatSelect Label="Дежурный" @bind-Value="DutyVM.User" Outlined="true">
                         @if (users == null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
@@ -91,13 +96,10 @@
                             }
                         }
                     </MatSelect>
+                    <ValidationMessage For="() => DutyVM.User" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatButton Raised="true" Icon="add" Type="submit" Disabled="@DisabledOnValidation" Label="Добавить" />
-                </div>
-                <div class="col-12">
-                    <DataAnnotationsValidator />
-                    <ValidationErrors Model="@dutyVM" />
+                    <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
                 </div>
             </EditForm>
         </div>
@@ -108,61 +110,21 @@
 @code {
 
     public DateTime? PikDate { get; set; } = DateTime.Now;
-    public List<Duty> listOfDuty { get; set; } = new List<Duty>();
-    List<DateTime> days { get; set; }
-    List<AppUser> users;
+    protected List<Duty> ListOfDuty { get; set; } = new List<Duty>();
+    protected DutyViewModel DutyVM { get; set; } = new DutyViewModel();
+    protected List<DateTime> ListOfDays { get; set; }
+    protected List<AppUser> users;
 
     DateTime title = DateTime.Now;
 
     #region Sort table prop
-
     bool IsSortedAscending;
     string CurrentSortColumn;
-
-    #endregion
-
-
-    #region Validation prop
-
-    private EditContext EditContext;
-    protected DutyViewModel dutyVM { get; set; } = new DutyViewModel();
-    protected bool DisabledOnValidation { get; set; }
-
-    #endregion
-
-
-    #region Validation methods
-    protected override void OnAfterRender(bool firstRender)
-    {
-        DisabledSubmitButton();
-    }
-
-
-    private void OnFieldChanged(object sender, FieldChangedEventArgs e)
-    {
-        DisabledSubmitButton();
-    }
-
-    private void DisabledSubmitButton()
-    {
-        if (EditContext.Validate())
-        {
-            DisabledOnValidation = false;
-        }
-        else
-        {
-            DisabledOnValidation = true;
-        }
-    }
-
     #endregion
 
 
     protected async override Task OnInitializedAsync()
     {
-        EditContext = new EditContext(dutyVM);
-        EditContext.OnFieldChanged += OnFieldChanged;
-
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
 
@@ -173,13 +135,13 @@
 
     async Task GetCalendarAsync(int month, int year)
     {
-        listOfDuty = null;
-        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
+        ListOfDuty = null;
+        ListOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
 
-        days = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
+        ListOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
             .ToList();
 
-        days.RemoveAll(r => listOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
+        ListOfDays.RemoveAll(r => ListOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
         title = PikDate.Value;
     }
 
@@ -187,22 +149,20 @@
     {
         if (dutyUser.DutyId > 0)
         {
-            var deleteDutyUser = listOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
+            var deleteDutyUser = ListOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
             await HttpClient.DeleteAsync($"api/duty/delete/{deleteDutyUser.DutyId}");
+            ListOfDuty.Remove(dutyUser);
+            ListOfDays.Add(dutyUser.DayOfDuty);
+            Toaster.Add($"{deleteDutyUser.AssignedTo.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
         }
-
-        listOfDuty.Remove(dutyUser);
-        days.Add(dutyUser.DayOfDuty);
-
     }
 
     async Task AddDuty()
     {
-
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
-        var day = Int32.Parse(dutyVM.Day);
-        var user = Int32.Parse(dutyVM.User);
+        var day = Int32.Parse(DutyVM.Day);
+        var user = Int32.Parse(DutyVM.User);
         var date = new DateTime(year, month, day);
         var findUser = users.Where(u => u.AppUserId == user).FirstOrDefault();
 
@@ -210,20 +170,20 @@
         {
             DayOfDuty = date,
             AppUserId = findUser.AppUserId
-
         };
 
-        listOfDuty.Add(
+        ListOfDuty.Add(
             new Duty
             {
                 DayOfDuty = date,
                 AssignedTo = findUser
             });
 
-        days.Remove(duty.DayOfDuty);
+        ListOfDays.Remove(duty.DayOfDuty);
 
-        await HttpClient.PostJsonAsync<Duty>("api/duty/create", duty);
-
+        var response = await HttpClient.PostJsonAsync<Duty>("api/duty/create", duty);
+        Toaster.Add($"{response.AssignedTo.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
+        DutyVM = new DutyViewModel();
     }
 
     async Task DownloadFile(int month, int year)
@@ -236,24 +196,24 @@
     #region Sort tabe methods
     void SortTable(string columnName)
     {
-        if (listOfDuty.Any())
+        if (ListOfDuty.Any())
         {
 
             if (columnName != CurrentSortColumn)
             {
                 //We need to force order by descending on the new column
-                listOfDuty = listOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+                ListOfDuty = ListOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
                 CurrentSortColumn = columnName;
                 IsSortedAscending = true;
 
             }
             if (IsSortedAscending)
             {
-                listOfDuty = listOfDuty.OrderByDescending(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+                ListOfDuty = ListOfDuty.OrderByDescending(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
             }
             else
             {
-                listOfDuty = listOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+                ListOfDuty = ListOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
             }
 
             IsSortedAscending = !IsSortedAscending;

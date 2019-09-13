@@ -35,9 +35,9 @@
             <div class="col-4 border-right">
                 @if (user.DaysOfDuty.Any())
                 {
-                    <h3>Мои дежурства</h3>
+                    <h3 class="text-center">Мои дежурства</h3>
                     <table class="table table-striped">
-                        @foreach (var duty in user.DaysOfDuty)
+                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
                         {
                             <tr>
                                 <td>@duty.DayOfDuty.ToShortDateString()</td>
@@ -49,9 +49,9 @@
             <div class="col-4">
                 @if (user.Articles.Any())
                 {
-                    <h3>Мои объявления</h3>
+                    <h3 class="text-center">Мои объявления</h3>
 
-                    @foreach (var article in user.Articles)
+                    @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
                     {
                         <div class="card @CssExtension.Border(article) mb-2">
                             <div class="card-body @CssExtension.Text(article)">

@@ -7,8 +7,9 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class DutyViewModel : IValidatableObject
     {
-        
+        [Required(ErrorMessage = "Поле \"Дата\" не может быть пустым")]
         public string Day { get; set; }
+        [Required(ErrorMessage = "Поле \"Дежурный\" не может быть пустым")] 
         public string User { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

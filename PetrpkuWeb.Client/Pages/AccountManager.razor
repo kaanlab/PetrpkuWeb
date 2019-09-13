@@ -2,6 +2,7 @@
 
 
 @inject HttpClient HttpClient
+@inject IMatToaster Toaster
 
 <h2 class="col-12 mb-4 text-center">Пользователи</h2>
 
@@ -10,7 +11,7 @@
 </div>
 <div class="row">
     <div class="col-6">
-        <h2>Активные учетные записи</h2>
+        <h2 class="text-center">Активные учетные записи</h2>
         @if (usersIdentity == null)
         {
             <div class="spinner-border text-primary text-center" role="status">
@@ -48,7 +49,7 @@
         }
     </div>
     <div class="col-6">
-        <h2>Архивные учетные записи</h2>
+        <h2 class="text-center">Архивные учетные записи</h2>
         @if (disabledUsers == null)
         {
             <div class="spinner-border text-primary text-center" role="status">
@@ -110,17 +111,17 @@
     </MatDialog>
 </EditForm>
 
-@if(user != null)
-{ 
-<EditForm Model="@user">
-    <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
-        <MatDialogTitle>Удалить пользователя @user.DisplayName?</MatDialogTitle>
-        <MatDialogActions>
-            <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(user.Id))" Label="Да" />
-        </MatDialogActions>
-    </MatDialog>
-</EditForm>
+@if (user != null)
+{
+    <EditForm Model="@user">
+        <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
+            <MatDialogTitle>Удалить пользователя @user.DisplayName?</MatDialogTitle>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(user.Id))" Label="Да" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
 }
 
 @code {

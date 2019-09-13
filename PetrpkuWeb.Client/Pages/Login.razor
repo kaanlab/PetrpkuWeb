@@ -3,52 +3,57 @@
 @using System.Net.Http
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
+@inject IMatToaster Toaster
 
 <h1>Вход</h1>
 
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Пожалуйста, введите свои учетные данные</h5>
-        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" OnInvalidSubmit="@(() => Toaster.Add("Пожалуйста, укажите имя пользователя и пароль",MatToastType.Danger,"Ошибка!"))">
             <DataAnnotationsValidator />
-            <ValidationErrors Model="loginModel" />
-            <div class="form-group">
-                <label for="username">Имя пользователя</label>
-                <InputText Id="username" Class="form-control" @bind-Value="loginModel.Username" />
-
-            </div>
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <InputText Id="password" type="password" Class="form-control" @bind-Value="loginModel.Password" />
-            </div>
-            <MatButton Type="submit" Raised="true" Label="Отправить" Icon="done" />
-        </EditForm>
+            <div class=" form-group">
+            <label for="username">Имя пользователя</label>
+            <InputText Id="username" Class="form-control" @bind-Value="loginModel.Username" />
+            <ValidationMessage For="() => loginModel.Username" />
     </div>
+    <div class="form-group">
+        <label for="password">Пароль</label>
+        <InputText Id="password" type="password" Class="form-control" @bind-Value="loginModel.Password" />
+        <ValidationMessage For="() => loginModel.Password" />
+    </div>
+    <MatButton Type="submit" Raised="true" Label="Отправить" Icon="done" />
+    </EditForm>
+</div>
 </div>
 
-<MatSnackbar @bind-IsOpen="@showError">
-    <MatSnackbarContent>@message</MatSnackbarContent>
-</MatSnackbar>
 
 @code {
 
     private LoginViewModel loginModel = new LoginViewModel();
-    private bool showError = false;
-    private string message;
 
 
     private async Task HandleLogin()
     {
         try
         {
-  
-            await AuthService.Login(loginModel);
+            var result = await AuthService.Login(loginModel);
+            if(result.Successful)
+            {
+                Toaster.Add($"Добро пожаловать, {loginModel.Username}", MatToastType.Success, "Успех!");
+            }
+            else 
+            { 
+                Toaster.Add($"При авторизации произошла следующая ошибка: {result.Error}", MatToastType.Danger, "Ошибка!");
+            }
+
         }
         catch (HttpRequestException e)
         {
-            showError = true;
-            message = e.Message;
-            this.StateHasChanged();
+            Toaster.Add($"Ошибка на сервере: {e.Message}", MatToastType.Danger, "Ошибка!");
+            //showError = true;
+            //message = e.Message;
+            //this.StateHasChanged();
             return;
         }
 

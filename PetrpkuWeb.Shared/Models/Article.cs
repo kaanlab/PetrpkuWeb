@@ -20,7 +20,9 @@ namespace PetrpkuWeb.Shared.Models
         }
 
         public int ArticleId { get; set; }
+        [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
+        [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
         public string Content { get; set; }
         public DateTime PublishDate { get; set; }
         public Style Type { get; set; }

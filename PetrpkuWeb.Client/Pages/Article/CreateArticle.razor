@@ -8,20 +8,27 @@
 @inject NavigationManager NavigationManager
 @inject IFileReaderService fileReaderService
 @inject IMapper mapper
+@inject IMatToaster Toaster
 
 
-<h1>Создать объявление</h1>
+<h2 class="col-12 mb-4 text-center">Создать объявление</h2>
 
 <div class="row">
     <div class="col-12">
-        <EditForm Model="NewArticle">
+        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации объявления необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+            <div class="col-12">
+                <DataAnnotationsValidator />
+            </div>
             <div class="col-12 mb-2">
                 <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
+                <ValidationMessage For="() => NewArticle.Title" />
             </div>
             <div class="col-12 mb-2">
                 <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
+                <ValidationMessage For="() => NewArticle.Content" />
             </div>
             <div class="col-12 mb-2">
+                Выберете важность сообщения
                 <select @bind="NewArticle.Type">
                     @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                     {
@@ -65,7 +72,7 @@
                 }
             </div>
             <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Сохранить" OnClick="@AddArticle" />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Сохранить" />
             </div>
         </EditForm>
     </div>
@@ -155,8 +162,9 @@
         NewArticle.Attachments = mapper.Map<List<Attachment>>(ListFileUploadVM);
         NewArticle.AppUserId = identityUserId;
         NewArticle.PublishDate = DateTime.Now;
-        var res = await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
-        NavigationManager.NavigateTo($"article/{res.ArticleId}");
+        var response = await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
+        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
+        NavigationManager.NavigateTo($"article/{response.ArticleId}");
     }
 
     public string ShowImg(string ext)

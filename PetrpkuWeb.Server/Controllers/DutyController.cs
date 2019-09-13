@@ -63,19 +63,20 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPost("createdutylist")]
-        public async Task<ActionResult> PostDutyListAsync([FromBody] List<Duty> dutyList)
+        public async Task<ActionResult> PostDutyListAsync(List<Duty> dutyList)
         {
             await _db.Duties.AddRangeAsync(dutyList);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(dutyList);
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<Duty>> PostDutyAsync([FromBody]Duty duty)
+        public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
         {
             _db.Duties.Add(duty);
             await _db.SaveChangesAsync();
-            return Ok();
+            var response = _db.Duties.Where(d => d.DutyId == duty.DutyId).Include(u => u.AssignedTo).FirstOrDefault();
+            return Ok(response);
         }
 
         [HttpPut("update/{dutyId:int}")]

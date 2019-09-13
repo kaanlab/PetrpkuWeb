@@ -7,7 +7,10 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class LoginViewModel : IValidatableObject
     {
+        [Required(ErrorMessage = "Поле \"Имя пользователя\" не может быть пустым")]
         public string Username { get; set; }
+
+        [Required(ErrorMessage = "Поле \"Пароль\" не может быть пустым")]
         public string Password { get; set; }
         public bool RememberMe { get; set; }
 
