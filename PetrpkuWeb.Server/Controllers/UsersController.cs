@@ -49,6 +49,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .Where(u => u.AppUserId == appUserId)
                 .Include(d => d.DaysOfDuty)
                 .Include(a => a.Articles)
+                .ThenInclude(atach => atach.Attachments)
                 .FirstOrDefault();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace PetrpkuWeb.Shared.Models
@@ -8,17 +9,21 @@ namespace PetrpkuWeb.Shared.Models
     {
         public enum Style
         {
+            [Display(Name = "Стандартное")]
             Standard,
-            Warning,
+            [Display(Name = "Информационное")]
+            Info,
+            [Display(Name = "Важное")]
             Danger,
-            Info
+            [Display(Name = "Особое")]
+            Warning
         }
 
         public int ArticleId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime PublishDate { get; set; }
-        public Style Name { get; set; }
+        public Style Type { get; set; }
 
 
 

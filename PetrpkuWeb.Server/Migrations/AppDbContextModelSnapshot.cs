@@ -289,6 +289,9 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("ArticleId");
 
                     b.HasIndex("AppUserId");

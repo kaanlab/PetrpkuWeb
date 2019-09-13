@@ -17,27 +17,25 @@
                     <img src="@user.PhotoUrl" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">@user.DisplayName</h5>
-                        <p class="card-text">@user.WorkingPosition</p>
                     </div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item">@user.LastName</li>
-                        <li class="list-group-item">@user.FirstName</li>
-                        <li class="list-group-item">@user.MidleName</li>
-                        <li class="list-group-item"><MatIcon Icon="contact_phone" />@user.IntPhone</li>
-                        <li class="list-group-item"><MatIcon Icon="phone_iphone" />@user.MobPhone</li>
-                        <li class="list-group-item"><MatIcon Icon="phone" />@user.ExtPhone</li>
-                        <li class="list-group-item"><MatIcon Icon="room" />@user.Office</li>
-                        <li class="list-group-item"><MatIcon Icon="notification_important" />@user.Birthday.ToShortDateString()</li>
+                        <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
+                        <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
+                        <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Office</span></li>
+                        <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
                     </ul>
                     <div class="card-body">
-                        <MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" />
+                        <span class="ml-3"><MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" /></span>
                     </div>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-4 border-right">
                 @if (user.DaysOfDuty.Any())
                 {
-                    <h2>Мои дежурства</h2>
+                    <h3>Мои дежурства</h3>
                     <table class="table table-striped">
                         @foreach (var duty in user.DaysOfDuty)
                         {
@@ -51,24 +49,31 @@
             <div class="col-4">
                 @if (user.Articles.Any())
                 {
-                    <h2>Мои новости</h2>
-                    <table class="table">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                            </tr>
-                        </thead>
-                        @foreach (var article in user.Articles)
-                        {
-                            <tr>
-                                <td>@article.Title</td>
-                                <td>@article.Content</td>
-                                <td>@article.PublishDate.ToShortDateString()</td>
-                            </tr>
-                        }
-                    </table>
+                    <h3>Мои объявления</h3>
+
+                    @foreach (var article in user.Articles)
+                    {
+                        <div class="card @CssExtension.Border(article) mb-2">
+                            <div class="card-body @CssExtension.Text(article)">
+                                <h5 class="card-title">@article.Title</h5>
+                                <p class="card-text">@article.Content</p>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="card-text"><small class="text-muted"> @article.PublishDate</small></p>
+                                    </div>
+                                    @if (article.Attachments.Any())
+                                    {
+                                        <div class="col-4">
+                                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
+                                        </div>
+                                    }
+                                    <a class="stretched-link" href="/article/@article.ArticleId"></a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 }
             </div>
         }

@@ -6,8 +6,8 @@
 
 @if (article != null)
 {
-    <div class="card">
-        <div class="card-body">
+    <div class="card @CssExtension.Border(article)">
+        <div class="card-body @CssExtension.Text(article)">
             <h5 class="card-title">@article.Title</h5>
             <p class="card-text">@article.Content</p>
         </div>
@@ -36,7 +36,7 @@
                             @if (attachment.Extension.StartsWith(".doc") || attachment.Extension.StartsWith(".xls") || attachment.Extension.StartsWith(".rtf") || attachment.Extension.StartsWith(".pdf"))
                             {
                                 <tr>
-                                    <td><img class="img-fluid" src="@ShowImg(attachment.Extension)" /></td>
+                                    <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
                                     <td>@attachment.Description</td>
                                     <td>@attachment.Name</td>
                                     <td>@attachment.Length</td>
@@ -53,8 +53,8 @@
             }
         </ul>
         <div class="card-footer text-muted">
-            <p>@article.PublishDate.ToShortDateString()</p>
             <p>@article.Author.FirstName @article.Author.LastName</p>
+            <p>@article.PublishDate.ToShortDateString()</p>
         </div>
     </div>
 }
@@ -71,24 +71,4 @@
     {
         article = await HttpClient.GetJsonAsync<Article>($"api/articles/article/{ArticleId}");
     }
-
-    public string ShowImg(string ext)
-    {
-        switch (ext)
-        {
-            case ".doc":
-            case ".docx":
-                return @"/img/site/word.png";
-            case ".xls":
-            case ".xlsx":
-                return @"/img/site/excel.png";
-            case ".pdf":
-                return @"/img/site/pdf.png";
-            case ".rtf":
-                return @"/img/site/rtf.png";
-        }
-
-        return String.Empty;
-    }
-
 }

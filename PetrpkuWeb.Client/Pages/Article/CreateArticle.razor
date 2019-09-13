@@ -22,10 +22,10 @@
                 <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
             </div>
             <div class="col-12 mb-2">
-                <select @bind="NewArticle.Name">
-                    @foreach (var styleType in Enum.GetValues(typeof(Article.Style)))
+                <select @bind="NewArticle.Type">
+                    @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                     {
-                        <option>@styleType</option>
+                        <option value="@styleType">@styleType.DisplayName()</option>
                     }
                 </select>
             </div>
@@ -53,7 +53,7 @@
                                 var index = ListFileUploadVM.IndexOf(file);
                                 <tr>
                                     <td>@(ListFileUploadVM.IndexOf(file) + 1)</td>
-                                    <td><img src="@ShowImg(file.Extension)" /></td>
+                                    <td><img src="@CssExtension.Img(file.Extension)" /></td>
                                     <td>@file.Description</td>
                                     <td>@file.Name</td>
                                     <td>@file.Length</td>

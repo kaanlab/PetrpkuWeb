@@ -55,6 +55,7 @@ namespace PetrpkuWeb.Server.Migrations
                     Title = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
                     PublishDate = table.Column<DateTime>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
                     AppUserId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

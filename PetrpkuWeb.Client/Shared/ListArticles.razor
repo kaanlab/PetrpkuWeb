@@ -1,7 +1,7 @@
 @inject HttpClient HttpClient
 
 
-<ForeachTemplate Loader="@LoadArticles">
+<ListTemplate Loader="@LoadArticles">
     <LoadingContent>
         <div class="spinner-border text-primary text-center" role="status">
             <span class="sr-only">Loading...</span>
@@ -15,8 +15,8 @@
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div class="card @BorderCss(item) mb-2">
-            <div class="card-body">
+        <div class="card @CssExtension.Border(item) mb-2">
+            <div class="card-body @CssExtension.Text(item)">
                 <h5 class="card-title">@item.Title</h5>
                 <p class="card-text">@item.Content</p>
             </div>
@@ -40,25 +40,14 @@
             </div>
         </div>
     </ItemContent>
-</ForeachTemplate>
+</ListTemplate>
 
 
 @code {
 
-async Task<List<Article>> LoadArticles()
+    async Task<List<Article>> LoadArticles()
     {
         return await HttpClient.GetJsonAsync<List<Article>>("api/articles/all");
     }
 
-    public string BorderCss(Article article)
-    {
-        switch (article.Name)
-        {
-            case Article.Style.Warning: return "border-warning";
-            case Article.Style.Danger: return "border-danger";
-            case Article.Style.Info: return "border-info";
-        }
-
-        return String.Empty;
-    }
 }

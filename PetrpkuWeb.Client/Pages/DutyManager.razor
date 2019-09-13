@@ -126,24 +126,14 @@
 
     private EditContext EditContext;
     protected DutyViewModel dutyVM { get; set; } = new DutyViewModel();
-    protected bool DisabledOnValidation { get; set; } = true;
+    protected bool DisabledOnValidation { get; set; }
 
     #endregion
 
 
     #region Validation methods
-    protected override void OnInitialized()
-    {
-        EditContext = new EditContext(dutyVM);
-        EditContext.OnFieldChanged += OnFieldChanged;
-
-        //base.OnInitialized();
-    }
-
     protected override void OnAfterRender(bool firstRender)
     {
-        //base.OnAfterRender();
-
         DisabledSubmitButton();
     }
 
@@ -151,7 +141,6 @@
     private void OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         DisabledSubmitButton();
-        this.StateHasChanged(); //!
     }
 
     private void DisabledSubmitButton()
@@ -166,12 +155,14 @@
         }
     }
 
-
     #endregion
 
 
     protected async override Task OnInitializedAsync()
     {
+        EditContext = new EditContext(dutyVM);
+        EditContext.OnFieldChanged += OnFieldChanged;
+
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
 

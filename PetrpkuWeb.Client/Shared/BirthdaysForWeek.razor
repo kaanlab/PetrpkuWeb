@@ -2,7 +2,7 @@
 
 
 <h4>Дни рождения c @FirstDayOfWeek по @LastDayOfWeek:</h4>
-<ForeachTemplate Loader="@LoadBirthdaysForWeek">
+<ListTemplate Loader="@LoadBirthdaysForWeek">
     <LoadingContent>
         <div class="spinner-border text-primary text-center" role="status">
             <span class="sr-only">Loading...</span>
@@ -25,7 +25,7 @@
             </div>
         </div>
     </ItemContent>
-</ForeachTemplate>
+</ListTemplate>
 
 
 @code {
