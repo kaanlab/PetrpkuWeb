@@ -93,6 +93,7 @@
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>@user.DisplayName</MatDialogTitle>
             <MatDialogContent>
+                <img src="@user.PhotoUrl" />
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
@@ -101,11 +102,47 @@
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
                 <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
-                <MatTextField Label="Фото" Disabled="true" @bind-Value="@avatarFilePath"></MatTextField>
+
                 <div class="alert alert-danger" role="alert">
                     Для профиля желательно изображение размером 400х400px!
+                    @if (selectedFiles != null)
+                    {
+                        foreach (var file in selectedFiles)
+                        {
+                            var isLoading = file.Data.Position > 0;
+
+                            <div class="row">
+                                @if (showInfo)
+                                {
+                                    <!-- File info -->
+                                    <div>
+                                        <h2>@file.Name</h2>
+                                        Size: <strong>@file.Size bytes</strong>;
+                                        Last modified: <strong>@file.LastModified.ToShortDateString()</strong>;
+                                        Type: <strong>@file.Type</strong>
+                                        <img src="data:image/jpeg;base64,@avatarDescription" alt="Red dot" />
+
+                                    </div>
+                                }
+                                <button @onclick="() => LoadFileInfo(file)"></button>
+
+                                <!-- Upload button -->
+                                <button @onclick="() => LoadFile(file)" disabled="@isLoading">
+                                    @if (!isLoading)
+                                    {
+                                        <span>Load</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Loaded @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
+                                    }
+                                </button>
+                            </div>
+                        }
+                    }
                 </div>
-                <input type="file" accept="image/png, image/jpg, image/jpeg" @ref=inputElement @onchange="UploadFile" />
+                <InputFile accept="image/jpeg, image/jpg" OnChange="HandleSelection" />
+                <MatTextField Label="Описание" @bind-Value="@avatarDescription"></MatTextField>
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -130,10 +167,14 @@
     private AppUser user;
     private int identityUserId;
     bool dialogIsOpen = false;
+    bool showInfo = false;
 
-    ElementReference inputElement;
+    //ElementReference inputElement;
+
+    IFileListEntry[] selectedFiles;
 
     string avatarFilePath = String.Empty;
+    string avatarDescription = String.Empty;
 
 
     protected override async Task OnInitializedAsync()
@@ -157,21 +198,51 @@
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
     }
 
-    async Task UploadFile()
+    //async Task UploadFile()
+    //{
+    //    var multipartFormDataContent = new MultipartFormDataContent();
+    //    foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+    //    {
+    //        multipartFormDataContent.Add(
+    //            new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+    //    }
+
+    //    var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+    //    var content = await response.Content.ReadAsStringAsync();
+    //    ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+    //    avatarFilePath = ListFileUploadVM.First().Path;
+    //}
+
+    void HandleSelection(IFileListEntry[] files)
     {
-        var multipartFormDataContent = new MultipartFormDataContent();
-        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        selectedFiles = files;
+    }
+
+    async Task LoadFileInfo(IFileListEntry file)
+    {
+        if (file != null)
         {
-            multipartFormDataContent.Add(
-                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+            showInfo = true;
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            var byteArray = ms.ToArray();
+            avatarDescription = Convert.ToBase64String(byteArray);
         }
+    }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
-        var content = await response.Content.ReadAsStringAsync();
-        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        avatarFilePath = ListFileUploadVM.First().Path;
+    async Task LoadFile(IFileListEntry file)
+    {
+        if (file != null)
+        {
+            var multipartFormDataContent = new MultipartFormDataContent();
 
-        //this.StateHasChanged();
+            multipartFormDataContent.Add(new StreamContent(file.Data, 1048576), "files", file.Name);
+            var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+            var content = await response.Content.ReadAsStringAsync();
+            ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+            avatarFilePath = ListFileUploadVM.First().Path;
+        }
     }
 
 }
+
