@@ -1,8 +1,8 @@
 @page "/createarticle"
 
 @using Newtonsoft.Json
-@using System.IO
 @using AutoMapper
+@using System.IO
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -82,11 +82,35 @@
     <div class="col-12 mb-2">
         <div class="alert alert-danger" role="alert">
             Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
+            @if (ListFilesVM.Any())
+            {
+                foreach (var fileData in ListFilesVM)
+                {
+                    <div class="row">
+                        <!-- File info -->
+                        <div>
+                            <EditForm Model="@FileVM">
+                                <h2>@fileData.Name</h2>
+                                Size: <strong>@fileData.Size bytes</strong>;
+                                Type: <strong>@fileData.Type</strong>
+                                <img src="data:image/jpeg;base64,@(fileData.Byte64String)" alt="Red dot" />
+                                <p>Width: @fileData.Width</p>
+                                <InputNumber @bind-Value="@newWidth"></InputNumber>
+                                <p>Height: @fileData.Height</p>
+                                <InputNumber @bind-Value="@newHeight"></InputNumber>
+                                <button type="submit" @onclick="@(() => Resize(fileData, newWidth, newHeight))" class="btn btn-primary">Resize</button>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+                <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
+                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+            }
         </div>
         <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
 
-        <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
-        <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+        <button @onclick="ShowFileInfo" class="btn btn-primary">Предпросмотр</button>
+
     </div>
 </div>
 
@@ -108,14 +132,27 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     private int identityUserId;
 
     Article NewArticle { get; set; } = new Article();
+
     List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
+    FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
+
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();
 
-    FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
+    List<FileDataViewModel> ListFileDataVM { get; set; } = new List<FileDataViewModel>();
+    FileDataViewModel FileDataVM { get; set; } = new FileDataViewModel();
+
+    List<FileViewModel> ListFilesVM { get; set; } = new List<FileViewModel>();
+    FileViewModel FileVM { get; set; } = new FileViewModel();
+
     bool dialogIsOpen = false;
+
+    int newWidth = 0;
+    int newHeight = 0;
+
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
@@ -134,21 +171,133 @@
         fileReaderReference = fileReaderService.CreateReference(inputElement);
     }
 
+    //public async Task ShowFileInfo()
+    //{
+    //    foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+    //    {
+    //        using (var ms = await file.CreateMemoryStreamAsync(8192))
+    //        {
+    //            var byteArray = ms.ToArray();
+    //            var fileInfo = await file.ReadFileInfoAsync();
+    //            var fileData = new FileDataViewModel();
+    //            fileData.ByteArray = byteArray;
+    //            fileData.Name = fileInfo.Name;
+    //            fileData.Size = fileInfo.Size;
+    //            fileData.Byte64String = Convert.ToBase64String(byteArray);
+    //            fileData.Type = fileInfo.Type;
+
+    //            using (Image image = Image.Load(ms))
+    //            {
+    //                fileData.Width = image.Width;
+    //                fileData.Height = image.Height;
+    //            }
+
+    //            ListFileDataVM.Add(fileData);
+    //        }
+    //    }
+    //}
+
+    public async Task ShowFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            using (var ms = await file.CreateMemoryStreamAsync(8192))
+            {
+
+                var fileInfo = await file.ReadFileInfoAsync();
+
+                var fileData = new FileViewModel();
+                var byteArray = ms.ToArray();
+                fileData.Byte64String = Convert.ToBase64String(byteArray);
+
+                //fileData.File = file;
+                fileData.ByteArray = byteArray;
+                fileData.Name = fileInfo.Name;
+                fileData.Size = fileInfo.Size;
+
+                fileData.Type = fileInfo.Type;
+
+                using (Image image = Image.Load(ms))
+                {
+                    fileData.Width = image.Width;
+                    fileData.Height = image.Height;
+                }
+
+                ListFilesVM.Add(fileData);
+            }
+        }
+    }
+
+    public void Resize(FileViewModel fileData, int width, int height)
+    {
+
+        using (var ms = new MemoryStream(fileData.ByteArray))
+        {
+            //fileData.ByteArray
+            //var fileInfo = await fileData.File.ReadFileInfoAsync();
+
+            using (Image image = Image.Load(ms))
+            {
+                image.Mutate(x => x.Resize(image.Width / width, image.Height / height));
+
+                if (fileData.Type.StartsWith(".jp"))
+                {
+                    image.SaveAsJpeg(ms);
+                }
+                else
+                {
+                    image.SaveAsPng(ms);
+                }
+
+                //IFileReference fileRef = ;
+                //fileRef.OpenReadAsync()
+                fileData.Width = image.Width;
+                fileData.Height = image.Height;
+                //fileData.File = await fileData.File.OpenReadAsync(ms);
+            }
+
+            fileData.Size = ms.Length;
+            fileData.ByteArray = ms.ToArray();
+
+            StateHasChanged();
+        }
+    }
+
     public async Task ClearFile()
     {
         ListFileUploadVM.Clear();
+        ListFileDataVM.Clear();
         await fileReaderReference.ClearValue();
     }
+
+    //public async Task UploadFiles()
+    //{
+    //    this.FileList.Clear();
+
+    //    var multipartFormDataContent = new MultipartFormDataContent();
+    //    foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+    //    {
+    //        multipartFormDataContent.Add(
+    //            new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+    //    }
+
+    //    var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+    //    var content = await response.Content.ReadAsStringAsync();
+    //    ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
+    //    await fileReaderReference.ClearValue();
+    //}
 
     public async Task UploadFiles()
     {
         this.FileList.Clear();
 
         var multipartFormDataContent = new MultipartFormDataContent();
-        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        foreach (var file in ListFilesVM)
         {
-            multipartFormDataContent.Add(
-                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+            using (var ms = new MemoryStream(file.ByteArray))
+            {
+                multipartFormDataContent.Add(new StreamContent(ms, 8192), "files", file.Name);
+            }
         }
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);

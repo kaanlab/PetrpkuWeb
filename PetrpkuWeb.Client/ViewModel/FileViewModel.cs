@@ -1,24 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System.Threading.Tasks;
+using Blazor.FileReader;
 
-namespace PetrpkuWeb.Shared.ViewModels
+namespace PetrpkuWeb.Client.ViewModel
 {
-    public class FileDataViewModel
+    public class FileViewModel
     {
+        //public string Name { get; set; }
         public long Size { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
         public string Byte64String { get; set; }
-        
         public byte[] ByteArray { get; set; }
-
+        //public IFileReference File { get; set; }
+        public int Resize { get; set; }
         public int Width { get; set; }
-
         public int Height { get; set; }
-        //public IFormFile File { get; set; }
-
-
     }
 }
