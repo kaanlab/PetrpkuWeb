@@ -113,7 +113,7 @@
                                     <h2>@fileData.Name</h2>
                                     Size: <strong>@fileData.Size bytes</strong>;
                                     Type: <strong>@fileData.Type</strong>
-                                    <img src="data:image/jpeg;base64,@(fileData.Byte64String)" alt="Red dot" />
+    
                                 </div>
                             </div>
                         }
@@ -145,7 +145,7 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
-    List<FileDataViewModel> ListFileDataVM { get; set; } = new List<FileDataViewModel>();
+    List<FileInfoViewModel> ListFileDataVM { get; set; } = new List<FileInfoViewModel>();
     List<IFileInfo> FileList { get; } = new List<IFileInfo>();
 
     private AppUser user;
@@ -178,10 +178,10 @@
             var ms = await file.CreateMemoryStreamAsync();
             var byteArray = ms.ToArray();
             var fileInfo = await file.ReadFileInfoAsync();
-            var fileData = new FileDataViewModel();
+            var fileData = new FileInfoViewModel();
             fileData.Name = fileInfo.Name;
-            fileData.Size = fileInfo.Size;
-            fileData.Byte64String = Convert.ToBase64String(byteArray);
+            //fileData.Size = fileInfo.Size;
+            //fileData.Byte64String = Convert.ToBase64String(byteArray);
             fileData.Type = fileInfo.Type;
             ListFileDataVM.Add(fileData);
         }
