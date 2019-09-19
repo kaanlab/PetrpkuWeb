@@ -9,14 +9,14 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190913094332_InitDb")]
+    [Migration("20190919084915_InitDb")]
     partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-preview9.19423.6");
+                .HasAnnotation("ProductVersion", "3.0.0-rc1.19456.14");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -283,12 +283,14 @@ namespace PetrpkuWeb.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("PublishDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
@@ -307,7 +309,7 @@ namespace PetrpkuWeb.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ArticleId")
+                    b.Property<int?>("ArticleId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
@@ -424,9 +426,7 @@ namespace PetrpkuWeb.Server.Migrations
                 {
                     b.HasOne("PetrpkuWeb.Shared.Models.Article", "Article")
                         .WithMany("Attachments")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ArticleId");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Duty", b =>

@@ -12,7 +12,7 @@ namespace PetrpkuWeb.Client.Extensions
     {
         public MapperProfile()
         {
-            CreateMap<FileUploadViewModel, Attachment>();
+            //CreateMap<FileUploadViewModel, Attachment>();
         }
         
     }

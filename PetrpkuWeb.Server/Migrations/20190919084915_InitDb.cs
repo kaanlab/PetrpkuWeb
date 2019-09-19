@@ -52,8 +52,8 @@ namespace PetrpkuWeb.Server.Migrations
                 {
                     ArticleId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(nullable: true),
-                    Content = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: false),
+                    Content = table.Column<string>(nullable: false),
                     PublishDate = table.Column<DateTime>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     AppUserId = table.Column<int>(nullable: false)
@@ -154,7 +154,7 @@ namespace PetrpkuWeb.Server.Migrations
                     Extension = table.Column<string>(nullable: true),
                     Path = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    ArticleId = table.Column<int>(nullable: false)
+                    ArticleId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,7 +164,7 @@ namespace PetrpkuWeb.Server.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "ArticleId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

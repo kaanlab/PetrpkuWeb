@@ -1,12 +1,10 @@
 @page "/createarticle"
 
 @using Newtonsoft.Json
-@using AutoMapper
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject IFileReaderService fileReaderService
-@inject IMapper mapper
 @inject IMatToaster Toaster
 
 
@@ -36,16 +34,16 @@
                 </select>
             </div>
             <table class="table">
-                @foreach (var file in ListFileUploadVM)
+                @foreach (var attachment in listOfAttachments)
                 {
-                        var index = ListFileUploadVM.IndexOf(file);
+                        var index = listOfAttachments.IndexOf(attachment);
                         <tr>
-                            <td>@(ListFileUploadVM.IndexOf(file) + 1)</td>
-                            <td><img src="@CssExtension.Img(file.Extension)" /></td>
-                            <td>@file.Description</td>
-                            <td>@file.Name</td>
-                            <td>@file.Length</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(index))" Label="Редактировать" /></td>
+                            <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
+                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
                         </tr>
                 }
             </table>
@@ -75,7 +73,7 @@
 
                 </table>
                 <div class="row">
-                    <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
+                    <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
                     <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                 </div>
 
@@ -88,16 +86,16 @@
     </div>
 </div>
 
-<EditForm Model="@FileUploadVM">
+<EditForm Model="@CurrentAttachment">
     <MatDialog @bind-IsOpen="@dialogIsOpen">
-        <MatDialogTitle>"@FileUploadVM.Name</MatDialogTitle>
+        <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
         <MatDialogContent>
-            <MatTextField Label="Фамилия" @bind-Value="@FileUploadVM.Description"></MatTextField>
+            <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="save" OnClick="@DeleteFileUploadVM" Label="Удалить" />
-            <MatButton Icon="save" Type="submit" OnClick="@UpdateFileUploadVM" Label="Сохранить" />
+            <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+            <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
         </MatDialogActions>
     </MatDialog>
 </EditForm>
@@ -109,14 +107,17 @@
 
     private int identityUserId;
 
-    Article NewArticle { get; set; } = new Article();
+    private ArticleViewModel NewArticle { get; set; } = new ArticleViewModel();
 
-    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
-    FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
+    //List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
+    //FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
 
-    List<IFileInfo> FileList { get; } = new List<IFileInfo>();
+    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
+    private Attachment CurrentAttachment { get; set; } = new Attachment();
 
-    List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+    //List<IFileInfo> FileList { get; } = new List<IFileInfo>();
+
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     bool dialogIsOpen = false;
 
@@ -124,7 +125,7 @@
     IFileReaderRef fileReaderReference;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
-    string Description = String.Empty;
+    //string Description = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,7 +152,7 @@
         }
     }
 
-    public async Task ClearFile()
+    public async Task ClearFileInfo()
     {
         ListFileInfoVM.Clear();
         await fileReaderReference.ClearValue();
@@ -159,7 +160,7 @@
 
     public async Task UploadFiles()
     {
-        this.FileList.Clear();
+        //this.FileList.Clear();
 
         var multipartFormDataContent = new MultipartFormDataContent();
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
@@ -170,38 +171,46 @@
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        await ClearFile();
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+
+        await ClearFileInfo();
     }
 
     public async Task AddArticle()
     {
-        NewArticle.Attachments = mapper.Map<List<Attachment>>(ListFileUploadVM);
         NewArticle.AppUserId = identityUserId;
         NewArticle.PublishDate = DateTime.Now;
-        var response = await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
+        NewArticle.Attachments = new List<Attachment>();
+        NewArticle.Attachments.AddRange(listOfAttachments); //= mapper.Map<List<Attachment>>(listOfAttachments);
+        var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
-        NavigationManager.NavigateTo($"article/{response.ArticleId}");
+        //NavigationManager.NavigateTo($"article/{response.ArticleId}");
     }
 
-    void OpenDialog(int index)
+    void OpenDialog(int attachmentId)
     {
-        FileUploadVM = ListFileUploadVM[index];
+        CurrentAttachment = listOfAttachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+        //FileUploadVM = ListFileUploadVM[index];
         dialogIsOpen = true;
     }
 
-    void UpdateFileUploadVM()
+    public async Task UpdateAttachmentInfo()
     {
-        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        var index = ListFileUploadVM.IndexOf(vm);
-        ListFileUploadVM[index] = FileUploadVM;
+        //var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
+        //var index = ListFileUploadVM.IndexOf(vm);
+        //ListFileUploadVM[index] = FileUploadVM;
+        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+        
         dialogIsOpen = false;
+        StateHasChanged();
     }
 
-    void DeleteFileUploadVM()
+    public async Task DeleteAttachment()
     {
-        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        ListFileUploadVM.Remove(vm);
+        //var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
+        //ListFileUploadVM.Remove(vm);
+        await HttpClient.DeleteAsync($"api/deleteinfo/{CurrentAttachment.AttachmentId}");
         dialogIsOpen = false;
     }
 

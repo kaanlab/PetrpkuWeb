@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Shared.Models
         public string Description { get; set; }
 
         // rel
-        public int ArticleId { get; set; }
+        public int? ArticleId { get; set; }
         public Article Article { get; set; }
     }
 }

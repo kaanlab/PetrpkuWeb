@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Controllers
 {
@@ -32,11 +33,38 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<Article>> CreateArticle(Article article)
+        public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
         {
-            _db.Articles.Add(article);
-            await _db.SaveChangesAsync();
-            return Ok(article);
+            if (newArticle != null)
+            {
+                var article = new Article()
+                {
+                    AppUserId = newArticle.AppUserId,
+                    Title = newArticle.Title,
+                    Content = newArticle.Content
+                };
+
+                _db.Articles.Add(article);
+
+                var updateAttachments = new List<Attachment>(); 
+                updateAttachments.AddRange(newArticle.Attachments); 
+
+                foreach (var attach in updateAttachments)
+                {
+                    attach.ArticleId = article.ArticleId;
+                    _db.Attachments.Update(attach);
+                }
+
+                //_db.Attachments.UpdateRange(newArticle.Attachments);
+                article.Attachments.AddRange(updateAttachments);
+                _db.Articles.Update(article);
+
+                await _db.SaveChangesAsync();
+                return Ok(article);
+
+            }
+
+            return BadRequest();
         }
 
         [HttpGet("article/{articleId:int}")]
