@@ -45,23 +45,13 @@ namespace PetrpkuWeb.Server.Controllers
                 };
 
                 _db.Articles.Add(article);
+                _db.SaveChanges();
 
-                var updateAttachments = new List<Attachment>(); 
-                updateAttachments.AddRange(newArticle.Attachments); 
-
-                foreach (var attach in updateAttachments)
-                {
-                    attach.ArticleId = article.ArticleId;
-                    _db.Attachments.Update(attach);
-                }
-
-                //_db.Attachments.UpdateRange(newArticle.Attachments);
-                article.Attachments.AddRange(updateAttachments);
+                article.Attachments.AddRange(newArticle.Attachments);
                 _db.Articles.Update(article);
 
                 await _db.SaveChangesAsync();
                 return Ok(article);
-
             }
 
             return BadRequest();

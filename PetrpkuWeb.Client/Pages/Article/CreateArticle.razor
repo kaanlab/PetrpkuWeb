@@ -108,14 +108,8 @@
     private int identityUserId;
 
     private ArticleViewModel NewArticle { get; set; } = new ArticleViewModel();
-
-    //List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
-    //FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
-
     private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
     private Attachment CurrentAttachment { get; set; } = new Attachment();
-
-    //List<IFileInfo> FileList { get; } = new List<IFileInfo>();
 
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
@@ -125,7 +119,7 @@
     IFileReaderRef fileReaderReference;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
-    //string Description = String.Empty;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,8 +154,6 @@
 
     public async Task UploadFiles()
     {
-        //this.FileList.Clear();
-
         var multipartFormDataContent = new MultipartFormDataContent();
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
@@ -181,36 +173,33 @@
         NewArticle.AppUserId = identityUserId;
         NewArticle.PublishDate = DateTime.Now;
         NewArticle.Attachments = new List<Attachment>();
-        NewArticle.Attachments.AddRange(listOfAttachments); //= mapper.Map<List<Attachment>>(listOfAttachments);
+        NewArticle.Attachments.AddRange(listOfAttachments); 
         var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
-        //NavigationManager.NavigateTo($"article/{response.ArticleId}");
+        NavigationManager.NavigateTo("/");
     }
 
     void OpenDialog(int attachmentId)
     {
         CurrentAttachment = listOfAttachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
-        //FileUploadVM = ListFileUploadVM[index];
+
         dialogIsOpen = true;
     }
 
     public async Task UpdateAttachmentInfo()
     {
-        //var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        //var index = ListFileUploadVM.IndexOf(vm);
-        //ListFileUploadVM[index] = FileUploadVM;
         CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
         
         dialogIsOpen = false;
-        StateHasChanged();
     }
 
     public async Task DeleteAttachment()
     {
-        //var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        //ListFileUploadVM.Remove(vm);
-        await HttpClient.DeleteAsync($"api/deleteinfo/{CurrentAttachment.AttachmentId}");
+        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        listOfAttachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
+
         dialogIsOpen = false;
     }
 
