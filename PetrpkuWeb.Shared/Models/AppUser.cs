@@ -15,7 +15,6 @@ namespace PetrpkuWeb.Shared.Models
         public string IntPhone { get; set; }
         public string ExtPhone { get; set; }
         public string Office { get; set; }
-        public string PhotoUrl { get; set; }
         public DateTime Birthday { get; set; }
         public bool IsActive { get; set; }
         public bool IsDuty { get; set; }

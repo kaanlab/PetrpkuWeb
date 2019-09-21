@@ -22,7 +22,6 @@ namespace PetrpkuWeb.Server.Migrations
                     IntPhone = table.Column<string>(nullable: true),
                     ExtPhone = table.Column<string>(nullable: true),
                     Office = table.Column<string>(nullable: true),
-                    PhotoUrl = table.Column<string>(nullable: true),
                     Birthday = table.Column<DateTime>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     IsDuty = table.Column<bool>(nullable: false)
@@ -154,11 +153,18 @@ namespace PetrpkuWeb.Server.Migrations
                     Extension = table.Column<string>(nullable: true),
                     Path = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    ArticleId = table.Column<int>(nullable: true)
+                    ArticleId = table.Column<int>(nullable: true),
+                    AppUserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attachments", x => x.AttachmentId);
+                    table.ForeignKey(
+                        name: "FK_Attachments_AppUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AppUsers",
+                        principalColumn: "AppUserId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Attachments_Articles_ArticleId",
                         column: x => x.ArticleId,
@@ -298,6 +304,12 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attachments_AppUserId",
+                table: "Attachments",
+                column: "AppUserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(

@@ -26,20 +26,20 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("all/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveUsers()
         {
-            return await _db.AppUsers.Where(u => u.IsActive).ToListAsync();
+            return await _db.AppUsers.Where(u => u.IsActive).Include(a => a.Avatar).ToListAsync();
         }
 
         [HttpGet("duty/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
         {
-            return await _db.AppUsers.Where(u => u.IsActive && u.IsDuty).ToListAsync();
+            return await _db.AppUsers.Where(u => u.IsActive && u.IsDuty).Include(a => a.Avatar).ToListAsync();
         }
 
 
         [HttpGet("all/disabled")]
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {
-            return await _db.AppUsers.Where(u => u.IsActive == false).ToListAsync();
+            return await _db.AppUsers.Where(u => u.IsActive == false).Include(a => a.Avatar).ToListAsync();
         }
 
         [HttpGet("{appUserId:int}")]
@@ -48,6 +48,7 @@ namespace PetrpkuWeb.Server.Controllers
             return _db.AppUsers
                 .Where(u => u.AppUserId == appUserId)
                 .Include(d => d.DaysOfDuty)
+                .Include(a => a.Avatar)
                 .Include(a => a.Articles)
                 .ThenInclude(atach => atach.Attachments)
                 .FirstOrDefault();
@@ -64,6 +65,7 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.AppUsers
                 .Where(d => (d.Birthday.DayOfYear >= firstDayOfWeek.DayOfYear && d.Birthday.DayOfYear <= lastDayOfWeek.DayOfYear))
                 .OrderBy(o => o.Birthday.DayOfYear)
+                .Include(a => a.Avatar)
                 .ToListAsync();
         }
 

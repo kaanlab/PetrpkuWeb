@@ -100,7 +100,7 @@ namespace PetrpkuWeb.Server.Controllers
             }
             catch (NotSupportedException ex)
             {
-                return BadRequest(new FileUploadViewModel() { Extension = ex.Message });
+                return BadRequest(new { Message = $"Error: {ex.Message}"});
             }
         }
 

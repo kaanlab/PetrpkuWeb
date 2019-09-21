@@ -13,7 +13,7 @@
         {
             <div class="col-4">
                 <div class="card">
-                    <img src="@user.PhotoUrl" class="card-img-top">
+                    <img src="@user.Avatar.Path" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">@user.DisplayName</h5>
                     </div>
@@ -92,6 +92,32 @@
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>@user.DisplayName</MatDialogTitle>
             <MatDialogContent>
+                <img src="@user.Avatar.Path" />
+                <div class="alert alert-danger" role="alert">
+                    Для профиля желательно изображение размером 400х400px!
+                    @if (ListFileInfoVM.Any())
+                    {
+                        <table class="table">
+                            @foreach (var fileInfo in ListFileInfoVM)
+                            {
+                                <tr>
+                                    <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                    <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                    <td>@fileInfo.Name</td>
+                                    <td>@fileInfo.Size</td>
+                                </tr>
+                            }
+
+                        </table>
+                        <div class="row">
+                            <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                            <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                        </div>
+
+                    }
+                </div>
+                <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
+                <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить" />
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
@@ -100,31 +126,6 @@
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
                 <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
                 <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
-
-                <div class="alert alert-danger" role="alert">
-                    Для профиля желательно изображение размером 400х400px!
-                    @if (ListFileDataVM.Any())
-                    {
-                        foreach (var fileData in ListFileDataVM)
-                        {
-                            <div class="row">
-                                <!-- File info -->
-                                <div>
-                                    <h2>@fileData.Name</h2>
-                                    Size: <strong>@fileData.Size bytes</strong>;
-                                    Type: <strong>@fileData.Type</strong>
-    
-                                </div>
-                            </div>
-                        }
-                        <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
-                        <button @onclick="UploadFile" class="btn btn-primary">Загрузить файлы</button>
-                    }
-                </div>
-                <input type="file" accept="image/jpeg, image/png"  @ref="inputElement" />
-                <button @onclick="ShowFileInfo" class="btn btn-primary">Предпросмотр</button>
-
-                
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -144,9 +145,8 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
-    List<FileInfoViewModel> ListFileDataVM { get; set; } = new List<FileInfoViewModel>();
-    List<IFileInfo> FileList { get; } = new List<IFileInfo>();
+    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     private AppUser user;
     private int identityUserId;
@@ -154,9 +154,6 @@
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
-
-    string avatarFilePath = String.Empty;
-    string avatarDescription = String.Empty;
 
     protected override void OnAfterRender(bool isFirstRender)
     {
@@ -175,43 +172,37 @@
     {
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
-            var ms = await file.CreateMemoryStreamAsync();
-            var byteArray = ms.ToArray();
             var fileInfo = await file.ReadFileInfoAsync();
+
             var fileData = new FileInfoViewModel();
             fileData.Name = fileInfo.Name;
-            //fileData.Size = fileInfo.Size;
-            //fileData.Byte64String = Convert.ToBase64String(byteArray);
+            fileData.Size = fileInfo.Size;
             fileData.Type = fileInfo.Type;
-            ListFileDataVM.Add(fileData);
+            ListFileInfoVM.Add(fileData);
         }
     }
 
-    public async Task ClearFile()
+    public async Task ClearFileInfo()
     {
-        ListFileUploadVM.Clear();
-        ListFileDataVM.Clear();
+        ListFileInfoVM.Clear();
         await fileReaderReference.ClearValue();
     }
 
     void OpenDialog()
     {
         dialogIsOpen = true;
-        avatarFilePath = user.PhotoUrl;
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        user.PhotoUrl = avatarFilePath;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
     }
 
-    async Task UploadFile()
+    async Task UploadFiles()
     {
-        this.FileList.Clear();
         var multipartFormDataContent = new MultipartFormDataContent();
-        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
             multipartFormDataContent.Add(
                 new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
@@ -219,8 +210,9 @@
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        avatarFilePath = ListFileUploadVM.First().Path;
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+        user.Avatar = listOfAttachments.FirstOrDefault();
+        await ClearFileInfo();
     }
 }
 
