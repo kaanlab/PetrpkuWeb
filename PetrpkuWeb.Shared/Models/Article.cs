@@ -9,17 +9,20 @@ namespace PetrpkuWeb.Shared.Models
     {
         public enum Style
         {
-            Standard,
-            Info,
-            Danger,
-            Warning
+            [Display(Name = "Стандартное")] Standard,
+            [Display(Name = "Информационное")] Info,
+            [Display(Name = "Важное")] Danger,
+            [Display(Name = "Особое")] Warning
         }
 
         public int ArticleId { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
         public string Content { get; set; }
+
         public DateTime PublishDate { get; set; }
         public Style Type { get; set; }
         

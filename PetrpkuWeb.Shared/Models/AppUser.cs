@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Shared.Models
         public string MobPhone { get; set; }
         public string IntPhone { get; set; }
         public string ExtPhone { get; set; }
-        public string Office { get; set; }
+        public string Room { get; set; }
         public DateTime Birthday { get; set; }
         public bool IsActive { get; set; }
         public bool IsDuty { get; set; }
@@ -27,5 +27,11 @@ namespace PetrpkuWeb.Shared.Models
 
         public int? AttachmentId { get; set; }
         public Attachment Avatar { get; set; }
+
+        public int? DepartmaentId { get; set; }
+        public Department Department { get; set; }
+
+        public int? BuildingId { get; set; }
+        public Building Building { get; set; }
     }
 }
