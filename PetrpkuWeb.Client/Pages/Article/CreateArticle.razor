@@ -1,4 +1,4 @@
-@page "/createarticle"
+@page "/article/create"
 
 @using Newtonsoft.Json
 
@@ -12,7 +12,7 @@
 
 <div class="row">
     <div class="col-12">
-        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации объявления необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
             <div class="col-12">
                 <DataAnnotationsValidator />
             </div>
@@ -171,7 +171,6 @@
     public async Task AddArticle()
     {
         NewArticle.AppUserId = identityUserId;
-        NewArticle.PublishDate = DateTime.Now;
         NewArticle.Attachments = new List<Attachment>();
         NewArticle.Attachments.AddRange(listOfAttachments); 
         var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);

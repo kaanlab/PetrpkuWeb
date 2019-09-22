@@ -62,6 +62,7 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
             if (appUserIdentity == null)
             {
+                //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
                 appUserIdentity = AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
             }
@@ -153,7 +154,7 @@ namespace PetrpkuWeb.Server.Controllers
                 }
 
                 var appUser = _db.AppUsers.Find(user.AssosiateUser.AppUserId);
-                appUser.DisplayName = user.DisplayName + "(d)";
+                appUser.DisplayName = "(removed) " + user.DisplayName;
                 appUser.IsActive = false;
 
                 _db.Users.Remove(user);
@@ -167,7 +168,7 @@ namespace PetrpkuWeb.Server.Controllers
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {
-            var avatar = _db.Attachments.Where(a => a.Path == @"/img/user/default_avatar.png").FirstOrDefault();
+            var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
             
             var appUserIdentity = new AppUserIdentity()
             {

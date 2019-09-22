@@ -32,20 +32,7 @@
                 </div>
             </div>
             <div class="col-4 border-right">
-                @if (user.DaysOfDuty.Any())
-                {
-                    <h3 class="text-center">Мои дежурства</h3>
-                    <table class="table table-striped">
-                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
-                        {
-                            <tr>
-                                <td>@duty.DayOfDuty.ToShortDateString()</td>
-                            </tr>
-                        }
-                    </table>
-                }
-            </div>
-            <div class="col-4">
+
                 @if (user.Articles.Any())
                 {
                     <h3 class="text-center">Мои объявления</h3>
@@ -68,11 +55,32 @@
                                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
                                         </div>
                                     }
-                                    <a class="stretched-link" href="/article/@article.ArticleId"></a>
                                 </div>
+                                <div class="row">
+                                    <a class="btn btn-outline-primary mr-2" href="/article/show/@article.ArticleId" role="button">Просмотреть</a>
+                                    <a class="btn btn-outline-info" href="/article/edit/@article.ArticleId" role="button">Редактировать</a>
+                                </div>
+
                             </div>
                         </div>
                     }
+                }
+            </div>
+            <div class="col-4">
+                @if (user.DaysOfDuty.Any())
+                {
+
+                    <h3 class="text-center">Мои дежурства</h3>
+                    <table class="table table-striped">
+                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
+                        {
+                            <tr>
+                                <td>@duty.DayOfDuty.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </table>
+
+
                 }
             </div>
         }

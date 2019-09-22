@@ -154,6 +154,9 @@ namespace PetrpkuWeb.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("AttachmentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("TEXT");
 
@@ -191,6 +194,9 @@ namespace PetrpkuWeb.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("AppUserId");
+
+                    b.HasIndex("AttachmentId")
+                        .IsUnique();
 
                     b.ToTable("AppUsers");
                 });
@@ -304,9 +310,6 @@ namespace PetrpkuWeb.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("ArticleId")
                         .HasColumnType("INTEGER");
 
@@ -326,9 +329,6 @@ namespace PetrpkuWeb.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("AttachmentId");
-
-                    b.HasIndex("AppUserId")
-                        .IsUnique();
 
                     b.HasIndex("ArticleId");
 
@@ -405,6 +405,13 @@ namespace PetrpkuWeb.Server.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.AppUser", b =>
+                {
+                    b.HasOne("PetrpkuWeb.Shared.Models.Attachment", "Avatar")
+                        .WithOne("AppUser")
+                        .HasForeignKey("PetrpkuWeb.Shared.Models.AppUser", "AttachmentId");
+                });
+
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.AppUserIdentity", b =>
                 {
                     b.HasOne("PetrpkuWeb.Shared.Models.AppUser", "AssosiateUser")
@@ -425,10 +432,6 @@ namespace PetrpkuWeb.Server.Migrations
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Attachment", b =>
                 {
-                    b.HasOne("PetrpkuWeb.Shared.Models.AppUser", "AppUser")
-                        .WithOne("Avatar")
-                        .HasForeignKey("PetrpkuWeb.Shared.Models.Attachment", "AppUserId");
-
                     b.HasOne("PetrpkuWeb.Shared.Models.Article", "Article")
                         .WithMany("Attachments")
                         .HasForeignKey("ArticleId");

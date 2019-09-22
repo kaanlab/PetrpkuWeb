@@ -26,32 +26,44 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("all/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveUsers()
         {
-            return await _db.AppUsers.Where(u => u.IsActive).Include(a => a.Avatar).ToListAsync();
+            return await _db.AppUsers
+                .Include(a => a.Avatar)
+                .Where(u => u.IsActive)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         [HttpGet("duty/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
         {
-            return await _db.AppUsers.Where(u => u.IsActive && u.IsDuty).Include(a => a.Avatar).ToListAsync();
+            return await _db.AppUsers
+                .Include(a => a.Avatar)
+                .Where(u => u.IsActive && u.IsDuty)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
 
         [HttpGet("all/disabled")]
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {
-            return await _db.AppUsers.Where(u => u.IsActive == false).Include(a => a.Avatar).ToListAsync();
+            return await _db.AppUsers
+                .Include(a => a.Avatar)
+                .Where(u => u.IsActive == false)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         [HttpGet("{appUserId:int}")]
-        public  ActionResult<AppUser> GetUser(int appUserId)
+        public async Task<ActionResult<AppUser>> GetUser(int appUserId)
         {
-            return _db.AppUsers
-                .Where(u => u.AppUserId == appUserId)
+            return await _db.AppUsers
                 .Include(d => d.DaysOfDuty)
                 .Include(a => a.Avatar)
                 .Include(a => a.Articles)
                 .ThenInclude(atach => atach.Attachments)
-                .FirstOrDefault();
+                .AsNoTracking()
+                .SingleOrDefaultAsync(u => u.AppUserId == appUserId);
         }
 
         [HttpGet("birthdaysweek")]
@@ -63,23 +75,18 @@ namespace PetrpkuWeb.Server.Controllers
             var lastDayOfWeek = DateTime.Now.LastDayOfWeek().AddDays(1);
 
             return await _db.AppUsers
+                .Include(a => a.Avatar)
                 .Where(d => (d.Birthday.DayOfYear >= firstDayOfWeek.DayOfYear && d.Birthday.DayOfYear <= lastDayOfWeek.DayOfYear))
                 .OrderBy(o => o.Birthday.DayOfYear)
-                .Include(a => a.Avatar)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         [HttpPut("update/{appUserId:int}")]
         public async Task<IActionResult> PutUserAsync(int appUserId, AppUser user)
         {
-            if (appUserId != user.AppUserId)
-            {
-                return BadRequest();
-            }
-
-            _db.Entry(user).State = EntityState.Modified;
+            _db.Attach(user).State = EntityState.Modified;
             await _db.SaveChangesAsync();
-
             return NoContent();
         }
     }

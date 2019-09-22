@@ -24,7 +24,8 @@ namespace PetrpkuWeb.Shared.Models
         public AppUserIdentity AuthIdentity { get; set; }
         public IEnumerable<Duty> DaysOfDuty { get; set; }
         public IEnumerable<Article> Articles { get; set; }
-        public Attachment Avatar { get; set; }
 
+        public int? AttachmentId { get; set; }
+        public Attachment Avatar { get; set; }
     }
 }

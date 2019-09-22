@@ -28,9 +28,9 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<Duty>> GetWhoIsDutyTodayAsync()
         {
             return await _db.Duties
-                .Where(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear)
                 .Include(u => u.AssignedTo)
-                .FirstOrDefaultAsync();
+                .AsNoTracking()
+                .SingleOrDefaultAsync(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear);
         }
 
         [HttpGet("month/{selectedMonth:int}/{selectedYear:int}")]
@@ -40,6 +40,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
                 .OrderBy(d => d.DayOfDuty)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -49,9 +50,10 @@ namespace PetrpkuWeb.Server.Controllers
             var tempFileName = Path.GetTempFileName();
 
             var listOfDuty = await _db.Duties
-                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
+                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .OrderBy(d => d.DayOfDuty)
+                .AsNoTracking()
                 .ToListAsync();
 
             var days = Enumerable.Range(1, DateTime.DaysInMonth(selectedYear, selectedMonth)).Select(day => new DateTime(selectedYear, selectedMonth, day))
