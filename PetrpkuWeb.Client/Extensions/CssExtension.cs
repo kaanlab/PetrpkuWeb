@@ -38,16 +38,32 @@ namespace PetrpkuWeb.Client.Extensions
             {
                 case ".doc":
                 case ".docx":
+                case "application/msword":
+                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                     return @"/img/site/word.png";
                 case ".xls":
                 case ".xlsx":
+                case "application/vnd.ms-excel":
                     return @"/img/site/excel.png";
                 case ".pdf":
+                case "application/pdf":
                     return @"/img/site/pdf.png";
                 case ".rtf":
                     return @"/img/site/rtf.png";
+                case ".jpeg":
+                case ".jpg":
+                case "image/jpeg":
+                    return @"/img/site/jpeg.png";
+                case ".png":
+                case "image/png":
+                    return @"/img/site/png.png";
+                case ".pptx":
+                case ".ppt":
+                case ".pps":
+                case "application/vnd.ms-powerpoint":
+                case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                    return @"/img/site/pptx.png";
             }
-
             return String.Empty;
         }
     }

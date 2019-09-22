@@ -8,31 +8,6 @@ namespace PetrpkuWeb.Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppUsers",
-                columns: table => new
-                {
-                    AppUserId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DisplayName = table.Column<string>(nullable: true),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    MidleName = table.Column<string>(nullable: true),
-                    WorkingPosition = table.Column<string>(nullable: true),
-                    MobPhone = table.Column<string>(nullable: true),
-                    IntPhone = table.Column<string>(nullable: true),
-                    ExtPhone = table.Column<string>(nullable: true),
-                    Office = table.Column<string>(nullable: true),
-                    PhotoUrl = table.Column<string>(nullable: true),
-                    Birthday = table.Column<DateTime>(nullable: false),
-                    IsActive = table.Column<bool>(nullable: false),
-                    IsDuty = table.Column<bool>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppUsers", x => x.AppUserId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -47,13 +22,34 @@ namespace PetrpkuWeb.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RoleId = table.Column<string>(nullable: false),
+                    ClaimType = table.Column<string>(nullable: true),
+                    ClaimValue = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Articles",
                 columns: table => new
                 {
                     ArticleId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(nullable: true),
-                    Content = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: false),
+                    Content = table.Column<string>(nullable: false),
                     PublishDate = table.Column<DateTime>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     AppUserId = table.Column<int>(nullable: false)
@@ -61,12 +57,61 @@ namespace PetrpkuWeb.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Articles", x => x.ArticleId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    AttachmentId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Length = table.Column<long>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Extension = table.Column<string>(nullable: true),
+                    Path = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    ArticleId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.AttachmentId);
                     table.ForeignKey(
-                        name: "FK_Articles_AppUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AppUsers",
-                        principalColumn: "AppUserId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Attachments_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticleId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppUsers",
+                columns: table => new
+                {
+                    AppUserId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DisplayName = table.Column<string>(nullable: true),
+                    FirstName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true),
+                    MidleName = table.Column<string>(nullable: true),
+                    WorkingPosition = table.Column<string>(nullable: true),
+                    MobPhone = table.Column<string>(nullable: true),
+                    IntPhone = table.Column<string>(nullable: true),
+                    ExtPhone = table.Column<string>(nullable: true),
+                    Office = table.Column<string>(nullable: true),
+                    Birthday = table.Column<DateTime>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false),
+                    IsDuty = table.Column<bool>(nullable: false),
+                    AttachmentId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUsers", x => x.AppUserId);
+                    table.ForeignKey(
+                        name: "FK_AppUsers_Attachments_AttachmentId",
+                        column: x => x.AttachmentId,
+                        principalTable: "Attachments",
+                        principalColumn: "AttachmentId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -119,51 +164,6 @@ namespace PetrpkuWeb.Server.Migrations
                         column: x => x.AppUserId,
                         principalTable: "AppUsers",
                         principalColumn: "AppUserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetRoleClaims",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RoleId = table.Column<string>(nullable: false),
-                    ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Attachments",
-                columns: table => new
-                {
-                    AttachmentId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Length = table.Column<long>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Extension = table.Column<string>(nullable: true),
-                    Path = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    ArticleId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attachments", x => x.AttachmentId);
-                    table.ForeignKey(
-                        name: "FK_Attachments_Articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "Articles",
-                        principalColumn: "ArticleId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -253,6 +253,12 @@ namespace PetrpkuWeb.Server.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUsers_AttachmentId",
+                table: "AppUsers",
+                column: "AttachmentId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Articles_AppUserId",
                 table: "Articles",
                 column: "AppUserId");
@@ -309,10 +315,22 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "IX_Duties_AppUserId",
                 table: "Duties",
                 column: "AppUserId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Articles_AppUsers_AppUserId",
+                table: "Articles",
+                column: "AppUserId",
+                principalTable: "AppUsers",
+                principalColumn: "AppUserId",
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_AppUsers_Attachments_AttachmentId",
+                table: "AppUsers");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -329,9 +347,6 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Attachments");
-
-            migrationBuilder.DropTable(
                 name: "Duties");
 
             migrationBuilder.DropTable(
@@ -339,6 +354,9 @@ namespace PetrpkuWeb.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Attachments");
 
             migrationBuilder.DropTable(
                 name: "Articles");

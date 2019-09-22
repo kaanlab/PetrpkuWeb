@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -61,6 +62,7 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
             if (appUserIdentity == null)
             {
+                //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
                 appUserIdentity = AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
             }
@@ -141,7 +143,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpDelete("identity/delete/{appUserIdentityId}")]
-        public IActionResult Delete(string appUserIdentityId)
+        public async Task<IActionResult> Delete(string appUserIdentityId)
         {
             if (ModelState.IsValid)
             {
@@ -152,11 +154,11 @@ namespace PetrpkuWeb.Server.Controllers
                 }
 
                 var appUser = _db.AppUsers.Find(user.AssosiateUser.AppUserId);
-                appUser.DisplayName = user.DisplayName + "(d)";
+                appUser.DisplayName = "(removed) " + user.DisplayName;
                 appUser.IsActive = false;
 
                 _db.Users.Remove(user);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 return NoContent();
             }
 
@@ -166,6 +168,8 @@ namespace PetrpkuWeb.Server.Controllers
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {
+            var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
+            
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -173,7 +177,7 @@ namespace PetrpkuWeb.Server.Controllers
                 AssosiateUser = new AppUser()
                 {
                     DisplayName = authUser.DisplayName,
-                    PhotoUrl = @"/img/user/default_avatar.png",
+                    Avatar = avatar,
                     IsActive = true,
                     IsDuty = false
                 }

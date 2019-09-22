@@ -1,6 +1,5 @@
 @page "/user/{appUserId}"
 
-@using System.IO
 @using Newtonsoft.Json
 
 @inject HttpClient HttpClient
@@ -14,7 +13,7 @@
         {
             <div class="col-4">
                 <div class="card">
-                    <img src="@user.PhotoUrl" class="card-img-top">
+                    <img src="@user.Avatar.Path" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">@user.DisplayName</h5>
                     </div>
@@ -24,7 +23,7 @@
                         <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
                         <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
                         <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Office</span></li>
+                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
                         <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
                     </ul>
                     <div class="card-body">
@@ -33,20 +32,7 @@
                 </div>
             </div>
             <div class="col-4 border-right">
-                @if (user.DaysOfDuty.Any())
-                {
-                    <h3 class="text-center">Мои дежурства</h3>
-                    <table class="table table-striped">
-                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
-                        {
-                            <tr>
-                                <td>@duty.DayOfDuty.ToShortDateString()</td>
-                            </tr>
-                        }
-                    </table>
-                }
-            </div>
-            <div class="col-4">
+
                 @if (user.Articles.Any())
                 {
                     <h3 class="text-center">Мои объявления</h3>
@@ -69,11 +55,32 @@
                                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
                                         </div>
                                     }
-                                    <a class="stretched-link" href="/article/@article.ArticleId"></a>
                                 </div>
+                                <div class="row">
+                                    <a class="btn btn-outline-primary mr-2" href="/article/show/@article.ArticleId" role="button">Просмотреть</a>
+                                    <a class="btn btn-outline-info" href="/article/edit/@article.ArticleId" role="button">Редактировать</a>
+                                </div>
+
                             </div>
                         </div>
                     }
+                }
+            </div>
+            <div class="col-4">
+                @if (user.DaysOfDuty.Any())
+                {
+
+                    <h3 class="text-center">Мои дежурства</h3>
+                    <table class="table table-striped">
+                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
+                        {
+                            <tr>
+                                <td>@duty.DayOfDuty.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </table>
+
+
                 }
             </div>
         }
@@ -93,6 +100,32 @@
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>@user.DisplayName</MatDialogTitle>
             <MatDialogContent>
+                <img src="@user.Avatar.Path" />
+                <div class="alert alert-danger" role="alert">
+                    Для профиля желательно изображение размером 400х400px!
+                    @if (ListFileInfoVM.Any())
+                    {
+                        <table class="table">
+                            @foreach (var fileInfo in ListFileInfoVM)
+                            {
+                                <tr>
+                                    <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                    <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                    <td>@fileInfo.Name</td>
+                                    <td>@fileInfo.Size</td>
+                                </tr>
+                            }
+
+                        </table>
+                        <div class="row">
+                            <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                            <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                        </div>
+
+                    }
+                </div>
+                <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
+                <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить" />
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
@@ -100,12 +133,7 @@
                 <MatTextField Label="Внутренний телефон" @bind-Value="@user.IntPhone"></MatTextField>
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
                 <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
-                <MatTextField Label="Кабинет" @bind-Value="@user.Office"></MatTextField>
-                <MatTextField Label="Фото" Disabled="true" @bind-Value="@avatarFilePath"></MatTextField>
-                <div class="alert alert-danger" role="alert">
-                    Для профиля желательно изображение размером 400х400px!
-                </div>
-                <input type="file" accept="image/png, image/jpg, image/jpeg" @ref=inputElement @onchange="UploadFile" />
+                <MatTextField Label="Кабинет" @bind-Value="@user.Room"></MatTextField>
                 <p>День рождения</p>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
@@ -125,16 +153,20 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
+    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     private AppUser user;
     private int identityUserId;
     bool dialogIsOpen = false;
 
     ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
 
-    string avatarFilePath = String.Empty;
-
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -144,23 +176,41 @@
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
     }
 
+    public async Task ShowFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    public async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
+        await fileReaderReference.ClearValue();
+    }
+
     void OpenDialog()
     {
         dialogIsOpen = true;
-        avatarFilePath = user.PhotoUrl;
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        user.PhotoUrl = avatarFilePath;
         await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
     }
 
-    async Task UploadFile()
+    async Task UploadFiles()
     {
         var multipartFormDataContent = new MultipartFormDataContent();
-        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
             multipartFormDataContent.Add(
                 new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
@@ -168,10 +218,9 @@
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        avatarFilePath = ListFileUploadVM.First().Path;
-
-        //this.StateHasChanged();
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+        user.Avatar = listOfAttachments.FirstOrDefault();
+        await ClearFileInfo();
     }
-
 }
+

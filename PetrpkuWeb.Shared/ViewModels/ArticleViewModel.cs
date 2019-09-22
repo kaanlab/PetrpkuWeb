@@ -1,11 +1,12 @@
-﻿using System;
+﻿using PetrpkuWeb.Shared.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace PetrpkuWeb.Shared.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class Article
+    public class ArticleViewModel
     {
         public enum Style
         {
@@ -15,8 +16,6 @@ namespace PetrpkuWeb.Shared.Models
             [Display(Name = "Особое")] Warning
         }
 
-        public int ArticleId { get; set; }
-
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
 
@@ -25,12 +24,7 @@ namespace PetrpkuWeb.Shared.Models
 
         public DateTime PublishDate { get; set; }
         public Style Type { get; set; }
-        
-
-        // relationship
         public int AppUserId { get; set; }
-        public AppUser Author { get; set; }
-        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        public List<Attachment> Attachments { get; set; }
     }
-
 }

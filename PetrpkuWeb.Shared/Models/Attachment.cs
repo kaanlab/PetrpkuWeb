@@ -13,8 +13,10 @@ namespace PetrpkuWeb.Shared.Models
         public string Path { get; set; }
         public string Description { get; set; }
 
-        // rel
-        public int ArticleId { get; set; }
+        // relationship
+        public int? ArticleId { get; set; }
         public Article Article { get; set; }
+        //public int? AppUserId { get; set; }
+        public AppUser AppUser { get; set; }
     }
 }

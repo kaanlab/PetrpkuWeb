@@ -23,7 +23,7 @@
             <div class="card-footer">
                 <div class="row">
                     <div class="media col-8">
-                        <img src="@item.Author.PhotoUrl" class="rounded-circle mr-3" style="width: 3rem;">
+                        <img src="@item.Author.Avatar.Path" class="rounded-circle mr-3" style="width: 3rem;">
                         <div class="media-body">
                             <p class="mt-0">@item.Author.FirstName @item.Author.LastName</p>
                             <p class="card-text"><small class="text-muted"> @item.PublishDate</small></p>
@@ -35,7 +35,7 @@
                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.Attachments.Count()</span></small>
                         </div>
                     }
-                    <a class="stretched-link" href="/article/@item.ArticleId"></a>
+                    <a class="stretched-link" href="/article/show/@item.ArticleId"></a>
                 </div>
             </div>
         </div>

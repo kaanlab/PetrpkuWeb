@@ -1,21 +1,18 @@
-@page "/createarticle"
+@page "/article/create"
 
 @using Newtonsoft.Json
-@using System.IO
-@using AutoMapper
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject IFileReaderService fileReaderService
-@inject IMapper mapper
 @inject IMatToaster Toaster
 
 
-<h2 class="col-12 mb-4 text-center">Создать объявление</h2>
+<h2 class="col-12 mb-4 text-center">Новое объявление</h2>
 
 <div class="row">
     <div class="col-12">
-        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации объявления необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
             <div class="col-12">
                 <DataAnnotationsValidator />
             </div>
@@ -36,43 +33,22 @@
                     }
                 </select>
             </div>
-            <div class="col-12 mb-2">
-                @if (ListFileUploadVM.Any())
+            <table class="table">
+                @foreach (var attachment in listOfAttachments)
                 {
-                    var rand = new Random();
-                    <div class="img-container">
-                        @foreach (var file in ListFileUploadVM)
-                        {
-                            @if (file.Extension.StartsWith(".jp") || file.Extension.StartsWith(".pn"))
-                            {
-                                int index = rand.Next(imgCssClass.Length);
-                                <div class="@imgCssClass[index]">
-                                    <img src="@file.Path" />
-                                </div>
-                            }
-                        }
-                    </div>
-                    <table class="table">
-                        @foreach (var file in ListFileUploadVM)
-                        {
-                            @if (file.Extension.StartsWith(".doc") || file.Extension.StartsWith(".xls") || file.Extension.StartsWith(".rtf") || file.Extension.StartsWith(".pdf"))
-                            {
-                                var index = ListFileUploadVM.IndexOf(file);
-                                <tr>
-                                    <td>@(ListFileUploadVM.IndexOf(file) + 1)</td>
-                                    <td><img src="@CssExtension.Img(file.Extension)" /></td>
-                                    <td>@file.Description</td>
-                                    <td>@file.Name</td>
-                                    <td>@file.Length</td>
-                                    <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(index))" Label="Редактировать" /></td>
-                                </tr>
-                            }
-                        }
-                    </table>
+                        var index = listOfAttachments.IndexOf(attachment);
+                        <tr>
+                            <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
+                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                        </tr>
                 }
-            </div>
+            </table>
             <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Сохранить" />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
             </div>
         </EditForm>
     </div>
@@ -82,24 +58,44 @@
     <div class="col-12 mb-2">
         <div class="alert alert-danger" role="alert">
             Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
-        </div>
-        <input type="file" accept="image/jpeg, image/png, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf" multiple @ref="inputElement" />
+            @if (ListFileInfoVM.Any())
+            {
+                <table class="table">
+                    @foreach (var fileInfo in ListFileInfoVM)
+                    {
+                        <tr>
+                            <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                            <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                            <td>@fileInfo.Name</td>
+                            <td>@fileInfo.Size</td>
+                        </tr>
+                    }
 
-        <button @onclick="ClearFile" class="btn btn-primary">Очистить</button>
-        <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                </table>
+                <div class="row">
+                    <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                    <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                </div>
+
+            }
+        </div>
+        <input type="file" multiple @ref="inputElement" />
+
+        <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
     </div>
 </div>
 
-<EditForm Model="@FileUploadVM">
+<EditForm Model="@CurrentAttachment">
     <MatDialog @bind-IsOpen="@dialogIsOpen">
-        <MatDialogTitle>"@FileUploadVM.Name</MatDialogTitle>
+        <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
         <MatDialogContent>
-            <MatTextField Label="Фамилия" @bind-Value="@FileUploadVM.Description"></MatTextField>
+            <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="save" OnClick="@DeleteFileUploadVM" Label="Удалить" />
-            <MatButton Icon="save" Type="submit" OnClick="@UpdateFileUploadVM" Label="Сохранить" />
+            <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+            <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
         </MatDialogActions>
     </MatDialog>
 </EditForm>
@@ -108,20 +104,22 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     private int identityUserId;
 
-    Article NewArticle { get; set; } = new Article();
-    List<FileUploadViewModel> ListFileUploadVM { get; set; } = new List<FileUploadViewModel>();
-    List<IFileInfo> FileList { get; } = new List<IFileInfo>();
+    private ArticleViewModel NewArticle { get; set; } = new ArticleViewModel();
+    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
+    private Attachment CurrentAttachment { get; set; } = new Attachment();
 
-    FileUploadViewModel FileUploadVM { get; set; } = new FileUploadViewModel();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+
     bool dialogIsOpen = false;
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
-    string Description = String.Empty;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -134,16 +132,28 @@
         fileReaderReference = fileReaderService.CreateReference(inputElement);
     }
 
-    public async Task ClearFile()
+    public async Task ShowFileInfo()
     {
-        ListFileUploadVM.Clear();
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    public async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
         await fileReaderReference.ClearValue();
     }
 
     public async Task UploadFiles()
     {
-        this.FileList.Clear();
-
         var multipartFormDataContent = new MultipartFormDataContent();
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
@@ -153,57 +163,42 @@
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        ListFileUploadVM.AddRange(JsonConvert.DeserializeObject<List<FileUploadViewModel>>(content));
-        await fileReaderReference.ClearValue();
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+
+        await ClearFileInfo();
     }
 
     public async Task AddArticle()
     {
-        NewArticle.Attachments = mapper.Map<List<Attachment>>(ListFileUploadVM);
         NewArticle.AppUserId = identityUserId;
-        NewArticle.PublishDate = DateTime.Now;
-        var response = await HttpClient.PostJsonAsync<Article>("api/articles/create", NewArticle);
+        NewArticle.Attachments = new List<Attachment>();
+        NewArticle.Attachments.AddRange(listOfAttachments); 
+        var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
-        NavigationManager.NavigateTo($"article/{response.ArticleId}");
+        NavigationManager.NavigateTo("/");
     }
 
-    public string ShowImg(string ext)
+    void OpenDialog(int attachmentId)
     {
-        switch (ext)
-        {
-            case ".doc":
-            case ".docx":
-                return @"/img/site/word.png";
-            case ".xls":
-            case ".xlsx":
-                return @"/img/site/excel.png";
-            case ".pdf":
-                return @"/img/site/pdf.png";
-            case ".rtf":
-                return @"/img/site/rtf.png";
-        }
+        CurrentAttachment = listOfAttachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
 
-        return String.Empty;
-    }
-
-    void OpenDialog(int index)
-    {
-        FileUploadVM = ListFileUploadVM[index];
         dialogIsOpen = true;
     }
 
-    void UpdateFileUploadVM()
+    public async Task UpdateAttachmentInfo()
     {
-        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        var index = ListFileUploadVM.IndexOf(vm);
-        ListFileUploadVM[index] = FileUploadVM;
+        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+        
         dialogIsOpen = false;
     }
 
-    void DeleteFileUploadVM()
+    public async Task DeleteAttachment()
     {
-        var vm = ListFileUploadVM.Where(f => f.Name == FileUploadVM.Name).FirstOrDefault();
-        ListFileUploadVM.Remove(vm);
+        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        listOfAttachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
+
         dialogIsOpen = false;
     }
 

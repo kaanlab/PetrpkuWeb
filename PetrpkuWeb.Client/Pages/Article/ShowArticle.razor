@@ -1,4 +1,4 @@
-@page "/article/{articleId}"
+@page "/article/show/{articleId}"
 
 
 @inject HttpClient HttpClient
@@ -69,6 +69,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        article = await HttpClient.GetJsonAsync<Article>($"api/articles/article/{ArticleId}");
+        article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
     }
 }

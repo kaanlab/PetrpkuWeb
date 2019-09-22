@@ -5,7 +5,6 @@ using Blazored.LocalStorage;
 using PetrpkuWeb.Client.Extensions;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
-using AutoMapper;
 using MatBlazor;
 
 namespace PetrpkuWeb.Client
@@ -20,7 +19,6 @@ namespace PetrpkuWeb.Client
             services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
-            services.AddAutoMapper(typeof(Startup));
             services.AddMatToaster(config =>
             {
                 config.Position = MatToastPosition.BottomRight;

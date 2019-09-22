@@ -1,0 +1,213 @@
+@page "/article/edit/{articleId}"
+
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IFileReaderService fileReaderService
+@inject IMatToaster Toaster
+
+@if (Article != null)
+{
+    <div class="row">
+        <div class="col-12">
+            <EditForm Model="Article" OnValidSubmit="@UpdateArticle" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+                <div class="col-12">
+                    <DataAnnotationsValidator />
+                </div>
+                <div class="col-12 mb-2">
+                    <MatTextField Label="Заголовок" @bind-Value="@Article.Title"></MatTextField>
+                    <ValidationMessage For="() => Article.Title" />
+                </div>
+                <div class="col-12 mb-2">
+                    <MatTextField Label="Текст" TextArea="true" @bind-Value="@Article.Content"></MatTextField>
+                    <ValidationMessage For="() => Article.Content" />
+                </div>
+                <div class="col-12 mb-2">
+                    Выберете важность сообщения
+                    <select @bind="Article.Type">
+                        @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
+                        {
+                            <option value="@styleType">@styleType.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+                <table class="table">
+                    @foreach (var attachment in Article.Attachments)
+                    {
+                        var index = Article.Attachments.IndexOf(attachment);
+                        <tr>
+                            <td>@(Article.Attachments.IndexOf(attachment) + 1)</td>
+                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                        </tr>
+                    }
+                </table>
+                <div class="col-12 mb-2">
+                    <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
+                </div>
+            </EditForm>
+        </div>
+        <br />
+
+        <div class="col-12 mb-2">
+            <div class="alert alert-danger" role="alert">
+                Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
+                @if (ListFileInfoVM.Any())
+                {
+                    <table class="table">
+                        @foreach (var fileInfo in ListFileInfoVM)
+                        {
+                            <tr>
+                                <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                <td>@fileInfo.Name</td>
+                                <td>@fileInfo.Size</td>
+                            </tr>
+                        }
+
+                    </table>
+                    <div class="row">
+                        <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                        <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                    </div>
+                }
+            </div>
+            <input type="file" multiple @ref="inputElement" />
+
+            <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
+        </div>
+
+        <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
+    </div>
+}
+
+<EditForm Model="@CurrentAttachment">
+    <MatDialog @bind-IsOpen="@dialogIsOpen">
+        <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+            <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public string ArticleId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>
+    authenticationStateTask
+    { get; set; }
+
+    private int identityUserId;
+
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
+
+    private Article Article { get; set; }
+    private Attachment CurrentAttachment { get; set; } = new Attachment();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+
+    string[] imgCssClass = { "big", "vertical", String.Empty };
+    bool dialogIsOpen = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var identityUser = (await authenticationStateTask).User;
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+
+        Article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
+    }
+
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+    }
+
+    async Task UpdateArticle()
+    {
+        Article.AppUserId = identityUserId;
+        var response = await HttpClient.PutJsonAsync<Article>($"api/articles/update/{Article.ArticleId}", Article);
+        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
+        NavigationManager.NavigateTo("/");
+    }
+
+    public async Task DeleteArticle()
+    {
+        await HttpClient.DeleteAsync($"api/articles/delete/{Article.ArticleId}");
+        Toaster.Add($"Новость {Article.Title} удалена", MatToastType.Success, "Успех!");
+        NavigationManager.NavigateTo("/");
+    }
+
+    void OpenDialog(int attachmentId)
+    {
+        CurrentAttachment = Article.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+
+        dialogIsOpen = true;
+    }
+
+    public async Task ShowFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    public async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
+        await fileReaderReference.ClearValue();
+    }
+
+    public async Task UploadFiles()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var content = await response.Content.ReadAsStringAsync();
+        Article.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+
+        await ClearFileInfo();
+    }
+
+    public async Task UpdateAttachmentInfo()
+    {
+        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+
+    public async Task DeleteAttachment()
+    {
+        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        Article.Attachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+}
