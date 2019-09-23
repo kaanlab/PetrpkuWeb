@@ -1,0 +1,25 @@
+@page "/contactsmanager"
+
+@inject HttpClient HttpClient
+
+
+<h3>Адресная книга</h3>
+
+
+
+@code {
+
+    private List<AppUser> Contacts { get; set; }
+    private List<Department> Departments { get; set; }
+    private List<Building> Buildings { get; set; }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        Contacts = await HttpClient.GetJsonAsync<List<AppUser>>("api/contacts/all");
+        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/contacts/departments");
+        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/contacts/buildings");
+    }
+
+
+}

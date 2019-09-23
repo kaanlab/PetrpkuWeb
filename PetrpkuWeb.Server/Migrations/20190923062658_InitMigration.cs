@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PetrpkuWeb.Server.Migrations
 {
-    public partial class InitDb : Migration
+    public partial class InitMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,6 +19,32 @@ namespace PetrpkuWeb.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Building",
+                columns: table => new
+                {
+                    BuildingId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Building", x => x.BuildingId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Department",
+                columns: table => new
+                {
+                    DepartmentId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Department", x => x.DepartmentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -97,11 +123,13 @@ namespace PetrpkuWeb.Server.Migrations
                     MobPhone = table.Column<string>(nullable: true),
                     IntPhone = table.Column<string>(nullable: true),
                     ExtPhone = table.Column<string>(nullable: true),
-                    Office = table.Column<string>(nullable: true),
+                    Room = table.Column<string>(nullable: true),
                     Birthday = table.Column<DateTime>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     IsDuty = table.Column<bool>(nullable: false),
-                    AttachmentId = table.Column<int>(nullable: true)
+                    AttachmentId = table.Column<int>(nullable: true),
+                    DepartmentId = table.Column<int>(nullable: true),
+                    BuildingId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -111,6 +139,18 @@ namespace PetrpkuWeb.Server.Migrations
                         column: x => x.AttachmentId,
                         principalTable: "Attachments",
                         principalColumn: "AttachmentId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AppUsers_Building_BuildingId",
+                        column: x => x.BuildingId,
+                        principalTable: "Building",
+                        principalColumn: "BuildingId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AppUsers_Department_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Department",
+                        principalColumn: "DepartmentId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -259,6 +299,18 @@ namespace PetrpkuWeb.Server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUsers_BuildingId",
+                table: "AppUsers",
+                column: "BuildingId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUsers_DepartmentId",
+                table: "AppUsers",
+                column: "DepartmentId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Articles_AppUserId",
                 table: "Articles",
                 column: "AppUserId");
@@ -363,6 +415,12 @@ namespace PetrpkuWeb.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppUsers");
+
+            migrationBuilder.DropTable(
+                name: "Building");
+
+            migrationBuilder.DropTable(
+                name: "Department");
         }
     }
 }

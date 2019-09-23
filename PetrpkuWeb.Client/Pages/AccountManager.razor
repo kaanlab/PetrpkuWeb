@@ -12,13 +12,13 @@
 <div class="row">
     <div class="col-6">
         <h2 class="text-center">Активные учетные записи</h2>
-        @if (usersIdentity == null)
+        @if (UsersIdentity == null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
         }
-        else if (usersIdentity.Count == 0)
+        else if (UsersIdentity.Count == 0)
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
@@ -36,7 +36,7 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var user in usersIdentity)
+                @foreach (var user in UsersIdentity)
                 {
                     var id = user.Id;
                     <tr>
@@ -85,19 +85,19 @@
     </div>
 </div>
 
-<EditForm Model="@ldapUser">
+<EditForm Model="@LdapUser">
     <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
         <MatDialogTitle>Выберете пользователя</MatDialogTitle>
         <MatDialogContent>
-            <MatSelect @bind-Value="@ldapUser.UserName" Outlined="true">
-                @if (ldapUsers == null)
+            <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
+                @if (LdapUsers == null)
                 {
                     <MatOption Value="">(loading...)</MatOption>
                 }
                 else
                 {
                     <MatOption Value="-1" Disabled="true" />
-                    @foreach (var user in ldapUsers)
+                    @foreach (var user in LdapUsers)
                     {
                         <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
                     }
@@ -106,19 +106,19 @@
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { newUserDialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="check" Type="submit" OnClick="@(() =>AddAccount(ldapUser.UserName))" Label="Добавить" />
+            <MatButton Icon="check" Type="submit" OnClick="@(() =>AddAccount(LdapUser.UserName))" Label="Добавить" />
         </MatDialogActions>
     </MatDialog>
 </EditForm>
 
-@if (user != null)
+@if (User != null)
 {
-    <EditForm Model="@user">
+    <EditForm Model="@User">
         <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
-            <MatDialogTitle>Удалить пользователя @user.DisplayName?</MatDialogTitle>
+            <MatDialogTitle>Удалить пользователя @User.DisplayName?</MatDialogTitle>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(user.Id))" Label="Да" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(User.Id))" Label="Да" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -126,12 +126,12 @@
 
 @code {
 
-    List<LdapUser> ldapUsers { get; set; }
-    List<AppUserIdentity> usersIdentity { get; set; }
-    AppUserIdentity user { get; set; }
+    private List<LdapUser> LdapUsers { get; set; }
+    private List<AppUserIdentity> UsersIdentity { get; set; }
+    private AppUserIdentity User { get; set; }
+    private LdapUser LdapUser { get; set; } = new LdapUser();
     List<AppUser> appUsers;
     List<AppUser> disabledUsers;
-    LdapUser ldapUser { get; set; } = new LdapUser();
 
     bool editUserDialogIsOpen = false;
     bool newUserDialogIsOpen = false;
@@ -141,13 +141,12 @@
     {
         await GetIdentity();
         await GetAppUsers();
-        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
-
+        LdapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
 
     async Task GetIdentity()
     {
-        usersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
+        UsersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
     }
 
     async Task GetAppUsers()
@@ -164,7 +163,7 @@
     async Task AddAccount(string userName)
     {
         newUserDialogIsOpen = false;
-        var newUser = ldapUsers.Where(u => u.UserName == userName).FirstOrDefault();
+        var newUser = LdapUsers.FirstOrDefault(u => u.UserName == userName);
         await HttpClient.PostJsonAsync<LdapUser>("api/account/identity/add", newUser);
         await GetIdentity();
 
@@ -173,7 +172,7 @@
     void OpenEditUserDialog(string userId)
     {
         editUserDialogIsOpen = true;
-        user = usersIdentity.Where(ui => ui.Id == userId).FirstOrDefault();
+        User = UsersIdentity.FirstOrDefault(ui => ui.Id == userId);
     }
 
     async Task Delete(string userId)

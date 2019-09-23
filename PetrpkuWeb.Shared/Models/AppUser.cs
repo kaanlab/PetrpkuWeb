@@ -28,7 +28,7 @@ namespace PetrpkuWeb.Shared.Models
         public int? AttachmentId { get; set; }
         public Attachment Avatar { get; set; }
 
-        public int? DepartmaentId { get; set; }
+        public int? DepartmentId { get; set; }
         public Department Department { get; set; }
 
         public int? BuildingId { get; set; }

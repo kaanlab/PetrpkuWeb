@@ -60,12 +60,14 @@
 }
 
 @code {
+
     [Parameter]
     public string ArticleId { get; set; }
 
     private Article article;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
+
 
     protected override async Task OnInitializedAsync()
     {

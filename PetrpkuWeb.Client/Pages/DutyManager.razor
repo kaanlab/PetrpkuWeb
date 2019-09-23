@@ -110,17 +110,16 @@
 @code {
 
     public DateTime? PikDate { get; set; } = DateTime.Now;
-    protected List<Duty> ListOfDuty { get; set; } = new List<Duty>();
-    protected DutyViewModel DutyVM { get; set; } = new DutyViewModel();
-    protected List<DateTime> ListOfDays { get; set; }
-    protected List<AppUser> users;
 
+    private List<Duty> ListOfDuty { get; set; } = new List<Duty>();
+    private DutyViewModel DutyVM { get; set; } = new DutyViewModel();
+    private List<DateTime> ListOfDays { get; set; }
+
+    List<AppUser> users;
     DateTime title = DateTime.Now;
 
-    #region Sort table prop
-    bool IsSortedAscending;
-    string CurrentSortColumn;
-    #endregion
+    bool isSortedAscending;
+    string currentSortColumn;
 
 
     protected async override Task OnInitializedAsync()
@@ -199,15 +198,15 @@
         if (ListOfDuty.Any())
         {
 
-            if (columnName != CurrentSortColumn)
+            if (columnName != currentSortColumn)
             {
                 //We need to force order by descending on the new column
                 ListOfDuty = ListOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
-                CurrentSortColumn = columnName;
-                IsSortedAscending = true;
+                currentSortColumn = columnName;
+                isSortedAscending = true;
 
             }
-            if (IsSortedAscending)
+            if (isSortedAscending)
             {
                 ListOfDuty = ListOfDuty.OrderByDescending(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
             }
@@ -216,17 +215,17 @@
                 ListOfDuty = ListOfDuty.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
             }
 
-            IsSortedAscending = !IsSortedAscending;
+            isSortedAscending = !isSortedAscending;
         }
     }
 
     string GetSortStyle(string columnName)
     {
-        if (CurrentSortColumn != columnName)
+        if (currentSortColumn != columnName)
         {
             return "sort";
         }
-        if (IsSortedAscending)
+        if (isSortedAscending)
         {
             return "keyboard_arrow_up";
         }

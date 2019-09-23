@@ -2,17 +2,18 @@
 
 @attribute [Authorize(Roles = "pku_admins, admin")]
 @inject HttpClient HttpClient
+@inject IMatToaster Toaster
 
 
 <h2 class="col-12 mb-4 text-center"> Редактирование пользователей</h2>
 
-@if (users == null)
+@if (Users == null)
 {
     <div class="spinner-border text-primary text-center" role="status">
         <span class="sr-only">Loading...</span>
     </div>
 }
-else if (users.Count == 0)
+else if (Users.Count == 0)
 {
     <div class="card border-danger mb-3">
         <div class="card-body">
@@ -31,7 +32,7 @@ else
                 <th scope="col"></th>
             </tr>
         </thead>
-        @foreach (var user in users)
+        @foreach (var user in Users)
         {
             var id = user.AppUserId;
 
@@ -54,22 +55,22 @@ else
     </table>
 }
 
-@if (editUser != null)
+@if (EditUser != null)
 {
-    <EditForm Model="@editUser">
+    <EditForm Model="@EditUser">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>День рождения @editUser.DisplayName</MatDialogTitle>
+            <MatDialogTitle>День рождения @EditUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <MatTextField Label="Фамилия" @bind-Value="@editUser.LastName"></MatTextField>
-                <MatTextField Label="Имя" @bind-Value="@editUser.FirstName"></MatTextField>
-                <MatTextField Label="Отчество" @bind-Value="@editUser.MidleName"></MatTextField>
-                <MatTextField Label="Должность" @bind-Value="@editUser.WorkingPosition"></MatTextField>
-                <MatTextField Label="Телефон" @bind-Value="@editUser.IntPhone"></MatTextField>
+                <MatTextField Label="Фамилия" @bind-Value="@EditUser.LastName"></MatTextField>
+                <MatTextField Label="Имя" @bind-Value="@EditUser.FirstName"></MatTextField>
+                <MatTextField Label="Отчество" @bind-Value="@EditUser.MidleName"></MatTextField>
+                <MatTextField Label="Должность" @bind-Value="@EditUser.WorkingPosition"></MatTextField>
+                <MatTextField Label="Телефон" @bind-Value="@EditUser.IntPhone"></MatTextField>
                 <p>День рождения</p>
-                <InputDate @bind-Value="@editUser.Birthday"></InputDate>
+                <InputDate @bind-Value="@EditUser.Birthday"></InputDate>
                 <hr />
                 <p>Дежурный</p>
-                <MatCheckbox @bind-Checked="@editUser.IsDuty"></MatCheckbox>
+                <MatCheckbox @bind-Checked="@EditUser.IsDuty"></MatCheckbox>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
@@ -81,28 +82,30 @@ else
 
 @code {
 
-    List<AppUser> users { get; set; }
-    AppUser editUser { get; set; }
-    protected int AppUserId { get; set; } = 0;
-
+    private List<AppUser> Users { get; set; }
+    private AppUser EditUser { get; set; }
+    
+    int appUserId;
     string TrCssClass;
     bool dialogIsOpen = false;
 
+
     protected async override Task OnInitializedAsync()
     {
-        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
+        Users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
     }
 
     void OpenDialog(int id)
     {
         dialogIsOpen = true;
-        AppUserId = id;
-        editUser = users.Where(u => u.AppUserId == AppUserId).FirstOrDefault();
+        appUserId = id;
+        EditUser = Users.FirstOrDefault(u => u.AppUserId == appUserId);
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{editUser.AppUserId}", editUser);
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{EditUser.AppUserId}", EditUser);
+        Toaster.Add($"Информация пользователя {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
     }
 }

@@ -156,12 +156,13 @@
     private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
-    private AppUser user;
-    private int identityUserId;
+    AppUser user;
+    int identityUserId;
     bool dialogIsOpen = false;
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
+
 
     protected override void OnAfterRender(bool isFirstRender)
     {
@@ -176,7 +177,7 @@
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
     }
 
-    public async Task ShowFileInfo()
+    async Task ShowFileInfo()
     {
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
@@ -190,7 +191,7 @@
         }
     }
 
-    public async Task ClearFileInfo()
+    async Task ClearFileInfo()
     {
         ListFileInfoVM.Clear();
         await fileReaderReference.ClearValue();

@@ -132,7 +132,7 @@
         fileReaderReference = fileReaderService.CreateReference(inputElement);
     }
 
-    public async Task ShowFileInfo()
+    async Task ShowFileInfo()
     {
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
@@ -146,13 +146,13 @@
         }
     }
 
-    public async Task ClearFileInfo()
+    async Task ClearFileInfo()
     {
         ListFileInfoVM.Clear();
         await fileReaderReference.ClearValue();
     }
 
-    public async Task UploadFiles()
+    async Task UploadFiles()
     {
         var multipartFormDataContent = new MultipartFormDataContent();
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
@@ -168,7 +168,7 @@
         await ClearFileInfo();
     }
 
-    public async Task AddArticle()
+    async Task AddArticle()
     {
         NewArticle.AppUserId = identityUserId;
         NewArticle.Attachments = new List<Attachment>();
@@ -185,7 +185,7 @@
         dialogIsOpen = true;
     }
 
-    public async Task UpdateAttachmentInfo()
+    async Task UpdateAttachmentInfo()
     {
         CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
@@ -193,7 +193,7 @@
         dialogIsOpen = false;
     }
 
-    public async Task DeleteAttachment()
+    async Task DeleteAttachment()
     {
         await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
         listOfAttachments.Remove(CurrentAttachment);

@@ -160,6 +160,12 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("BuildingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("TEXT");
 
@@ -187,7 +193,7 @@ namespace PetrpkuWeb.Server.Migrations
                     b.Property<string>("MobPhone")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Office")
+                    b.Property<string>("Room")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("WorkingPosition")
@@ -196,6 +202,12 @@ namespace PetrpkuWeb.Server.Migrations
                     b.HasKey("AppUserId");
 
                     b.HasIndex("AttachmentId")
+                        .IsUnique();
+
+                    b.HasIndex("BuildingId")
+                        .IsUnique();
+
+                    b.HasIndex("DepartmentId")
                         .IsUnique();
 
                     b.ToTable("AppUsers");
@@ -335,6 +347,34 @@ namespace PetrpkuWeb.Server.Migrations
                     b.ToTable("Attachments");
                 });
 
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.Building", b =>
+                {
+                    b.Property<int>("BuildingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("BuildingId");
+
+                    b.ToTable("Building");
+                });
+
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.Department", b =>
+                {
+                    b.Property<int>("DepartmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("DepartmentId");
+
+                    b.ToTable("Department");
+                });
+
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Duty", b =>
                 {
                     b.Property<int>("DutyId")
@@ -410,6 +450,14 @@ namespace PetrpkuWeb.Server.Migrations
                     b.HasOne("PetrpkuWeb.Shared.Models.Attachment", "Avatar")
                         .WithOne("AppUser")
                         .HasForeignKey("PetrpkuWeb.Shared.Models.AppUser", "AttachmentId");
+
+                    b.HasOne("PetrpkuWeb.Shared.Models.Building", "Building")
+                        .WithOne("AppUser")
+                        .HasForeignKey("PetrpkuWeb.Shared.Models.AppUser", "BuildingId");
+
+                    b.HasOne("PetrpkuWeb.Shared.Models.Department", "Department")
+                        .WithOne("AppUser")
+                        .HasForeignKey("PetrpkuWeb.Shared.Models.AppUser", "DepartmentId");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.AppUserIdentity", b =>
