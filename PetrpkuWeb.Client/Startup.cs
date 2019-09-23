@@ -26,7 +26,7 @@ namespace PetrpkuWeb.Client
                 config.NewestOnTop = true;
                 config.ShowCloseButton = true;
                 config.MaximumOpacity = 93;
-                config.VisibleStateDuration = 5000;
+                config.VisibleStateDuration = 7000;
             });
         }
 

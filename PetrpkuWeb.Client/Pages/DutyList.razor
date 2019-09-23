@@ -10,7 +10,7 @@
 <div class="row">
     <div class="col-10">
         <div class="row d-none d-lg-flex p-1 bg-dark text-white">
-            @if (daysOfWeek != null)
+            @if (daysOfWeek is { })
             {
                 @foreach (var weekday in daysOfWeek)
                 {
@@ -19,7 +19,7 @@
             }
         </div>
         <div class="row border border-right-0 border-bottom-0">
-            @if (days != null)
+            @if (days is { })
             {
                 @foreach (var day in days)
                 {
@@ -34,7 +34,7 @@
                             <span class="col-1">@day.Day</span>
                         </h5>
                         <div style="min-height:5rem;">
-                            @if (listOfDuty != null)
+                            @if (listOfDuty is { })
                             {
                                 @foreach (var user in listOfDuty)
                                 {

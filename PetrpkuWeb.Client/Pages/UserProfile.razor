@@ -7,7 +7,7 @@
 
 
 <div class="row">
-    @if (user != null)
+    @if (user is { })
     {
         @if (identityUserId == user.AppUserId)
         {
@@ -94,7 +94,7 @@
 </div>
 <div class="row" style="height: 10px;"></div>
 
-@if (user != null)
+@if (user is { })
 {
     <EditForm Model="@user">
         <MatDialog @bind-IsOpen="@dialogIsOpen">

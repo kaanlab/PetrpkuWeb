@@ -100,7 +100,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             var dutyUser = await _db.Duties.FindAsync(dutyId);
 
-            if (dutyUser == null)
+            if (dutyUser is null)
             {
                 return NotFound();
             }

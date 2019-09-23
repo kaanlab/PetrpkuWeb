@@ -54,17 +54,23 @@ namespace PetrpkuWeb.Server.Controllers
                 return Unauthorized(new { message = "Username or password can't be null" });
 
             var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
-            if (ldapUser == null)
+            if (ldapUser is null)
             {
                 return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
             }
 
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
-            if (appUserIdentity == null)
+            if (appUserIdentity is null)
             {
                 //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
                 appUserIdentity = AddIdentityUser(ldapUser);
-                await _userManager.CreateAsync(appUserIdentity);
+                var result = await _userManager.CreateAsync(appUserIdentity);
+                if (result.Succeeded)
+                {
+                    var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
+                    appUserIdentity.AssosiateUser.Avatar = avatar;
+                    await _userManager.UpdateAsync(appUserIdentity);
+                }
             }
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
@@ -100,7 +106,7 @@ namespace PetrpkuWeb.Server.Controllers
         public ActionResult<IAuthUser> SearchUser(string ldapUserName)
         {
             var ldapUser = _appAuthenticationService.Search(ldapUserName);
-            if (ldapUser == null)
+            if (ldapUser is null)
             {
                 return BadRequest(new LoginResult { Successful = false, Error = "Bad username" });
             }
@@ -119,20 +125,23 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPost("identity/add")]
-        public async Task<ActionResult<bool>> AddAccount(LdapUser authUser)
+        public async Task<ActionResult> AddAccount(LdapUser authUser)
         {
-            if (authUser != null)
+            if (authUser is { })
             {
                 var appUserIdentity = AddIdentityUser(authUser);
-
                 var result = await _userManager.CreateAsync(appUserIdentity);
 
                 if (result.Succeeded)
-                    return Ok();
-
+                {
+                    var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
+                    appUserIdentity.AssosiateUser.Avatar = avatar;
+                    var updateresult = await _userManager.UpdateAsync(appUserIdentity);
+                    if (updateresult.Succeeded)
+                        return Ok();
+                }
                 return BadRequest();
             }
-
             return BadRequest();
         }
 
@@ -148,7 +157,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (ModelState.IsValid)
             {
                 var user = _db.Users.Find(appUserIdentityId);
-                if (user == null)
+                if (user is null)
                 {
                     return NotFound();
                 }
@@ -168,8 +177,6 @@ namespace PetrpkuWeb.Server.Controllers
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {
-            var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
-            
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -177,7 +184,6 @@ namespace PetrpkuWeb.Server.Controllers
                 AssosiateUser = new AppUser()
                 {
                     DisplayName = authUser.DisplayName,
-                    Avatar = avatar,
                     IsActive = true,
                     IsDuty = false
                 }

@@ -36,14 +36,14 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
         {
-            if (newArticle == null)
+            if (newArticle is null)
                 return BadRequest();
 
             var article = new Article()
             {
                 AppUserId = newArticle.AppUserId,
                 Title = newArticle.Title,
-                Content = newArticle.Content,
+                Content = newArticle.Content,                
                 PublishDate = DateTime.Now
             };
 
@@ -69,21 +69,21 @@ namespace PetrpkuWeb.Server.Controllers
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
-            if (article == null)
+            if (article is null)
                 return BadRequest();
 
             return Ok(article);
         }
 
         [HttpPut("update/{articleId:int}")]
-        public async Task<IActionResult> PutUserAsync(int articleId, Article article)
+        public async Task<ActionResult> PutUserAsync(int articleId, Article article)
         {
             
             article.PublishDate = DateTime.Now;
             //_db.Attach(article).State = EntityState.Modified;
             _db.Update(article);
             await _db.SaveChangesAsync();
-            return NoContent();
+            return Ok(article);
         }
 
         [HttpDelete("delete/{articleId:int}")]
@@ -97,7 +97,7 @@ namespace PetrpkuWeb.Server.Controllers
                  .ThenInclude(a => a.Avatar)
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
-                if (article == null)
+                if (article is null)
                 {
                     return NotFound();
                 }

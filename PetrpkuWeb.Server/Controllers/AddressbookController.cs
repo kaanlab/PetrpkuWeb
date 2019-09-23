@@ -12,11 +12,11 @@ namespace PetrpkuWeb.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactsController : ControllerBase
+    public class AddressbookController : ControllerBase
     {
         private readonly AppDbContext _db;
 
-        public ContactsController(AppDbContext db)
+        public AddressbookController(AppDbContext db)
         {
             _db = db;
         }

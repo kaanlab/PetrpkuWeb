@@ -48,7 +48,7 @@ namespace PetrpkuWeb.Server.Controllers
                     response = await client.GetStringAsync(_urlMil);
                 }
 
-                if (response != null)
+                if (response is { })
                 {
                     var document = XDocument.Parse(response);
 
@@ -78,7 +78,7 @@ namespace PetrpkuWeb.Server.Controllers
                     response = await client.GetStringAsync(_urlCalend);
                 }
 
-                if (response != null)
+                if (response is { })
                 {
                     var document = XDocument.Parse(response);
 

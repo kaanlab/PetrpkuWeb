@@ -7,25 +7,25 @@
 @inject IFileReaderService fileReaderService
 @inject IMatToaster Toaster
 
-@if (Article != null)
+@if (article is { })
 {
     <div class="row">
         <div class="col-12">
-            <EditForm Model="Article" OnValidSubmit="@UpdateArticle" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+            <EditForm Model="article" OnValidSubmit="@UpdateArticle" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12">
                     <DataAnnotationsValidator />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatTextField Label="Заголовок" @bind-Value="@Article.Title"></MatTextField>
-                    <ValidationMessage For="() => Article.Title" />
+                    <MatTextField Label="Заголовок" @bind-Value="@article.Title"></MatTextField>
+                    <ValidationMessage For="() => article.Title" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatTextField Label="Текст" TextArea="true" @bind-Value="@Article.Content"></MatTextField>
-                    <ValidationMessage For="() => Article.Content" />
+                    <MatTextField Label="Текст" TextArea="true" @bind-Value="@article.Content"></MatTextField>
+                    <ValidationMessage For="() => article.Content" />
                 </div>
                 <div class="col-12 mb-2">
                     Выберете важность сообщения
-                    <select @bind="Article.Type">
+                    <select @bind="article.Type">
                         @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                         {
                             <option value="@styleType">@styleType.DisplayName()</option>
@@ -33,11 +33,11 @@
                     </select>
                 </div>
                 <table class="table">
-                    @foreach (var attachment in Article.Attachments)
+                    @foreach (var attachment in article.Attachments)
                     {
-                        var index = Article.Attachments.IndexOf(attachment);
+                        var index = article.Attachments.IndexOf(attachment);
                         <tr>
-                            <td>@(Article.Attachments.IndexOf(attachment) + 1)</td>
+                            <td>@(article.Attachments.IndexOf(attachment) + 1)</td>
                             <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
                             <td>@attachment.Description</td>
                             <td>@attachment.Name</td>
@@ -108,10 +108,10 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private Article Article { get; set; }
     private Attachment CurrentAttachment { get; set; } = new Attachment();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
     
+    Article article; 
     int identityUserId;
 
     ElementReference inputElement;
@@ -126,7 +126,7 @@
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
 
-        Article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
+        article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -136,22 +136,22 @@
 
     async Task UpdateArticle()
     {
-        Article.AppUserId = identityUserId;
-        var response = await HttpClient.PutJsonAsync<Article>($"api/articles/update/{Article.ArticleId}", Article);
-        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
+        article.AppUserId = identityUserId;
+        await HttpClient.PutJsonAsync<Article>($"api/articles/update/{article.ArticleId}", article);
+        Toaster.Add($"Объявление успешно обновлено", MatToastType.Success, "Успех!");
         NavigationManager.NavigateTo("/");
     }
 
     async Task DeleteArticle()
     {
-        await HttpClient.DeleteAsync($"api/articles/delete/{Article.ArticleId}");
-        Toaster.Add($"Новость {Article.Title} удалена", MatToastType.Success, "Успех!");
+        await HttpClient.DeleteAsync($"api/articles/delete/{article.ArticleId}");
+        Toaster.Add($"Новость {article.Title} удалена", MatToastType.Warning, "Внимание!");
         NavigationManager.NavigateTo("/");
     }
 
     void OpenDialog(int attachmentId)
     {
-        CurrentAttachment = Article.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+        CurrentAttachment = article.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
 
         dialogIsOpen = true;
     }
@@ -187,7 +187,7 @@
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        Article.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+        article.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
 
         await ClearFileInfo();
     }
@@ -203,8 +203,8 @@
     async Task DeleteAttachment()
     {
         await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
-        Article.Attachments.Remove(CurrentAttachment);
-        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
+        article.Attachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
 
         dialogIsOpen = false;
     }

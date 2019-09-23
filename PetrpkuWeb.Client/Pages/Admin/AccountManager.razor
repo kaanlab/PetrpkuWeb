@@ -12,7 +12,7 @@
 <div class="row">
     <div class="col-6">
         <h2 class="text-center">Активные учетные записи</h2>
-        @if (UsersIdentity == null)
+        @if (UsersIdentity is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
@@ -50,7 +50,7 @@
     </div>
     <div class="col-6">
         <h2 class="text-center">Архивные учетные записи</h2>
-        @if (disabledUsers == null)
+        @if (disabledUsers is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
@@ -90,7 +90,7 @@
         <MatDialogTitle>Выберете пользователя</MatDialogTitle>
         <MatDialogContent>
             <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
-                @if (LdapUsers == null)
+                @if (LdapUsers is null)
                 {
                     <MatOption Value="">(loading...)</MatOption>
                 }
@@ -111,7 +111,7 @@
     </MatDialog>
 </EditForm>
 
-@if (User != null)
+@if (User is { })
 {
     <EditForm Model="@User">
         <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
@@ -166,7 +166,6 @@
         var newUser = LdapUsers.FirstOrDefault(u => u.UserName == userName);
         await HttpClient.PostJsonAsync<LdapUser>("api/account/identity/add", newUser);
         await GetIdentity();
-
     }
 
     void OpenEditUserDialog(string userId)

@@ -123,7 +123,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             var attachmentInfo = await _db.Attachments.FindAsync(attachmentId);
 
-            if (attachmentInfo == null)
+            if (attachmentInfo is null)
             {
                 return NotFound();
             }

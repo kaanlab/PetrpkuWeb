@@ -13,7 +13,7 @@
 </div>
 <div class="row mb-2">
     <div class="col-9 border-right">
-        @if (ListOfDuty != null)
+        @if (ListOfDuty is { })
         {
             <table class="table">
                 <thead class="thead-dark">
@@ -83,7 +83,7 @@
                 </div>
                 <div class="col-12 mb-2">
                     <MatSelect Label="Дежурный" @bind-Value="DutyVM.User" Outlined="true">
-                        @if (users == null)
+                        @if (users is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
                         }
@@ -137,8 +137,7 @@
         ListOfDuty = null;
         ListOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
 
-        ListOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day))
-            .ToList();
+        ListOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day)).ToList();
 
         ListOfDays.RemoveAll(r => ListOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
         title = PikDate.Value;
