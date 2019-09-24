@@ -25,6 +25,6 @@ namespace PetrpkuWeb.Shared.ViewModels
         public DateTime PublishDate { get; set; }
         public Style Type { get; set; }
         public int AppUserId { get; set; }
-        public List<Attachment> Attachments { get; set; }
+        public List<Attachment> Attachments { get; set; } 
     }
 }

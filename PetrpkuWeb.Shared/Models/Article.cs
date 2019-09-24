@@ -30,7 +30,7 @@ namespace PetrpkuWeb.Shared.Models
         // relationship
         public int AppUserId { get; set; }
         public AppUser Author { get; set; }
-        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        public List<Attachment> Attachments { get; set; } //= new List<Attachment>();
     }
 
 }

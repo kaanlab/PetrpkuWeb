@@ -30,7 +30,6 @@ namespace PetrpkuWeb.Server.Controllers
         private readonly UserManager<AppUserIdentity> _userManager;
         private readonly AppDbContext _db;
 
-
         public AccountController(
             IConfiguration configuration,
             SignInManager<AppUserIdentity> signInManager,
@@ -43,7 +42,6 @@ namespace PetrpkuWeb.Server.Controllers
             _appAuthenticationService = appAuthenticationService;
             _userManager = userManager;
             _db = db;
-
         }
 
         [HttpPost("login")]
@@ -119,6 +117,7 @@ namespace PetrpkuWeb.Server.Controllers
             var ldapUser = _appAuthenticationService.SearchAll();
             if (ldapUser.Count > 0)
             {
+                //TODO: exclude from ldapUser then return
                 return Ok(ldapUser);
             }
             return BadRequest(new { Message = "Пользователи отсутствуют" });

@@ -7,6 +7,7 @@ using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Shared.ViewModels;
+using AutoMapper;
 
 namespace PetrpkuWeb.Server.Controllers
 {
@@ -15,10 +16,12 @@ namespace PetrpkuWeb.Server.Controllers
     public class ArticlesController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly IMapper _mapper;
 
-        public ArticlesController(AppDbContext db)
+        public ArticlesController(AppDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -39,18 +42,14 @@ namespace PetrpkuWeb.Server.Controllers
             if (newArticle is null)
                 return BadRequest();
 
-            var article = new Article()
-            {
-                AppUserId = newArticle.AppUserId,
-                Title = newArticle.Title,
-                Content = newArticle.Content,                
-                PublishDate = DateTime.Now
-            };
+            var article = _mapper.Map<Article>(newArticle);
+
+            article.PublishDate = DateTime.Now;
+            article.Attachments = new List<Attachment>();
 
             _db.Articles.Add(article);
             _db.SaveChanges();
 
-            //article.Attachments = new List<Attachment>();
             article.Attachments.AddRange(newArticle.Attachments);
             _db.Articles.Update(article);
 

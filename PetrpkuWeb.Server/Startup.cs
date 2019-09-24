@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,6 +17,7 @@ using Newtonsoft.Json;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Shared.Models;
+
 
 namespace PetrpkuWeb.Server
 {
@@ -69,9 +71,7 @@ namespace PetrpkuWeb.Server
 
             //services.AddCors();
             services.AddMemoryCache();
-
-           
-
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
