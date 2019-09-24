@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PetrpkuWeb.Server.Migrations
 {
-    public partial class InitMigration : Migration
+    public partial class InitDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -295,8 +295,7 @@ namespace PetrpkuWeb.Server.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_AppUsers_AttachmentId",
                 table: "AppUsers",
-                column: "AttachmentId",
-                unique: true);
+                column: "AttachmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppUsers_BuildingId",

@@ -1,5 +1,6 @@
 @page "/accountmanager"
 
+@using Newtonsoft.Json
 
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
@@ -31,6 +32,7 @@
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
+                        <th scope="col">ID</th>
                         <th scope="col">Логин</th>
                         <th scope="col">Ф.И.О.</th>
                         <th scope="col"></th>
@@ -38,11 +40,11 @@
                 </thead>
                 @foreach (var user in UsersIdentity)
                 {
-                    var id = user.Id;
                     <tr>
+                        <td>@user.AppUserId</td>
                         <td>@user.UserName</td>
                         <td>@user.DisplayName</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(id))" Label="Удалить" /></td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(user.UserName))" Label="Удалить" /></td>
                     </tr>
                 }
             </table>
@@ -67,16 +69,17 @@
         else
         {
             <table class="table">
-                <thead class="thead-dark">
+                <thead class="table-danger">
                     <tr>
-                        <th scope="col">Должность</th>
-
+                        <th scope="col">ID</th>
+                        <th scope="col">Ф.И.О.</th>
                     </tr>
                 </thead>
                 @foreach (var user in disabledUsers)
                 {
 
                     <tr>
+                        <td>@user.AppUserId</td>
                         <td>@user.DisplayName</td>
                     </tr>
                 }
@@ -118,7 +121,7 @@
             <MatDialogTitle>Удалить пользователя @User.DisplayName?</MatDialogTitle>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(User.Id))" Label="Да" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(User.UserName))" Label="Да" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -130,7 +133,6 @@
     private List<AppUserIdentity> UsersIdentity { get; set; }
     private AppUserIdentity User { get; set; }
     private LdapUser LdapUser { get; set; } = new LdapUser();
-    List<AppUser> appUsers;
     List<AppUser> disabledUsers;
 
     bool editUserDialogIsOpen = false;
@@ -139,20 +141,9 @@
 
     protected async override Task OnInitializedAsync()
     {
-        await GetIdentity();
-        await GetAppUsers();
-        LdapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
-    }
-
-    async Task GetIdentity()
-    {
-        UsersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
-    }
-
-    async Task GetAppUsers()
-    {
-        appUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
         disabledUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/disabled");
+        UsersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
+        LdapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
 
     void OpenNewUserDialog()
@@ -164,22 +155,32 @@
     {
         newUserDialogIsOpen = false;
         var newUser = LdapUsers.FirstOrDefault(u => u.UserName == userName);
-        await HttpClient.PostJsonAsync<LdapUser>("api/account/identity/add", newUser);
-        await GetIdentity();
+        var jsonContent = JsonConvert.SerializeObject(newUser);
+        var buffer = System.Text.Encoding.UTF8.GetBytes(jsonContent);
+        var byteContent = new ByteArrayContent(buffer);
+        byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        var response = await HttpClient.PostAsync("api/account/identity/add", byteContent);
+        var content = await response.Content.ReadAsStringAsync();
+        UsersIdentity.Add(JsonConvert.DeserializeObject<AppUserIdentity>(content));
+        Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
+        StateHasChanged();
     }
 
-    void OpenEditUserDialog(string userId)
+    void OpenEditUserDialog(string userName)
     {
         editUserDialogIsOpen = true;
-        User = UsersIdentity.FirstOrDefault(ui => ui.Id == userId);
+        User = UsersIdentity.FirstOrDefault(ui => ui.UserName == userName);
     }
 
-    async Task Delete(string userId)
+    async Task Delete(string userName)
     {
         editUserDialogIsOpen = false;
-        await HttpClient.DeleteAsync($"api/account/identity/delete/{userId}");
-        await GetIdentity();
-        await GetAppUsers();
+        UsersIdentity.Remove(User);
+        var response = await HttpClient.DeleteAsync($"api/account/identity/delete/{userName}");
+        var content = await response.Content.ReadAsStringAsync();
+        disabledUsers.Add(JsonConvert.DeserializeObject<AppUser>(content));
+        Toaster.Add($"Пользователь удален", MatToastType.Warning, "Внимание!");
     }
 
 }

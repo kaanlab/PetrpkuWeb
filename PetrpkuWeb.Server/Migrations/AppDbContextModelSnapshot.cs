@@ -14,7 +14,7 @@ namespace PetrpkuWeb.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-rc1.19456.14");
+                .HasAnnotation("ProductVersion", "3.0.0");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -201,8 +201,7 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.HasKey("AppUserId");
 
-                    b.HasIndex("AttachmentId")
-                        .IsUnique();
+                    b.HasIndex("AttachmentId");
 
                     b.HasIndex("BuildingId")
                         .IsUnique();
@@ -448,8 +447,8 @@ namespace PetrpkuWeb.Server.Migrations
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.AppUser", b =>
                 {
                     b.HasOne("PetrpkuWeb.Shared.Models.Attachment", "Avatar")
-                        .WithOne("AppUser")
-                        .HasForeignKey("PetrpkuWeb.Shared.Models.AppUser", "AttachmentId");
+                        .WithMany("ListOfUsers")
+                        .HasForeignKey("AttachmentId");
 
                     b.HasOne("PetrpkuWeb.Shared.Models.Building", "Building")
                         .WithOne("AppUser")

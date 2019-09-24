@@ -43,7 +43,6 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-
         [HttpGet("all/disabled")]
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {

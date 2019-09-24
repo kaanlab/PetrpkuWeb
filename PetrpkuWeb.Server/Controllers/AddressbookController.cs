@@ -34,7 +34,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPut("update/{appUserId:int}")]
-        public async Task<IActionResult> PutUserAsync(int appUserId, AppUser appUser)
+        public async Task<IActionResult> UpdateContact(int appUserId, AppUser appUser)
         {
             _db.Update(appUser);
             await _db.SaveChangesAsync();

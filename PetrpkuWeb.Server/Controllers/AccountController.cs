@@ -62,13 +62,7 @@ namespace PetrpkuWeb.Server.Controllers
             {
                 //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
                 appUserIdentity = AddIdentityUser(ldapUser);
-                var result = await _userManager.CreateAsync(appUserIdentity);
-                if (result.Succeeded)
-                {
-                    var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
-                    appUserIdentity.AssosiateUser.Avatar = avatar;
-                    await _userManager.UpdateAsync(appUserIdentity);
-                }
+                await _userManager.CreateAsync(appUserIdentity);
             }
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
@@ -112,13 +106,15 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpGet("ldap/all")]
-        public ActionResult<List<LdapUser>> GetAll()
+        public async Task<ActionResult<List<LdapUser>>> GetAll()
         {
-            var ldapUser = _appAuthenticationService.SearchAll();
-            if (ldapUser.Count > 0)
+            var ldapUsers = _appAuthenticationService.SearchAll();
+            if (ldapUsers.Count > 0)
             {
-                //TODO: exclude from ldapUser then return
-                return Ok(ldapUser);
+                var authUsers = await _db.Users.ToListAsync();
+                ldapUsers.RemoveAll(r => authUsers.Exists(u => u.UserName == r.UserName));
+
+                return Ok(ldapUsers);
             }
             return BadRequest(new { Message = "Пользователи отсутствуют" });
         }
@@ -133,11 +129,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                 if (result.Succeeded)
                 {
-                    var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
-                    appUserIdentity.AssosiateUser.Avatar = avatar;
-                    var updateresult = await _userManager.UpdateAsync(appUserIdentity);
-                    if (updateresult.Succeeded)
-                        return Ok();
+                    return Ok(appUserIdentity);
                 }
                 return BadRequest();
             }
@@ -150,24 +142,24 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.Users.ToListAsync();
         }
 
-        [HttpDelete("identity/delete/{appUserIdentityId}")]
-        public async Task<IActionResult> Delete(string appUserIdentityId)
+        [HttpDelete("identity/delete/{userName}")]
+        public async Task<ActionResult> Delete(string userName)
         {
             if (ModelState.IsValid)
             {
-                var user = _db.Users.Find(appUserIdentityId);
+                var user = await _db.Users.SingleOrDefaultAsync(u => u.UserName == userName);
                 if (user is null)
                 {
                     return NotFound();
                 }
 
-                var appUser = _db.AppUsers.Find(user.AssosiateUser.AppUserId);
-                appUser.DisplayName = "(removed) " + user.DisplayName;
+                var appUser = await _db.AppUsers.SingleOrDefaultAsync(u => u.AppUserId == user.AppUserId);
+                appUser.DisplayName = appUser.DisplayName + $"( удален {DateTime.Now.ToShortDateString()})";
                 appUser.IsActive = false;
 
                 _db.Users.Remove(user);
                 await _db.SaveChangesAsync();
-                return NoContent();
+                return Ok(appUser);
             }
 
             return BadRequest(ModelState);
@@ -176,6 +168,7 @@ namespace PetrpkuWeb.Server.Controllers
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {
+            var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -183,6 +176,7 @@ namespace PetrpkuWeb.Server.Controllers
                 AssosiateUser = new AppUser()
                 {
                     DisplayName = authUser.DisplayName,
+                    Avatar = avatar,
                     IsActive = true,
                     IsDuty = false
                 }
