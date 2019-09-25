@@ -154,7 +154,7 @@ namespace PetrpkuWeb.Server.Controllers
                 }
 
                 var appUser = await _db.AppUsers.SingleOrDefaultAsync(u => u.AppUserId == user.AppUserId);
-                appUser.DisplayName = appUser.DisplayName + $"( удален {DateTime.Now.ToShortDateString()})";
+                appUser.DisplayName += $"( удален {DateTime.Now.ToShortDateString()})";
                 appUser.IsActive = false;
 
                 _db.Users.Remove(user);

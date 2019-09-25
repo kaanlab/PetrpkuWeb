@@ -1,17 +1,166 @@
-@page "/catalogmanager"
+@page "/catalog"
 
 @inject HttpClient HttpClient
-
+@inject IMatToaster Toaster
 
 <h3>Адресная книга</h3>
+<div class="row md-2">
+    <div class="col-6">
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newDepartmentDialogIsOpen = true; })" Label="Добавить подразделение" />
+    </div>
+    <div class="col-6">
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newBuildingDialogIsOpen = true; })" Label="Добавить здание" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <h2 class="text-center">Список подразделений</h2>
+        @if (Departments is null)
+        {
+            <div class="spinner-border text-primary text-center" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        }
+        else if (Departments.Count == 0)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">No users...</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                @foreach (var department in Departments)
+                {
+                    <tr>
+                        <td>@department.Name</td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department.DepartmentId))" Label="Удалить" /></td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    <div class="col-6">        
+        <h2 class="text-center">Список зданий</h2>
+        @if (Buildings is null)
+        {
+            <div class="spinner-border text-primary text-center" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        }
+        else if (Buildings.Count == 0)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">No users...</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                @foreach (var building in Buildings)
+                {
+                    <tr>
+                        <td>@building.Name</td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(building.BuildingId))" Label="Удалить" /></td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+</div>
 
+<EditForm Model="@NewDepartment">
+    <MatDialog @bind-IsOpen="@newDepartmentDialogIsOpen">
+        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Подразделение" @bind-Value="@NewDepartment.Name"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newDepartmentDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddNewDepartment" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
 
+@if (currentDepartment is { })
+{
+    <EditForm Model="@currentDepartment">
+        <MatDialog @bind-IsOpen="@editDepartmentDialogIsOpen">
+            <MatDialogTitle>Редактировать подразделение</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Подразделение" @bind-Value="@currentDepartment.Name"></MatTextField>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { editDepartmentDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateDepartment(currentDepartment.DepartmentId))" Label="Обновить" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteDepartment(currentDepartment.DepartmentId))" Label="Удалить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
+
+<EditForm Model="@NewBuilding">
+    <MatDialog @bind-IsOpen="@newBuildingDialogIsOpen">
+        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Подразделение" @bind-Value="@NewBuilding.Name"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newBuildingDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddNewBuilding" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+@if (currentBuilding is { })
+{
+    <EditForm Model="@currentBuilding">
+        <MatDialog @bind-IsOpen="@editBuildingDialogIsOpen">
+            <MatDialogTitle>Редактировать здание</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Название" @bind-Value="@currentBuilding.Name"></MatTextField>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { editBuildingDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateBuilding(currentBuilding.BuildingId))" Label="Обновить" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteBuilding(currentBuilding.BuildingId))" Label="Удалить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
 
 @code {
 
 
     private List<Department> Departments { get; set; }
     private List<Building> Buildings { get; set; }
+
+    Department NewDepartment { get; set; } = new Department();
+    Building NewBuilding { get; set; } = new Building();
+    Department currentDepartment;
+    Building currentBuilding;
+
+    bool newDepartmentDialogIsOpen = false;
+    bool newBuildingDialogIsOpen = false;
+
+    bool editDepartmentDialogIsOpen = false;
+    bool editBuildingDialogIsOpen = false;
 
 
     protected async override Task OnInitializedAsync()
@@ -20,5 +169,53 @@
         Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/contacts/buildings");
     }
 
+    async Task AddNewDepartment()
+    {
+        await HttpClient.PostJsonAsync<Department>("api/addressbook/department/create", NewDepartment);
+    }
 
+    void OpenEditDepartmentDialog(int departmentId)
+    {
+        editDepartmentDialogIsOpen = true;
+        currentDepartment = Departments.FirstOrDefault(d => d.DepartmentId == departmentId);
+    }
+
+    async Task UpdateDepartment(int departmentId)
+    {
+        editDepartmentDialogIsOpen = false;
+        await HttpClient.PutJsonAsync<Department>($"api/addressbook/department/update/{currentDepartment.DepartmentId}", currentDepartment);
+        Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
+    }
+
+    async Task DeleteDepartment(int departmentId)
+    {
+        editDepartmentDialogIsOpen = false;
+        await HttpClient.DeleteAsync($"api/addressbook/department/delete/{currentDepartment.DepartmentId}");
+        Toaster.Add($"Запись о подразделении удалена", MatToastType.Warning, "Внимание!");
+    }
+
+    async Task AddNewBuilding()
+    {
+        await HttpClient.PostJsonAsync<Building>("api/addressbook/building/create", NewBuilding);
+    }
+
+    void OpenEditBuildingDialog(int buildingId)
+    {
+        editBuildingDialogIsOpen = true;
+        currentBuilding = Buildings.FirstOrDefault(d => d.BuildingId == buildingId);
+    }
+
+    async Task UpdateBuilding(int buildingId)
+    {
+        editBuildingDialogIsOpen = false;
+        await HttpClient.PutJsonAsync<Building>($"api/addressbook/building/update/{currentBuilding.BuildingId}", currentBuilding);
+        Toaster.Add($"Запись о здании успешно обновлена", MatToastType.Success, "Успех!");
+    }
+
+    async Task DeleteBuilding(int buildingId)
+    {
+        editDepartmentDialogIsOpen = false;
+        await HttpClient.DeleteAsync($"api/addressbook/building/delete/{currentBuilding.BuildingId}");
+        Toaster.Add($"Запись о здании удалена", MatToastType.Warning, "Внимание!");
+    }
 }

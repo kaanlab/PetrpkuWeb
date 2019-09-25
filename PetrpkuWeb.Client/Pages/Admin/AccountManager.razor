@@ -8,7 +8,7 @@
 <h2 class="col-12 mb-4 text-center">Пользователи</h2>
 
 <div class="row mb-5">
-    <MatButton Outlined="true" Icon="add" OnClick="@OpenNewUserDialog" Label="Добавить пользователя" />
+    <MatButton Outlined="true" Icon="add" OnClick="@(e => { newUserDialogIsOpen = true; })" Label="Добавить пользователя" />
 </div>
 <div class="row">
     <div class="col-6">
@@ -144,11 +144,6 @@
         disabledUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/disabled");
         UsersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
         LdapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
-    }
-
-    void OpenNewUserDialog()
-    {
-        newUserDialogIsOpen = true;
     }
 
     async Task AddAccount(string userName)

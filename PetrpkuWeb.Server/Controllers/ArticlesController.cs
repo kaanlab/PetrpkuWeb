@@ -77,12 +77,15 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpPut("update/{articleId:int}")]
         public async Task<ActionResult> PutUserAsync(int articleId, Article article)
         {
-            
-            article.PublishDate = DateTime.Now;
-            //_db.Attach(article).State = EntityState.Modified;
-            _db.Update(article);
-            await _db.SaveChangesAsync();
-            return Ok(article);
+            if (articleId == article.ArticleId)
+            {
+                article.PublishDate = DateTime.Now;
+                //_db.Attach(article).State = EntityState.Modified;
+                _db.Update(article);
+                await _db.SaveChangesAsync();
+                return Ok(article);
+            }
+            return BadRequest();
         }
 
         [HttpDelete("delete/{articleId:int}")]

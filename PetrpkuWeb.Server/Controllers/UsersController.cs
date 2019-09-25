@@ -82,11 +82,15 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPut("update/{appUserId:int}")]
-        public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser user)
+        public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser appUser)
         {
-            _db.Attach(user).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
-            return Ok(user);
+            if (appUserId == appUser.AppUserId)
+            {
+                _db.Attach(appUser).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
+                return Ok(appUser);
+            }
+            return BadRequest();
         }
     }
 }

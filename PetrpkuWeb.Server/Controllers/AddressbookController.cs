@@ -36,10 +36,14 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpPut("update/{appUserId:int}")]
         public async Task<IActionResult> UpdateContact(int appUserId, AppUser appUser)
         {
-            _db.Update(appUser);
-            await _db.SaveChangesAsync();
-            return NoContent();
+            if (appUserId == appUser.AppUserId)
+            {
+                _db.Update(appUser);
+                await _db.SaveChangesAsync();
+                return NoContent();
+            }
+            return BadRequest();
         }
-       
+
     }
 }
