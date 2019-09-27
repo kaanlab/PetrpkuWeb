@@ -357,7 +357,7 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.HasKey("BuildingId");
 
-                    b.ToTable("Building");
+                    b.ToTable("Buildings");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Department", b =>
@@ -371,7 +371,7 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.HasKey("DepartmentId");
 
-                    b.ToTable("Department");
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Duty", b =>

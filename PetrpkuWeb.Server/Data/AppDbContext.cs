@@ -19,6 +19,8 @@ namespace PetrpkuWeb.Server.Data
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Duty> Duties { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Building> Buildings { get; set; }
     }
     
 }

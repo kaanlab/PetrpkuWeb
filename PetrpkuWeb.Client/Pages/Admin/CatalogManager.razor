@@ -1,5 +1,7 @@
 @page "/catalog"
 
+@using Newtonsoft.Json
+
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
 
@@ -25,7 +27,7 @@
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
-                    <p class="card-text">No users...</p>
+                    <p class="card-text">Список пуст</p>
                 </div>
             </div>
         }
@@ -42,13 +44,13 @@
                 {
                     <tr>
                         <td>@department.Name</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department.DepartmentId))" Label="Удалить" /></td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department.DepartmentId))" Label="Редактировать" /></td>
                     </tr>
                 }
             </table>
         }
     </div>
-    <div class="col-6">        
+    <div class="col-6">
         <h2 class="text-center">Список зданий</h2>
         @if (Buildings is null)
         {
@@ -60,7 +62,7 @@
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
-                    <p class="card-text">No users...</p>
+                    <p class="card-text">Список пуст</p>
                 </div>
             </div>
         }
@@ -77,7 +79,7 @@
                 {
                     <tr>
                         <td>@building.Name</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(building.BuildingId))" Label="Удалить" /></td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building.BuildingId))" Label="Редактировать" /></td>
                     </tr>
                 }
             </table>
@@ -165,13 +167,16 @@
 
     protected async override Task OnInitializedAsync()
     {
-        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/contacts/departments");
-        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/contacts/buildings");
+        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
 
     async Task AddNewDepartment()
     {
-        await HttpClient.PostJsonAsync<Department>("api/addressbook/department/create", NewDepartment);
+        newDepartmentDialogIsOpen = false;
+        var response = await HttpClient.PostJsonAsync<Department>("api/phonebook/department/create", NewDepartment);
+        Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+        Departments.Add(response);
     }
 
     void OpenEditDepartmentDialog(int departmentId)
@@ -183,20 +188,25 @@
     async Task UpdateDepartment(int departmentId)
     {
         editDepartmentDialogIsOpen = false;
-        await HttpClient.PutJsonAsync<Department>($"api/addressbook/department/update/{currentDepartment.DepartmentId}", currentDepartment);
+        await HttpClient.PutJsonAsync<Department>($"api/phonebook/department/update/{departmentId}", currentDepartment);
         Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
     }
 
     async Task DeleteDepartment(int departmentId)
     {
         editDepartmentDialogIsOpen = false;
-        await HttpClient.DeleteAsync($"api/addressbook/department/delete/{currentDepartment.DepartmentId}");
-        Toaster.Add($"Запись о подразделении удалена", MatToastType.Warning, "Внимание!");
+        var response = await HttpClient.DeleteAsync($"api/phonebook/department/delete/{departmentId}");
+        var content = await response.Content.ReadAsStringAsync();
+        Departments.Remove(JsonConvert.DeserializeObject<Department>(content));
+        Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
     }
 
     async Task AddNewBuilding()
     {
-        await HttpClient.PostJsonAsync<Building>("api/addressbook/building/create", NewBuilding);
+        newBuildingDialogIsOpen = false;
+        var response = await HttpClient.PostJsonAsync<Building>("api/phonebook/building/create", NewBuilding);
+        Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
+        Buildings.Add(response);
     }
 
     void OpenEditBuildingDialog(int buildingId)
@@ -208,14 +218,17 @@
     async Task UpdateBuilding(int buildingId)
     {
         editBuildingDialogIsOpen = false;
-        await HttpClient.PutJsonAsync<Building>($"api/addressbook/building/update/{currentBuilding.BuildingId}", currentBuilding);
-        Toaster.Add($"Запись о здании успешно обновлена", MatToastType.Success, "Успех!");
+        await HttpClient.PutJsonAsync<Building>($"api/phonebook/building/update/{buildingId}", currentBuilding);
+        Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+        currentBuilding = null;
     }
 
     async Task DeleteBuilding(int buildingId)
     {
-        editDepartmentDialogIsOpen = false;
-        await HttpClient.DeleteAsync($"api/addressbook/building/delete/{currentBuilding.BuildingId}");
-        Toaster.Add($"Запись о здании удалена", MatToastType.Warning, "Внимание!");
+        editBuildingDialogIsOpen = false;
+        var response = await HttpClient.DeleteAsync($"api/phonebook/building/delete/{buildingId}");
+        var content = await response.Content.ReadAsStringAsync();
+        Buildings.Remove(JsonConvert.DeserializeObject<Building>(content));
+        Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
     }
 }

@@ -1,0 +1,66 @@
+@page "/phonebook"
+
+@inject HttpClient HttpClient
+
+<h3>Адресная книга</h3>
+
+<div class="row">
+
+    <h2 class="text-center">Список подразделений</h2>
+    @if (appUsersList is null)
+    {
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+    else if (appUsersList.Count == 0)
+    {
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">No users...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Отчество</th>
+                    <th scope="col">Подразделение</th>
+                    <th scope="col">Должность</th>
+                    <th scope="col">Кабинет</th>
+                    <th scope="col">Внутр.номер</th>
+                    <th scope="col">Корпус</th>
+
+                </tr>
+            </thead>
+            @foreach (var user in appUsersList)
+            {
+                <tr>
+                    <td>@user.LastName</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.MidleName</td>
+                    <td>@user.Department.Name</td>
+                    <td>@user.WorkingPosition</td>
+                    <td>@user.Room</td>
+                    <td>@user.IntPhone</td>
+                    <td>@user.Building.Name</td>
+                </tr>
+            }
+        </table>
+    }
+</div>
+
+@code {
+
+
+    private List<AppUser> appUsersList;
+
+    protected async override Task OnInitializedAsync()
+    {
+        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/phonebook/all");
+    }
+}

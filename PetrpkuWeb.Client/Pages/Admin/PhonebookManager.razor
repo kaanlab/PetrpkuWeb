@@ -1,0 +1,136 @@
+@page "/phonebookmanager"
+
+@inject HttpClient HttpClient
+@inject IMatToaster Toaster
+
+
+<h2 class="col-12 mb-4 text-center">Редактирование телефонной книги</h2>
+
+<div class="row">
+
+    <h2 class="text-center">Список подразделений</h2>
+    @if (AppUsersList is null)
+    {
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+    else if (AppUsersList.Count == 0)
+    {
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">No users...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Отчество</th>
+                    <th scope="col">Подразделение</th>
+                    <th scope="col">Должность</th>
+                    <th scope="col">Кабинет</th>
+                    <th scope="col">Внутр.номер</th>
+                    <th scope="col">Корпус</th>
+                    <th></th>
+
+                </tr>
+            </thead>
+            @foreach (var user in AppUsersList)
+            {
+                <tr>
+                    <td>@user.LastName</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.MidleName</td>
+                    <td>@user.Department.Name</td>
+                    <td>@user.WorkingPosition</td>
+                    <td>@user.Room</td>
+                    <td>@user.IntPhone</td>
+                    <td>@user.Building.Name</td>
+                    <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" Label="Удалить" /></td>
+                </tr>
+            }
+        </table>
+    }
+</div>
+
+<EditForm Model="@EditAppUser">
+    <MatDialog @bind-IsOpen="@editAppUserDialogIsOpen">
+        <MatDialogTitle>Редактирование информации о пользователе @EditAppUser.DisplayName</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
+            <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>
+            <MatTextField Label="Отчество" @bind-Value="@EditAppUser.MidleName"></MatTextField>
+            <MatSelect @bind-Value="@EditAppUser.Department.Name" Outlined="true">
+                @if (departments is null)
+                {
+                    <MatOption Value="">(loading...)</MatOption>
+                }
+                else
+                {
+                    <MatOption Value="-1" Disabled="true" />
+                    @foreach (var department in departments)
+                    {
+                        <MatOption Value="@department.Name">@department.Name</MatOption>
+                    }
+                }
+            </MatSelect>
+            <MatTextField Label="Должность" @bind-Value="@EditAppUser.WorkingPosition"></MatTextField>
+            <MatTextField Label="Должность" @bind-Value="@EditAppUser.Room"></MatTextField>
+            <MatTextField Label="Внутренний телефон" @bind-Value="@EditAppUser.IntPhone"></MatTextField>
+            <MatSelect @bind-Value="@EditAppUser.Building.Name" Outlined="true">
+                @if (buildings is null)
+                {
+                    <MatOption Value="">(loading...)</MatOption>
+                }
+                else
+                {
+                    <MatOption Value="-1" Disabled="true" />
+                    @foreach (var building in buildings)
+                    {
+                        <MatOption Value="@building.Name">@building.Name</MatOption>
+                    }
+                }
+            </MatSelect>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@(() =>UpdateAppUser(EditAppUser.AppUserId))" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+@code {
+
+    private List<AppUser> AppUsersList { get; set; }
+    private AppUser EditAppUser { get; set; } = new AppUser();
+
+    List<Department> departments;
+    List<Building> buildings;
+
+    bool editAppUserDialogIsOpen = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/phonebook/all");
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
+    }
+
+    void OpenEditAppUserDialog(int appUserId)
+    {
+        editAppUserDialogIsOpen = true;
+        EditAppUser = AppUsersList.FirstOrDefault(u => u.AppUserId == appUserId);
+    }
+
+    async Task UpdateAppUser(int appUserId)
+    {
+        editAppUserDialogIsOpen = false;
+        await HttpClient.PutJsonAsync<AppUser>($"api/phonebook/update/{appUserId}", EditAppUser);
+        Toaster.Add($"Информация о пользователе {EditAppUser.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
+    }
+}

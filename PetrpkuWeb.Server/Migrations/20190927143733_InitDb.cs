@@ -22,7 +22,7 @@ namespace PetrpkuWeb.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Building",
+                name: "Buildings",
                 columns: table => new
                 {
                     BuildingId = table.Column<int>(nullable: false)
@@ -31,11 +31,11 @@ namespace PetrpkuWeb.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Building", x => x.BuildingId);
+                    table.PrimaryKey("PK_Buildings", x => x.BuildingId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Department",
+                name: "Departments",
                 columns: table => new
                 {
                     DepartmentId = table.Column<int>(nullable: false)
@@ -44,7 +44,7 @@ namespace PetrpkuWeb.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Department", x => x.DepartmentId);
+                    table.PrimaryKey("PK_Departments", x => x.DepartmentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -141,15 +141,15 @@ namespace PetrpkuWeb.Server.Migrations
                         principalColumn: "AttachmentId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_AppUsers_Building_BuildingId",
+                        name: "FK_AppUsers_Buildings_BuildingId",
                         column: x => x.BuildingId,
-                        principalTable: "Building",
+                        principalTable: "Buildings",
                         principalColumn: "BuildingId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_AppUsers_Department_DepartmentId",
+                        name: "FK_AppUsers_Departments_DepartmentId",
                         column: x => x.DepartmentId,
-                        principalTable: "Department",
+                        principalTable: "Departments",
                         principalColumn: "DepartmentId",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -416,10 +416,10 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "AppUsers");
 
             migrationBuilder.DropTable(
-                name: "Building");
+                name: "Buildings");
 
             migrationBuilder.DropTable(
-                name: "Department");
+                name: "Departments");
         }
     }
 }

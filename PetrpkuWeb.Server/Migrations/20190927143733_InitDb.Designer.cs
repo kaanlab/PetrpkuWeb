@@ -9,7 +9,7 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190924174352_InitDb")]
+    [Migration("20190927143733_InitDb")]
     partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -359,7 +359,7 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.HasKey("BuildingId");
 
-                    b.ToTable("Building");
+                    b.ToTable("Buildings");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Department", b =>
@@ -373,7 +373,7 @@ namespace PetrpkuWeb.Server.Migrations
 
                     b.HasKey("DepartmentId");
 
-                    b.ToTable("Department");
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Duty", b =>
