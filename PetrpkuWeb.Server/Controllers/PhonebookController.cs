@@ -38,9 +38,15 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (appUserId == appUser.AppUserId)
             {
+                var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
+                var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
+
+                appUser.Building = building;
+                appUser.Department = department;
                 _db.Update(appUser);
                 await _db.SaveChangesAsync();
-                return NoContent();
+
+                return Ok(appUser);
             }
 
             return BadRequest();

@@ -61,7 +61,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (appUserIdentity is null)
             {
                 //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
-                appUserIdentity = AddIdentityUser(ldapUser);
+                appUserIdentity = await AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
             }
 
@@ -124,7 +124,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (authUser is { })
             {
-                var appUserIdentity = AddIdentityUser(authUser);
+                var appUserIdentity = await AddIdentityUser(authUser);
                 var result = await _userManager.CreateAsync(appUserIdentity);
 
                 if (result.Succeeded)
@@ -166,9 +166,12 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
 
-        private AppUserIdentity AddIdentityUser(IAuthUser authUser)
+        private async Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
         {
-            var avatar = _db.Attachments.SingleOrDefault(a => a.Path == @"/img/user/default_avatar.png");
+            var avatar = await _db.Attachments.SingleOrDefaultAsync(a => a.Path == @"/img/user/default_avatar.png");
+            var building = await _db.Buildings.SingleOrDefaultAsync(b => b.Name == "пусто");
+            var department = await _db.Departments.SingleOrDefaultAsync(d => d.Name == "пусто");
+
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -177,6 +180,8 @@ namespace PetrpkuWeb.Server.Controllers
                 {
                     DisplayName = authUser.DisplayName,
                     Avatar = avatar,
+                    Building = building,
+                    Department = department,
                     IsActive = true,
                     IsDuty = false
                 }

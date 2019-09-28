@@ -4,11 +4,10 @@
 @inject IMatToaster Toaster
 
 
-<h2 class="col-12 mb-4 text-center">Редактирование телефонной книги</h2>
+
 
 <div class="row">
-
-    <h2 class="text-center">Список подразделений</h2>
+    <h2 class="col-12 mb-4 text-center">Редактирование телефонного справочника</h2>
     @if (AppUsersList is null)
     {
         <div class="spinner-border text-primary text-center" role="status">
@@ -28,6 +27,7 @@
         <table class="table">
             <thead class="thead-dark">
                 <tr>
+                    <th scope="col">Ф.И.О.</th>
                     <th scope="col">Фамилия</th>
                     <th scope="col">Имя</th>
                     <th scope="col">Отчество</th>
@@ -43,6 +43,7 @@
             @foreach (var user in AppUsersList)
             {
                 <tr>
+                    <td>@user.DisplayName</td>
                     <td>@user.LastName</td>
                     <td>@user.FirstName</td>
                     <td>@user.MidleName</td>
@@ -58,56 +59,58 @@
     }
 </div>
 
-<EditForm Model="@EditAppUser">
-    <MatDialog @bind-IsOpen="@editAppUserDialogIsOpen">
-        <MatDialogTitle>Редактирование информации о пользователе @EditAppUser.DisplayName</MatDialogTitle>
-        <MatDialogContent>
-            <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
-            <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>
-            <MatTextField Label="Отчество" @bind-Value="@EditAppUser.MidleName"></MatTextField>
-            <MatSelect @bind-Value="@EditAppUser.Department.Name" Outlined="true">
-                @if (departments is null)
-                {
-                    <MatOption Value="">(loading...)</MatOption>
-                }
-                else
-                {
-                    <MatOption Value="-1" Disabled="true" />
-                    @foreach (var department in departments)
+@if (EditAppUser is { })
+{
+    <EditForm Model="@EditAppUser">
+        <MatDialog @bind-IsOpen="@editAppUserDialogIsOpen">
+            <MatDialogTitle>Редактирование информации о пользователе @EditAppUser.DisplayName</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
+                <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>
+                <MatTextField Label="Отчество" @bind-Value="@EditAppUser.MidleName"></MatTextField>
+                <select @bind="@EditAppUser.DepartmentId">
+                    @if (departments is null)
                     {
-                        <MatOption Value="@department.Name">@department.Name</MatOption>
+                        <option value="">(loading...)</option>
                     }
-                }
-            </MatSelect>
-            <MatTextField Label="Должность" @bind-Value="@EditAppUser.WorkingPosition"></MatTextField>
-            <MatTextField Label="Должность" @bind-Value="@EditAppUser.Room"></MatTextField>
-            <MatTextField Label="Внутренний телефон" @bind-Value="@EditAppUser.IntPhone"></MatTextField>
-            <MatSelect @bind-Value="@EditAppUser.Building.Name" Outlined="true">
-                @if (buildings is null)
-                {
-                    <MatOption Value="">(loading...)</MatOption>
-                }
-                else
-                {
-                    <MatOption Value="-1" Disabled="true" />
-                    @foreach (var building in buildings)
+                    else
+                    {                        
+                        @foreach (var department in departments)
+                        {
+                            <option value="@department.DepartmentId"> @department.Name</option>
+                        }
+                    }
+                </select>
+                <MatTextField Label="Должность" @bind-Value="@EditAppUser.WorkingPosition"></MatTextField>
+                <MatTextField Label="Кабинет" @bind-Value="@EditAppUser.Room"></MatTextField>
+                <MatTextField Label="Внутренний телефон" @bind-Value="@EditAppUser.IntPhone"></MatTextField>
+                <select @bind="@EditAppUser.BuildingId">
+                    @if (buildings is null)
                     {
-                        <MatOption Value="@building.Name">@building.Name</MatOption>
+                        <option value="">(loading...)</option>
                     }
-                }
-            </MatSelect>
-        </MatDialogContent>
-        <MatDialogActions>
-            <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="check" Type="submit" OnClick="@(() =>UpdateAppUser(EditAppUser.AppUserId))" Label="Добавить" />
-        </MatDialogActions>
-    </MatDialog>
-</EditForm>
+                    else
+                    {                        
+                        @foreach (var building in buildings)
+                        {
+                            <option value="@building.BuildingId">@building.Name</option>
+                        }
+                    }
+                </select>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="check" Type="submit" OnClick="@(() => UpdateAppUser(EditAppUser.AppUserId))" Label="Добавить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
+
 
 @code {
 
     private List<AppUser> AppUsersList { get; set; }
-    private AppUser EditAppUser { get; set; } = new AppUser();
+    private AppUser EditAppUser { get; set; }
 
     List<Department> departments;
     List<Building> buildings;
@@ -130,7 +133,9 @@
     async Task UpdateAppUser(int appUserId)
     {
         editAppUserDialogIsOpen = false;
-        await HttpClient.PutJsonAsync<AppUser>($"api/phonebook/update/{appUserId}", EditAppUser);
-        Toaster.Add($"Информация о пользователе {EditAppUser.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/phonebook/update/{appUserId}", EditAppUser);
+        var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
+        AppUsersList[index] = response;
+        Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
     }
 }

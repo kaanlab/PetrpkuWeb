@@ -16,8 +16,19 @@ namespace PetrpkuWeb.Server.Data
                 Extension = ".png",
                 Path = @"/img/user/default_avatar.png"
             };
-            _db.Attachments.Add(avatar);
-            _db.SaveChanges();
+            //_db.Attachments.Add(avatar);
+
+            var building = new Building()
+            {
+                Name = "пусто"
+            };
+
+            var departmaent = new Department()
+            {
+                Name = "пусто"
+            };
+
+            //_db.SaveChanges();
 
             var appUserIdentity = new AppUserIdentity()
             {
@@ -27,6 +38,8 @@ namespace PetrpkuWeb.Server.Data
                 {
                     DisplayName = "Кантышев А.В.",
                     Avatar = avatar,
+                    Building = building,
+                    Department = departmaent,
                     IsActive = true,
                     IsDuty = false
                 }

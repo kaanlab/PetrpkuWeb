@@ -10,6 +10,6 @@ namespace PetrpkuWeb.Shared.Models
         public string Name { get; set; }
 
         // relationship
-        public AppUser AppUser { get; set; }
+        public List<AppUser> ListOfUsers { get; set; }
     }
 }
