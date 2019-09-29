@@ -40,6 +40,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return await _db.AppUsers
                 .Include(a => a.Avatar)
+                .Include(b => b.Building)
+                .Include(d => d.Department)
                 .Where(u => u.IsActive && u.IsDuty)
                 .AsNoTracking()
                 .ToListAsync();
@@ -64,7 +66,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Include(a => a.Articles)
-                .ThenInclude(atach => atach.Attachments)
+                    .ThenInclude(atach => atach.Attachments)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.AppUserId == appUserId);
         }
@@ -79,6 +81,7 @@ namespace PetrpkuWeb.Server.Controllers
 
             return await _db.AppUsers
                 .Include(a => a.Avatar)
+                .Include(d =>d.Department)
                 .Where(d => (d.Birthday.DayOfYear >= firstDayOfWeek.DayOfYear && d.Birthday.DayOfYear <= lastDayOfWeek.DayOfYear))
                 .OrderBy(o => o.Birthday.DayOfYear)
                 .AsNoTracking()

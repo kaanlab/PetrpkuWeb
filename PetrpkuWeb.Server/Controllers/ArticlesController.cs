@@ -30,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.Articles
                 .Include(a => a.Attachments)
                 .Include(a => a.Author)
-                .ThenInclude(a => a.Avatar)
+                    .ThenInclude(a => a.Avatar)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
                 .ToListAsync();
@@ -64,7 +64,7 @@ namespace PetrpkuWeb.Server.Controllers
             var article = await _db.Articles
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
-                 .ThenInclude(a => a.Avatar)
+                    .ThenInclude(a => a.Avatar)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
@@ -96,7 +96,7 @@ namespace PetrpkuWeb.Server.Controllers
                 var article = await _db.Articles
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
-                 .ThenInclude(a => a.Avatar)
+                    .ThenInclude(a => a.Avatar)
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
                 if (article is null)

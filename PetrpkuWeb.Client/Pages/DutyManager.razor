@@ -24,10 +24,9 @@
                                 <MatIcon Icon="@(GetSortStyle("DayOfDuty"))" />
                             </MatTooltip>
                         </th>
-                        <th scope="col"></th>
+                        <th scope="col">Ф.И.О.</th>
                         <th scope="col">Подразделение</th>
                         <th scope="col">Должность</th>
-                        <th scope="col">Ф.И.О.</th>
                         <th scope="col">Телефон</th>
                         <th scope="col"></th>
                     </tr>
@@ -35,14 +34,14 @@
                 <tbody>
                     @foreach (var dutyUser in ListOfDuty)
                     {
-                        <tr>
-                            <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                            <td>@dutyUser.AssignedTo.Department.Name</td>
-                            <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                            <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
-                            <td>@dutyUser.AssignedTo.MobPhone</td>
-                            <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
-                        </tr>
+                    <tr>
+                        <th scope="row">@dutyUser.DayOfDuty.Day</th>
+                        <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
+                        <td>@dutyUser.AssignedTo.Department.Name</td>
+                        <td>@dutyUser.AssignedTo.WorkingPosition</td>
+                        <td>@dutyUser.AssignedTo.MobPhone</td>
+                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                    </tr>
                     }
                 </tbody>
             </table>
