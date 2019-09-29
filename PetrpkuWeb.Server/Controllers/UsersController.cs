@@ -28,6 +28,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return await _db.AppUsers
                 .Include(a => a.Avatar)
+                .Include(b => b.Building)
+                .Include(d => d.Department)
                 .Where(u => u.IsActive)
                 .AsNoTracking()
                 .ToListAsync();
@@ -53,12 +55,14 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [HttpGet("{appUserId:int}")]
+        [HttpGet("user/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> GetUser(int appUserId)
         {
             return await _db.AppUsers
                 .Include(d => d.DaysOfDuty)
                 .Include(a => a.Avatar)
+                .Include(b => b.Building)
+                .Include(d => d.Department)
                 .Include(a => a.Articles)
                 .ThenInclude(atach => atach.Attachments)
                 .AsNoTracking()
@@ -81,7 +85,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [HttpPut("update/{appUserId:int}")]
+        [HttpPut("user/update/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser appUser)
         {
             if (appUserId == appUser.AppUserId)

@@ -1,12 +1,71 @@
 @page "/phonebook"
 
 @inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
 
-<h3>Адресная книга</h3>
+@inject HttpClient HttpClient
+@inject IMatToaster Toaster
+
+
+<div class="input-group mb-3 mt-3">
+    <input type="text" class="form-control" @bind-value="@SearchTerm" @bind-value:event="oninput" @onkeydown="@(e => SearchKeyDown(e))" placeholder="Введите критерии поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона" aria-label="Поиск сотрудника" aria-describedby="button-search" />
+    <div class="input-group-append" id="button-search">
+        <button class="btn btn-outline-secondary" type="button" @onclick="ClearButton">Очистить</button>
+        <button class="btn btn-outline-secondary" type="button" @onclick="SearchButton">Найти</button>
+    </div>
+</div>
+
+@if (filtredAppUsers is { })
+{
+    <div class="row mb-3">
+        <h2 class="col-12 mb-4 text-center">Результаты поиска </h2>
+        @if (filtredAppUsers.Count < 1)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">Пользователь не найден. Попробуйте другой критерий поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона  </p>
+                </div>
+            </div>
+        }
+        @if (filtredAppUsers.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr class="table-info">
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Отчество</th>
+                        <th scope="col">Должность</th>
+                        <th scope="col">Подразделение</th>
+                        <th scope="col">Корпус</th>
+                        <th scope="col">Кабинет</th>
+                        <th scope="col">Внутр.номер</th>
+                        <th scope="col">Гор.номер</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in filtredAppUsers)
+                    {
+                        <tr class="table-success">
+                            <td>@user.LastName</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.MidleName</td>
+                            <td>@user.WorkingPosition</td>
+                            <td>@user.Department.Name</td>
+                            <td>@user.Building.Name</td>
+                            <td>@user.Room</td>
+                            <td>@user.IntPhone</td>
+                            <td>@user.ExtPhone</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
 
 <div class="row">
-
-    <h2 class="text-center">Список подразделений</h2>
+    <h2 class="col-12 mb-4 text-center">Телефонный справочник</h2>
     @if (appUsersList is null)
     {
         <div class="spinner-border text-primary text-center" role="status">
@@ -23,44 +82,85 @@
     }
     else
     {
-        <table class="table">
+        <table class="table table-hover">
             <thead class="thead-dark">
                 <tr>
+                    <th scope="col">№</th>
                     <th scope="col">Фамилия</th>
                     <th scope="col">Имя</th>
                     <th scope="col">Отчество</th>
-                    <th scope="col">Подразделение</th>
                     <th scope="col">Должность</th>
+                    <th scope="col">Подразделение</th>
+                    <th scope="col">Корпус</th>
                     <th scope="col">Кабинет</th>
                     <th scope="col">Внутр.номер</th>
-                    <th scope="col">Корпус</th>
-
+                    <th scope="col">Гор.номер</th>
                 </tr>
             </thead>
-            @foreach (var user in appUsersList)
-            {
-                <tr>
-                    <td>@user.LastName</td>
-                    <td>@user.FirstName</td>
-                    <td>@user.MidleName</td>
-                    <td>@user.Department.Name</td>
-                    <td>@user.WorkingPosition</td>
-                    <td>@user.Room</td>
-                    <td>@user.IntPhone</td>
-                    <td>@user.Building.Name</td>
-                </tr>
-            }
+            <tbody>
+                @foreach (var user in appUsersList)
+                {
+                    <tr>
+                        <th scope="row">@(appUsersList.IndexOf(user) + 1)</th>
+                        <td>@user.LastName</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.MidleName</td>
+                        <td>@user.WorkingPosition</td>
+                        <td>@user.Department.Name</td>
+                        <td>@user.Building.Name</td>
+                        <td>@user.Room</td>
+                        <td>@user.IntPhone</td>
+                        <td>@user.ExtPhone</td>
+                    </tr>
+                }
+            </tbody>
         </table>
     }
 </div>
 
 @code {
 
+    string SearchTerm { get; set; } = "";
 
-    private List<AppUser> appUsersList;
+    List<AppUser> appUsersList;
+    List<AppUser> filtredAppUsers;
 
     protected async override Task OnInitializedAsync()
     {
         appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/phonebook/all");
     }
+
+    void SearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SearchCommand();
+        }
+    }
+
+    void SearchButton()
+    {
+        SearchCommand();
+    }
+
+    void ClearButton()
+    {
+        filtredAppUsers = null;
+    }
+
+    void SearchCommand()
+    {
+        if (!string.IsNullOrEmpty(SearchTerm))
+        {
+            string filter = SearchTerm.ToLower();
+            filtredAppUsers = appUsersList.Where(u => u.LastName.ToLower().Contains(filter) || u.IntPhone.ToLower().Contains(filter) || u.Department.Name.ToLower().Contains(filter)).ToList();
+            if (filtredAppUsers.Count < 1)
+                Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
+        }
+        else
+        {
+            filtredAppUsers = null;
+        }
+    }
+
 }

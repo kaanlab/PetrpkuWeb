@@ -150,25 +150,26 @@ namespace PetrpkuWeb.Server.Controllers
                     TableCell tc2 = new TableCell();
                     TableCell tc3 = new TableCell();
                     TableCell tc4 = new TableCell();
-
+                    TableCell tc5 = new TableCell();
 
                     if (listOfDuty.Find(d => d.DayOfDuty.Day == day.Day) != null)
                     {
-
                         var duty = listOfDuty.Find(d => d.DayOfDuty.Day == day.Day);
                         tc2 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.WorkingPosition))));
-                        tc3 = new TableCell(new Paragraph(new Run(new Text($"{duty.AssignedTo.LastName} {duty.AssignedTo.FirstName} {duty.AssignedTo.MidleName}"))));
-                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.MobPhone))));
+                        tc3 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.Department.Name))));
+                        tc4 = new TableCell(new Paragraph(new Run(new Text($"{duty.AssignedTo.LastName} {duty.AssignedTo.FirstName} {duty.AssignedTo.MidleName}"))));
+                        tc5 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.MobPhone))));
                     }
                     else
                     {
                         tc2 = new TableCell(new Paragraph(new Run(new Text(""))));
                         tc3 = new TableCell(new Paragraph(new Run(new Text(""))));
                         tc4 = new TableCell(new Paragraph(new Run(new Text(""))));
+                        tc5 = new TableCell(new Paragraph(new Run(new Text(""))));
                     }
 
                     // Add a cell to each column in the row.
-                    tr1.Append(tc1, tc2, tc3, tc4);
+                    tr1.Append(tc1, tc2, tc3, tc4, tc5);
 
                     // Add row to the table.
                     tbl.AppendChild(tr1);

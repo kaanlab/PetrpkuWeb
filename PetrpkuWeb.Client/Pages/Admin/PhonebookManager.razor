@@ -4,10 +4,72 @@
 @inject IMatToaster Toaster
 
 
+<div class="input-group mb-3 mt-3">
+    <input type="text" class="form-control" @bind-value="@SearchTerm" @bind-value:event="oninput" @onkeydown="@(e => SearchKeyDown(e))" placeholder="Введите критерии поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона" aria-label="Поиск сотрудника" aria-describedby="button-search" />
+    <div class="input-group-append" id="button-search">
+        <button class="btn btn-outline-secondary" type="button" @onclick="ClearButton">Очистить</button>
+        <button class="btn btn-outline-secondary" type="button" @onclick="SearchButton">Найти</button>
+    </div>
+</div>
 
+@if (filtredAppUsers is { })
+{
+    <div class="row mb-3">
+        <h2 class="col-12 mb-4 text-center">Результаты поиска </h2>
+        @if (filtredAppUsers.Count < 1)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">Пользователь не найден. Попробуйте другой критерий поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона  </p>
+                </div>
+            </div>
+
+        }
+
+        @if (filtredAppUsers.Any())
+        {
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr class="table-info">
+                        <th scope="col">№</th>
+                        <th scope="col">Ф.И.О.</th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Отчество</th>
+                        <th scope="col">Должность</th>
+                        <th scope="col">Подразделение</th>
+                        <th scope="col">Корпус</th>
+                        <th scope="col">Кабинет</th>
+                        <th scope="col">Внутр.номер</th>
+                        <th scope="col">Гор.номер</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in filtredAppUsers)
+                    {
+                        <tr class="table-success">
+                            <td>@user.DisplayName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.MidleName</td>
+                            <td>@user.WorkingPosition</td>
+                            <td>@user.Department.Name</td>
+                            <td>@user.Building.Name</td>
+                            <td>@user.Room</td>
+                            <td>@user.IntPhone</td>
+                            <td>@user.ExtPhone</td>
+                            <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
 
 <div class="row">
-    <h2 class="col-12 mb-4 text-center">Редактирование телефонного справочника</h2>
+    <h2 class="col-12 mb-4 text-center">Телефонный справочник</h2>
     @if (AppUsersList is null)
     {
         <div class="spinner-border text-primary text-center" role="status">
@@ -24,37 +86,42 @@
     }
     else
     {
-        <table class="table">
+        <table class="table table-sm table-hover">
             <thead class="thead-dark">
                 <tr>
+                    <th scope="col">№</th>
                     <th scope="col">Ф.И.О.</th>
                     <th scope="col">Фамилия</th>
                     <th scope="col">Имя</th>
                     <th scope="col">Отчество</th>
-                    <th scope="col">Подразделение</th>
                     <th scope="col">Должность</th>
+                    <th scope="col">Подразделение</th>
+                    <th scope="col">Корпус</th>
                     <th scope="col">Кабинет</th>
                     <th scope="col">Внутр.номер</th>
-                    <th scope="col">Корпус</th>
+                    <th scope="col">Гор.номер</th>
                     <th></th>
-
                 </tr>
             </thead>
-            @foreach (var user in AppUsersList)
-            {
-                <tr>
-                    <td>@user.DisplayName</td>
-                    <td>@user.LastName</td>
-                    <td>@user.FirstName</td>
-                    <td>@user.MidleName</td>
-                    <td>@user.Department.Name</td>
-                    <td>@user.WorkingPosition</td>
-                    <td>@user.Room</td>
-                    <td>@user.IntPhone</td>
-                    <td>@user.Building.Name</td>
-                    <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" Label="Удалить" /></td>
-                </tr>
-            }
+            <tbody>
+                @foreach (var user in AppUsersList)
+                {
+                    <tr>
+                        <th scope="row">@(AppUsersList.IndexOf(user) + 1)</th>
+                        <td>@user.DisplayName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.MidleName</td>
+                        <td>@user.WorkingPosition</td>
+                        <td>@user.Department.Name</td>
+                        <td>@user.Building.Name</td>
+                        <td>@user.Room</td>
+                        <td>@user.IntPhone</td>
+                        <td>@user.ExtPhone</td>
+                        <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                    </tr>
+                }
+            </tbody>
         </table>
     }
 </div>
@@ -63,18 +130,19 @@
 {
     <EditForm Model="@EditAppUser">
         <MatDialog @bind-IsOpen="@editAppUserDialogIsOpen">
-            <MatDialogTitle>Редактирование информации о пользователе @EditAppUser.DisplayName</MatDialogTitle>
+            <MatDialogTitle>Редактирование информации о @EditAppUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@EditAppUser.MidleName"></MatTextField>
+                <label>Подразделение</label>
                 <select @bind="@EditAppUser.DepartmentId">
                     @if (departments is null)
                     {
                         <option value="">(loading...)</option>
                     }
                     else
-                    {                        
+                    {
                         @foreach (var department in departments)
                         {
                             <option value="@department.DepartmentId"> @department.Name</option>
@@ -82,25 +150,27 @@
                     }
                 </select>
                 <MatTextField Label="Должность" @bind-Value="@EditAppUser.WorkingPosition"></MatTextField>
-                <MatTextField Label="Кабинет" @bind-Value="@EditAppUser.Room"></MatTextField>
-                <MatTextField Label="Внутренний телефон" @bind-Value="@EditAppUser.IntPhone"></MatTextField>
+                <label>Корпус</label>
                 <select @bind="@EditAppUser.BuildingId">
                     @if (buildings is null)
                     {
                         <option value="">(loading...)</option>
                     }
                     else
-                    {                        
+                    {
                         @foreach (var building in buildings)
                         {
                             <option value="@building.BuildingId">@building.Name</option>
                         }
                     }
                 </select>
+                <MatTextField Label="Кабинет" @bind-Value="@EditAppUser.Room"></MatTextField>
+                <MatTextField Label="Внутренний телефон" @bind-Value="@EditAppUser.IntPhone"></MatTextField>
+                <MatTextField Label="Городской телефон" @bind-Value="@EditAppUser.ExtPhone"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="check" Type="submit" OnClick="@(() => UpdateAppUser(EditAppUser.AppUserId))" Label="Добавить" />
+                <MatButton Icon="save" Type="submit" OnClick="@(() => UpdateAppUser(EditAppUser.AppUserId))" Label="Сохранить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -111,9 +181,11 @@
 
     private List<AppUser> AppUsersList { get; set; }
     private AppUser EditAppUser { get; set; }
+    string SearchTerm { get; set; } = "";
 
     List<Department> departments;
     List<Building> buildings;
+    List<AppUser> filtredAppUsers;
 
     bool editAppUserDialogIsOpen = false;
 
@@ -138,4 +210,38 @@
         AppUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
     }
+
+    void SearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SearchCommand();
+        }
+    }
+
+    void SearchButton()
+    {
+        SearchCommand();
+    }
+
+    void ClearButton()
+    {
+        filtredAppUsers = null;
+    }
+
+    void SearchCommand()
+    {
+        if (!string.IsNullOrEmpty(SearchTerm))
+        {
+            string filter = SearchTerm.ToLower();
+            filtredAppUsers = AppUsersList.Where(u => u.LastName.ToLower().Contains(filter) || u.IntPhone.ToLower().Contains(filter) || u.Department.Name.ToLower().Contains(filter)).ToList();
+            if (filtredAppUsers.Count < 1)
+                Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
+        }
+        else
+        {
+            filtredAppUsers = null;
+        }
+    }
+
 }

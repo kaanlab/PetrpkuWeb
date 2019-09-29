@@ -18,13 +18,15 @@
                         <h5 class="card-title">@user.DisplayName</h5>
                     </div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
-                        <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
-                        <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
                         <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
+                        <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
+                        <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
+                        <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
+                        <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
                     </ul>
                     <div class="card-body">
                         <span class="ml-3"><MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" /></span>
@@ -55,12 +57,10 @@
                                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
                                         </div>
                                     }
+                                
+                                    <MatButton Icon="remove_red_eye" Link="@($"/article/show/{article.ArticleId}")" />
+                                    <MatButton Icon="edit" Link="@($"/article/edit/{article.ArticleId}")" />
                                 </div>
-                                <div class="row">
-                                    <a class="btn btn-outline-primary mr-2" href="/article/show/@article.ArticleId" role="button">Просмотреть</a>
-                                    <a class="btn btn-outline-info" href="/article/edit/@article.ArticleId" role="button">Редактировать</a>
-                                </div>
-
                             </div>
                         </div>
                     }
@@ -79,8 +79,6 @@
                             </tr>
                         }
                     </table>
-
-
                 }
             </div>
         }
@@ -98,7 +96,7 @@
 {
     <EditForm Model="@user">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>@user.DisplayName</MatDialogTitle>
+            <MatDialogTitle>Редактрирование профиля @user.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <img src="@user.Avatar.Path" />
                 <div class="alert alert-danger" role="alert">
@@ -115,13 +113,11 @@
                                     <td>@fileInfo.Size</td>
                                 </tr>
                             }
-
                         </table>
                         <div class="row">
                             <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
                             <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                         </div>
-
                     }
                 </div>
                 <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
@@ -129,12 +125,8 @@
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
-                <MatTextField Label="Должность" @bind-Value="@user.WorkingPosition"></MatTextField>
-                <MatTextField Label="Внутренний телефон" @bind-Value="@user.IntPhone"></MatTextField>
                 <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
-                <MatTextField Label="Городской телефон" @bind-Value="@user.ExtPhone"></MatTextField>
-                <MatTextField Label="Кабинет" @bind-Value="@user.Room"></MatTextField>
-                <p>День рождения</p>
+                <label>День рождения</label>
                 <InputDate @bind-Value="@user.Birthday"></InputDate>
             </MatDialogContent>
             <MatDialogActions>
@@ -171,7 +163,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
+        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/user/{AppUserId}");
 
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
@@ -205,7 +197,7 @@
     async Task OkClick()
     {
         dialogIsOpen = false;
-        await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
+        await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{user.AppUserId}", user);
     }
 
     async Task UploadFiles()
