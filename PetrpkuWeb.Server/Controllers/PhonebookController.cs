@@ -22,39 +22,6 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        //[Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
-        //[HttpGet("all")]
-        //public async Task<ActionResult<List<AppUser>>> GetContacts()
-        //{
-        //    return await _db.AppUsers
-        //        .Include(a => a.Avatar)
-        //        .Include(d => d.Department)
-        //        .Include(b => b.Building)
-        //        .Where(u => u.IsActive)
-        //        .AsNoTracking()
-        //        .ToListAsync();
-        //}
-
-        //[Authorize(Roles = "admin_webportal, kadry_webportal")]
-        //[HttpPut("update/{appUserId:int}")]
-        //public async Task<IActionResult> UpdateContact(int appUserId, AppUser appUser)
-        //{
-        //    if (appUserId == appUser.AppUserId)
-        //    {
-        //        var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
-        //        var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
-
-        //        appUser.Building = building;
-        //        appUser.Department = department;
-        //        _db.Update(appUser);
-        //        await _db.SaveChangesAsync();
-
-        //        return Ok(appUser);
-        //    }
-
-        //    return BadRequest();
-        //}
-
         [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("departments/all")]
         public async Task<ActionResult<List<Department>>> GetDepartments()
