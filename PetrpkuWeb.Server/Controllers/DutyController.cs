@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
@@ -13,6 +14,7 @@ using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server.Controllers
 {
+    
     [Route("api/duty")]
     [ApiController]
     public class DutyController : ControllerBase
@@ -24,6 +26,7 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
+        [AllowAnonymous]
         [HttpGet("today")]
         public async Task<ActionResult<Duty>> GetWhoIsDutyTodayAsync()
         {
@@ -36,6 +39,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .SingleOrDefaultAsync(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear);
         }
 
+        [AllowAnonymous]
         [HttpGet("month/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult<List<Duty>>> GetDutyMonthAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
@@ -43,11 +47,14 @@ namespace PetrpkuWeb.Server.Controllers
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .Include(u => u.AssignedTo)
                     .ThenInclude(b => b.Department)
+                .Include(u => u.AssignedTo)
+                    .ThenInclude(a => a.Avatar)
                 .OrderBy(d => d.DayOfDuty)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpGet("getfile/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult> GetFileAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
@@ -68,6 +75,7 @@ namespace PetrpkuWeb.Server.Controllers
             return File(file, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"API_{DateTime.Now.ToString("dd-MM-yyyy")}.docx");
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPost("createdutylist")]
         public async Task<ActionResult> PostDutyListAsync(List<Duty> dutyList)
         {
@@ -76,6 +84,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(dutyList);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPost("create")]
         public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
         {
@@ -85,6 +94,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPut("update/{dutyId:int}")]
         public async Task<IActionResult> PutDutyAsync(int dutyId, Duty duty)
         {
@@ -99,6 +109,7 @@ namespace PetrpkuWeb.Server.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpDelete("delete/{dutyId:int}")]
         public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyId)
         {

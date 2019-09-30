@@ -1,11 +1,14 @@
 @page "/article/edit/{articleId}"
 
+@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
+
 @using Newtonsoft.Json
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject IFileReaderService fileReaderService
 @inject IMatToaster Toaster
+
 
 @if (article is { })
 {

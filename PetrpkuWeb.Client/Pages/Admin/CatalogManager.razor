@@ -1,9 +1,12 @@
 @page "/catalog"
 
+@attribute [Authorize(Roles = "admin_webportal")]
+
 @using Newtonsoft.Json
 
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
+
 
 <h3>Адресная книга</h3>
 <div class="row md-2">

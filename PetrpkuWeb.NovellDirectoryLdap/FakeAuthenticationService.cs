@@ -12,7 +12,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             {
                 DisplayName = "Иванов И.И.",
                 UserName = "fakeuser",
-                Roles = new[] { "admin" }
+                Roles = new[] { "admin_webportal" }
             };
         }
 

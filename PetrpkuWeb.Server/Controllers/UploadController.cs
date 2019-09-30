@@ -13,9 +13,11 @@ using SixLabors.ImageSharp.Processing;
 using PetrpkuWeb.Shared.ViewModels;
 using PetrpkuWeb.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PetrpkuWeb.Server.Controllers
 {
+    [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
     [Route("api/[controller]")]
     [ApiController]
     public class UploadController : ControllerBase

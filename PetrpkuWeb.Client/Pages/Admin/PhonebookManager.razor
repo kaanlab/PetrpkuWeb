@@ -1,8 +1,9 @@
 @page "/phonebookmanager"
 
+@attribute [Authorize(Roles = "admin_webportal")]
+
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
-
 
 <div class="input-group mb-3 mt-3">
     <input type="text" class="form-control" @bind-value="@SearchTerm" @bind-value:event="oninput" @onkeydown="@(e => SearchKeyDown(e))" placeholder="Введите критерии поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона" aria-label="Поиск сотрудника" aria-describedby="button-search" />
@@ -191,7 +192,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/phonebook/all");
+        AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
         departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
         buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
@@ -205,7 +206,7 @@
     async Task UpdateAppUser(int appUserId)
     {
         editAppUserDialogIsOpen = false;
-        var response = await HttpClient.PutJsonAsync<AppUser>($"api/phonebook/update/{appUserId}", EditAppUser);
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{appUserId}", EditAppUser);
         var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
         AppUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");

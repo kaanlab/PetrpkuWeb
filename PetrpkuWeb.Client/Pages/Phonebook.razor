@@ -127,7 +127,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/phonebook/all");
+        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
     }
 
     void SearchKeyDown(KeyboardEventArgs e)

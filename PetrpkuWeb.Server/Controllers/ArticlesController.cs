@@ -8,9 +8,11 @@ using PetrpkuWeb.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Shared.ViewModels;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PetrpkuWeb.Server.Controllers
 {
+    
     [Route("api/articles")]
     [ApiController]
     public class ArticlesController : ControllerBase
@@ -24,6 +26,7 @@ namespace PetrpkuWeb.Server.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet("all")]
         public async Task<ActionResult<List<Article>>> GetArticles()
         {
@@ -36,6 +39,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
         {
@@ -58,6 +62,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(article);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("show/{articleId:int}")]
         public async Task<ActionResult<Article>> GetArticle(int articleId)
         {
@@ -74,6 +79,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(article);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpPut("update/{articleId:int}")]
         public async Task<ActionResult> PutUserAsync(int articleId, Article article)
         {
@@ -88,6 +94,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpDelete("delete/{articleId:int}")]
         public async Task<IActionResult> Delete(int articleId)
         {

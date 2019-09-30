@@ -1,5 +1,6 @@
 @page "/dutymanager"
-@attribute [Authorize(Roles = "pku_admins, admin")]
+
+@attribute [Authorize(Roles = "admin_webportal, kadry_webportal")]
 
 @using PetrpkuWeb.Client.Extensions
 
@@ -40,7 +41,7 @@
                         <td>@dutyUser.AssignedTo.Department.Name</td>
                         <td>@dutyUser.AssignedTo.WorkingPosition</td>
                         <td>@dutyUser.AssignedTo.MobPhone</td>
-                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" Label="Удалить" /></td>
+                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" /></td>
                     </tr>
                     }
                 </tbody>

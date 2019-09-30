@@ -7,11 +7,13 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
@@ -44,6 +46,7 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginViewModel model)
         {
@@ -94,6 +97,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpGet("search/{ldapUserName}")]
         public ActionResult<IAuthUser> SearchUser(string ldapUserName)
         {
@@ -105,6 +109,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(ldapUser);
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpGet("ldap/all")]
         public async Task<ActionResult<List<LdapUser>>> GetAll()
         {
@@ -119,6 +124,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(new { Message = "Пользователи отсутствуют" });
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpPost("identity/add")]
         public async Task<ActionResult> AddAccount(LdapUser authUser)
         {
@@ -136,12 +142,14 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpGet("identity/all")]
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
             return await _db.Users.ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpDelete("identity/delete/{userName}")]
         public async Task<ActionResult> Delete(string userName)
         {

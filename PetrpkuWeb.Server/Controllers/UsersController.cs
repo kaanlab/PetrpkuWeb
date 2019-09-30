@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
+        [AllowAnonymous]
         [HttpGet("all/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveUsers()
         {
@@ -35,6 +37,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("duty/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
         {
@@ -47,6 +50,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal")]
         [HttpGet("all/disabled")]
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {
@@ -57,6 +61,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("user/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> GetUser(int appUserId)
         {
@@ -71,6 +76,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .SingleOrDefaultAsync(u => u.AppUserId == appUserId);
         }
 
+        [AllowAnonymous]
         [HttpGet("birthdaysweek")]
         public async Task<ActionResult<List<AppUser>>> GetUsersBirthdaysForWeek()
         {
@@ -88,14 +94,19 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpPut("user/update/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser appUser)
         {
             if (appUserId == appUser.AppUserId)
             {
-                _db.Attach(appUser).State = EntityState.Modified;
+                var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
+                var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
+
+                appUser.Building = building;
+                appUser.Department = department;
+                _db.Update(appUser);
                 await _db.SaveChangesAsync();
-                return Ok(appUser);
             }
             return BadRequest();
         }

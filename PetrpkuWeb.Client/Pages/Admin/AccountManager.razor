@@ -1,9 +1,12 @@
 @page "/accountmanager"
 
+@attribute [Authorize(Roles = "admin_webportal")]
+
 @using Newtonsoft.Json
 
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
+
 
 <h2 class="col-12 mb-4 text-center">Пользователи</h2>
 

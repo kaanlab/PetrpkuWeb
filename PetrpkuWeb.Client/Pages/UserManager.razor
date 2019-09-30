@@ -1,6 +1,7 @@
 @page "/usermanager"
 
-@attribute [Authorize(Roles = "pku_admins, admin")]
+@attribute [Authorize(Roles = "admin_webportal, kadry_webportal")]
+
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
 
@@ -74,7 +75,7 @@ else
 {
     <EditForm Model="@EditAppUser">
         <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>Редактирование информации о @EditAppUser.DisplayName</MatDialogTitle>
+            <MatDialogTitle>Редактирование пользователя @EditAppUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>

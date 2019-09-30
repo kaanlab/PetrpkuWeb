@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,37 +22,40 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [HttpGet("all")]
-        public async Task<ActionResult<List<AppUser>>> GetContacts()
-        {
-            return await _db.AppUsers
-                .Include(a => a.Avatar)
-                .Include(d => d.Department)
-                .Include(b => b.Building)
-                .Where(u => u.IsActive)
-                .AsNoTracking()
-                .ToListAsync();
-        }
+        //[Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+        //[HttpGet("all")]
+        //public async Task<ActionResult<List<AppUser>>> GetContacts()
+        //{
+        //    return await _db.AppUsers
+        //        .Include(a => a.Avatar)
+        //        .Include(d => d.Department)
+        //        .Include(b => b.Building)
+        //        .Where(u => u.IsActive)
+        //        .AsNoTracking()
+        //        .ToListAsync();
+        //}
 
-        [HttpPut("update/{appUserId:int}")]
-        public async Task<IActionResult> UpdateContact(int appUserId, AppUser appUser)
-        {
-            if (appUserId == appUser.AppUserId)
-            {
-                var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
-                var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
+        //[Authorize(Roles = "admin_webportal, kadry_webportal")]
+        //[HttpPut("update/{appUserId:int}")]
+        //public async Task<IActionResult> UpdateContact(int appUserId, AppUser appUser)
+        //{
+        //    if (appUserId == appUser.AppUserId)
+        //    {
+        //        var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
+        //        var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
 
-                appUser.Building = building;
-                appUser.Department = department;
-                _db.Update(appUser);
-                await _db.SaveChangesAsync();
+        //        appUser.Building = building;
+        //        appUser.Department = department;
+        //        _db.Update(appUser);
+        //        await _db.SaveChangesAsync();
 
-                return Ok(appUser);
-            }
+        //        return Ok(appUser);
+        //    }
 
-            return BadRequest();
-        }
+        //    return BadRequest();
+        //}
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("departments/all")]
         public async Task<ActionResult<List<Department>>> GetDepartments()
         {
@@ -60,6 +64,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPost("department/create")]
         public async Task<ActionResult<Department>> AddDepartmentAsync(Department department)
         {
@@ -72,6 +77,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(department);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPut("department/update/{departmentId:int}")]
         public async Task<ActionResult> PutDepartmentAsync(int departmentId, Department department)
         {
@@ -86,6 +92,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpDelete("department/delete/{departmentId:int}")]
         public async Task<IActionResult> DeleteDepartmentAsync(int departmentId)
         {
@@ -107,6 +114,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(ModelState);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("buildings/all")]
         public async Task<ActionResult<List<Building>>> GetBuildings()
         {
@@ -115,6 +123,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPost("building/create")]
         public async Task<ActionResult<Building>> AddBuildingAsync(Building building)
         {
@@ -127,6 +136,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(building);
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpPut("building/update/{buildingId:int}")]
         public async Task<ActionResult> PutBuildingAsync(int buildingId, Building building)
         {
@@ -141,6 +151,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
+        [Authorize(Roles = "admin_webportal, kadry_webportal")]
         [HttpDelete("building/delete/{buildingId:int}")]
         public async Task<IActionResult> DeleteBuildingAsync(int buildingId)
         {

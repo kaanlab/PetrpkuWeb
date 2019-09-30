@@ -1,5 +1,6 @@
 @page "/article/show/{articleId}"
 
+@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
 
 @inject HttpClient HttpClient
 

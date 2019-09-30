@@ -1,5 +1,7 @@
 @page "/article/create"
 
+@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
+
 @using Newtonsoft.Json
 
 @inject HttpClient HttpClient
@@ -25,7 +27,7 @@
                 <ValidationMessage For="() => NewArticle.Content" />
             </div>
             <div class="col-12 mb-2">
-                Выберете важность сообщения
+                <label>Выберете важность сообщения</label>
                 <select @bind="NewArticle.Type">
                     @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                     {
