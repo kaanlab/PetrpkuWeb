@@ -1,11 +1,26 @@
 {
   "version": "1.0",
   "defaultProvider": "cdnjs",
-  "libraries": [    
+  "libraries": [
     {
       "library": "twitter-bootstrap@4.3.1",
       "files": [ "css/bootstrap.min.css" ],
       "destination": "wwwroot/lib/bootstrap"
+    },
+    {
+      "provider": "unpkg",
+      "library": "lightgallery.js@1.1.3",
+      "files": [
+        "dist/css/lightgallery.min.css",
+        "dist/js/lightgallery.min.js"
+      ],
+      "destination": "wwwroot/lib/lightgallery"
+    },
+    {
+      "provider": "unpkg",
+      "library": "lg-thumbnail.js@1.1.0",
+      "files": [ "dist/lg-thumbnail.min.js" ],
+      "destination": "wwwroot/lib/lightgallery"
     }
   ]
 }

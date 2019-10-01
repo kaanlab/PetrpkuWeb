@@ -1,6 +1,3 @@
-@inject IJSRuntime JSRuntime
-
-
 <nav class="navbar navbar-dark navbar-expand-lg nav-bgfoto" id="sticky-nav">
     <a class="navbar-brand mr-3">
         <img src="/img/site/logo.png" width="30" height="30" alt="">
@@ -31,12 +28,6 @@
     bool collapseNavMenu = true;
 
     string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        await JSRuntime.InvokeAsync<ValueTask<object>>("stickyNav");
-
-    }
 
     void ToggleNavMenu()
     {
