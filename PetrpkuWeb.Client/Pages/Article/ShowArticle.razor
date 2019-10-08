@@ -16,20 +16,22 @@
         <ul class="list-group list-group-flush">
             @if (article.Attachments.Any())
             {
-                <li class="list-group-item">
-                    <div id="lightgallery">
-                        @foreach (var attachment in article.Attachments)
-                        {
-                            @if (attachment.Extension.ToLower().StartsWith(".jp") || attachment.Extension.ToLower().StartsWith(".pn"))
-                            {
+                var rand = new Random();
+            <li class="list-group-item img-container">
+                
+                @foreach (var attachment in article.Attachments)
+                {
 
-                                <a href="@attachment.Path">
-                                    <img class="img-thumbnail" src="@attachment.Path" />
-                                </a>
-                            }
-                        }
-                    </div>
-                </li>
+                    @if (attachment.Extension.ToLower().StartsWith(".jp") || attachment.Extension.ToLower().StartsWith(".pn"))
+                    {
+                        int index = rand.Next(imgCssClass.Length);
+                        <a class="spotlight" href="@attachment.Path">
+                            <img class=@imgCssClass[index] src="@attachment.Path" />
+                        </a>
+                    }
+                }
+
+            </li>
                 <li class="list-group-item">
                     <table class="table">
                         @foreach (var attachment in article.Attachments)
@@ -69,16 +71,9 @@
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
-
     protected override async Task OnInitializedAsync()
     {
         article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
     }
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-      
-           await JSRuntime.InvokeAsync<object>("gallery.init");
-
-    }
 }
