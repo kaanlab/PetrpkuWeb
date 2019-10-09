@@ -37,22 +37,24 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+
 #if DEBUG
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
 #else
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSqlConnection")));
-
 #endif
 
             services.AddDefaultIdentity<AppUserIdentity>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
+#if DEBUG
+            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+#else
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
-
             services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-            //services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+#endif
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -94,12 +96,7 @@ namespace PetrpkuWeb.Server
             //app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseStaticFiles();
-            //app.UseStaticFiles(new StaticFileOptions
-            //{
-            //    FileProvider = new PhysicalFileProvider(
-            //        Path.Combine(Directory.GetCurrentDirectory(), "UploadFiles")),
-            //    RequestPath = "/UploadFiles"
-            //});
+
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(

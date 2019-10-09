@@ -16,40 +16,32 @@
         <ul class="list-group list-group-flush">
             @if (article.Attachments.Any())
             {
-                var rand = new Random();
+                var rand = new Random(3);
                 <li class="list-group-item img-container">
-
-                    @foreach (var attachment in article.Attachments)
+                    @foreach (var attachment in article.Attachments.Where(a => a.IsImage == true))
                     {
-                        
-                        @if (attachment.Extension.ToLower().StartsWith(".jp") || attachment.Extension.ToLower().StartsWith(".pn"))
-                        {
-                            int index = rand.Next(imgCssClass.Length);
-                            <a class="spotlight" href="@attachment.Path">
-                                <img class=@imgCssClass[index] src="@attachment.Path" />
-                            </a>
-                        }
+                        int index = rand.Next(imgCssClass.Length);
+                        <a class="spotlight" href="@attachment.Path">
+                            <img class=@imgCssClass[index] src="@attachment.Path" />
+                        </a>
                     }
-
                 </li>
                 <li class="list-group-item">
                     <table class="table">
-                        @foreach (var attachment in article.Attachments)
+                        @foreach (var attachment in article.Attachments.Where(a => a.IsImage == false))
                         {
-                            @if (attachment.Extension.ToLower().StartsWith(".doc") || attachment.Extension.ToLower().StartsWith(".xls") || attachment.Extension.ToLower().StartsWith(".rtf") || attachment.Extension.ToLower().StartsWith(".pdf"))
-                            {
-                                <tr>
-                                    <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
-                                    <td>@attachment.Description</td>
-                                    <td>@attachment.Name</td>
-                                    <td>@attachment.Length</td>
-                                    <td>
-                                        <form method="get" action="@attachment.Path">
-                                            <MatButton Type="submit" Icon="cloud_download" />
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
+                            <tr>
+                                <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
+                                <td>@attachment.Description</td>
+                                <td>@attachment.Name</td>
+                                <td>@attachment.Length</td>
+                                <td>
+                                    <form method="get" action="@attachment.Path">
+                                        <MatButton Type="submit" Icon="cloud_download" />
+                                    </form>
+                                </td>
+                            </tr>
+
                         }
                     </table>
                 </li>

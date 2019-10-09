@@ -10,26 +10,26 @@ namespace PetrpkuWeb.Client.Extensions
     {
         public static string Text(Article article)
         {
-            switch (article.Type)
+            return article.Type switch
             {
-                case Article.Style.Warning: return "text-warning";
-                case Article.Style.Danger: return "text-danger";
-                case Article.Style.Info: return "text-info";
-            }
+                Article.Style.Warning => "text-warning",
+                Article.Style.Danger => "text-danger",
+                Article.Style.Info => "text-info",
 
-            return String.Empty;
+                _ => String.Empty,
+            };
         }
 
         public static string Border(Article article)
         {
-            switch (article.Type)
+            return article.Type switch
             {
-                case Article.Style.Warning: return "border-warning";
-                case Article.Style.Danger: return "border-danger";
-                case Article.Style.Info: return "border-info";
-            }
+                Article.Style.Warning => "border-warning",
+                Article.Style.Danger => "border-danger",
+                Article.Style.Info => "border-info",
 
-            return String.Empty;
+                _ => String.Empty,
+            };
         }
 
         public static string Img(string extension)

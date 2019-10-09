@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PetrpkuWeb.Shared.Models;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using PetrpkuWeb.Shared.ViewModels;
 using PetrpkuWeb.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using ImageMagick;
 
 namespace PetrpkuWeb.Server.Controllers
 {
@@ -35,53 +34,43 @@ namespace PetrpkuWeb.Server.Controllers
             try
             {
                 var result = new List<Attachment>();
-                var dirPath = CreateRandomNameDirectory();
+                var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
+
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath);
+                }
 
                 foreach (var file in files)
                 {
+                    var isImage = false;
                     var extension = Path.GetExtension(file.FileName);
                     var path = Path.Combine(dirPath, file.FileName);
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        dirPath = CreateRandomNameDirectory();
+                        path = Path.Combine(dirPath, file.FileName);
+                    }
 
                     await using (var stream = new FileStream(path, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
+                    }
 
-                        if (extension.StartsWith(".jp") || extension.StartsWith(".png"))
+                    if (extension.ToLower().StartsWith(".jp") || extension.ToLower().StartsWith(".png"))
+                    {
+                        isImage = true;
+                        using (MagickImage image = new MagickImage(path))
                         {
-                            stream.Position = 0;
-                            using (Image image = Image.Load(stream))
+                            if (image.Width > 1920)
                             {
-                                switch (image.Width)
-                                {
-                                    case var expression when (image.Width >= 400 && image.Width < 600):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                    case var expression when (image.Width >= 600 && image.Width < 1000):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                    case var expression when (image.Width >= 1000 && image.Width < 1400):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                    case var expression when (image.Width >= 1400 && image.Width < 3000):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                    case var expression when (image.Width >= 3000 && image.Width < 5000):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                    case var expression when (image.Width >= 5000):
-                                        image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
-                                        break;
-                                }
-
-                                if (extension.StartsWith(".jp"))
-                                {
-                                    image.SaveAsJpeg(stream);
-                                }
-                                else
-                                {
-                                    image.SaveAsPng(stream);
-                                }
+                                image.AutoOrient();
+                                image.Quality = 40;
+                                image.Resize(1920, 0);
+                                image.Write(path);
                             }
+
                         }
                     }
 
@@ -90,7 +79,8 @@ namespace PetrpkuWeb.Server.Controllers
                         Name = file.FileName,
                         Length = file.Length,
                         Path = path,
-                        Extension = extension
+                        Extension = extension,
+                        IsImage = isImage
                     };
 
                     _db.Attachments.Add(attachment);
@@ -102,7 +92,7 @@ namespace PetrpkuWeb.Server.Controllers
             }
             catch (NotSupportedException ex)
             {
-                return BadRequest(new { Message = $"Error: {ex.Message}"});
+                return BadRequest(new { Message = $"Error: {ex.Message}" });
             }
         }
 

@@ -75,12 +75,13 @@
                     }
 
                 </table>
-                <div class="row">
-                    <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                <div class="col-12">
+                    <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
                     <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                 </div>
             }
 
+            <hr>
             <input type="file" multiple @ref="inputElement" />
             <hr>
             <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
