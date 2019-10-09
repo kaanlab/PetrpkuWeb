@@ -142,7 +142,7 @@
 @code {
 
     [Parameter]
-    public string AppUserId { get; set; }
+    public int AppUserId { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }

@@ -62,7 +62,8 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(article);
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+        [AllowAnonymous]
+        //[Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("show/{articleId:int}")]
         public async Task<ActionResult<Article>> GetArticle(int articleId)
         {
