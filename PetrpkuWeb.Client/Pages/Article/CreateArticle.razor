@@ -15,15 +15,17 @@
 <div class="row">
     <div class="col-12">
         <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
-            <div class="col-12">
+            <div class="col-12 mb-2">
                 <DataAnnotationsValidator />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
             </div>
             <div class="col-12 mb-2">
-                <MatTextField Label="Заголовок" @bind-Value="@NewArticle.Title"></MatTextField>
+                <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewArticle.Title"></MatTextField>
                 <ValidationMessage For="() => NewArticle.Title" />
             </div>
             <div class="col-12 mb-2">
-                <MatTextField Label="Текст" TextArea="true" @bind-Value="@NewArticle.Content"></MatTextField>
+                <label>Текст</label>
+                <textarea class="form-control" rows="15" @bind="@NewArticle.Content"></textarea>
                 <ValidationMessage For="() => NewArticle.Content" />
             </div>
             <div class="col-12 mb-2">
@@ -38,20 +40,17 @@
             <table class="table">
                 @foreach (var attachment in listOfAttachments)
                 {
-                        var index = listOfAttachments.IndexOf(attachment);
-                        <tr>
-                            <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
-                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
-                            <td>@attachment.Description</td>
-                            <td>@attachment.Name</td>
-                            <td>@attachment.Length</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
-                        </tr>
+                    var index = listOfAttachments.IndexOf(attachment);
+                    <tr>
+                        <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
+                        <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                        <td>@attachment.Description</td>
+                        <td>@attachment.Name</td>
+                        <td>@attachment.Length</td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                    </tr>
                 }
             </table>
-            <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
-            </div>
         </EditForm>
     </div>
 
@@ -59,7 +58,9 @@
 
     <div class="col-12 mb-2">
         <div class="alert alert-danger" role="alert">
-            Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
+            <h4 class="alert-heading">Добавте файлы для загрузки</h4>
+            <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
             @if (ListFileInfoVM.Any())
             {
                 <table class="table">
@@ -78,13 +79,12 @@
                     <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
                     <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                 </div>
-
             }
+
+            <input type="file" multiple @ref="inputElement" />
+            <hr>
+            <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
         </div>
-        <input type="file" multiple @ref="inputElement" />
-
-        <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
-
     </div>
 </div>
 
@@ -174,7 +174,7 @@
     {
         NewArticle.AppUserId = identityUserId;
         NewArticle.Attachments = new List<Attachment>();
-        NewArticle.Attachments.AddRange(listOfAttachments); 
+        NewArticle.Attachments.AddRange(listOfAttachments);
         var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
         NavigationManager.NavigateTo("/");
@@ -191,7 +191,7 @@
     {
         CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
-        
+
         dialogIsOpen = false;
     }
 

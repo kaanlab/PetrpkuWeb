@@ -12,18 +12,23 @@
 
 @if (article is { })
 {
+    <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
+
     <div class="row">
         <div class="col-12">
             <EditForm Model="article" OnValidSubmit="@UpdateArticle" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
-                <div class="col-12">
+                <div class="col-12 mb-2">
                     <DataAnnotationsValidator />
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" />
+                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatTextField Label="Заголовок" @bind-Value="@article.Title"></MatTextField>
+                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
                     <ValidationMessage For="() => article.Title" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatTextField Label="Текст" TextArea="true" @bind-Value="@article.Content"></MatTextField>
+                    <label>Текст</label>
+                    <textarea class="form-control" rows="15" @bind="@article.Content"></textarea>
                     <ValidationMessage For="() => article.Content" />
                 </div>
                 <div class="col-12 mb-2">
@@ -49,16 +54,16 @@
                         </tr>
                     }
                 </table>
-                <div class="col-12 mb-2">
-                    <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
-                </div>
             </EditForm>
         </div>
+
         <br />
 
         <div class="col-12 mb-2">
             <div class="alert alert-danger" role="alert">
-                Добавте файлы для загрузки. Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.
+                <h4 class="alert-heading">Добавте файлы для загрузки</h4>
+                <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
                 @if (ListFileInfoVM.Any())
                 {
                     <table class="table">
@@ -78,14 +83,16 @@
                         <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                     </div>
                 }
+
+                <input type="file" multiple @ref="inputElement" />
+                <hr>
+
+                <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
             </div>
-            <input type="file" multiple @ref="inputElement" />
 
-            <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
-
+            
         </div>
-
-        <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
     </div>
 }
 
@@ -106,15 +113,15 @@
 @code {
 
     [Parameter]
-    public string ArticleId { get; set; }
+    public int ArticleId { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private Attachment CurrentAttachment { get; set; } = new Attachment();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
-    
-    Article article; 
+
+    Article article;
     int identityUserId;
 
     ElementReference inputElement;
