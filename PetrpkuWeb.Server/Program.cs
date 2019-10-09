@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,10 +24,9 @@ namespace PetrpkuWeb.Server
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 // Create db and add data 
-                if (db.Database.EnsureCreated())
-                {
+                db.Database.Migrate();
+                if(!db.AppUsers.Any())
                     SeedData.Initialize(db);
-                }
             }
 
             host.Run();

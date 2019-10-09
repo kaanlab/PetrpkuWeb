@@ -23,7 +23,7 @@ namespace PetrpkuWeb.Server.Data
                 Name = "пусто"
             };
 
-            var departmaent = new Department()
+            var department = new Department()
             {
                 Name = "пусто"
             };
@@ -39,7 +39,7 @@ namespace PetrpkuWeb.Server.Data
                     DisplayName = "Кантышев А.В.",
                     Avatar = avatar,
                     Building = building,
-                    Department = departmaent,
+                    Department = department,
                     IsActive = true,
                     IsDuty = false
                 }

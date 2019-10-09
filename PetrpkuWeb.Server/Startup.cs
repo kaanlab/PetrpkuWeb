@@ -37,16 +37,22 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+#if DEBUG
+            services.AddDbContext<AppDbContext>(
+                options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
+#else
+            services.AddDbContext<AppDbContext>(
+                options => options.UseSqlServer(Configuration.GetConnectionString("MsSqlConnection")));
 
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+#endif
 
             services.AddDefaultIdentity<AppUserIdentity>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
 
-            //services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
+            //services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -63,11 +69,11 @@ namespace PetrpkuWeb.Server
                     };
                 });
 
-           services.AddResponseCompression(options =>
-            {
-                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { MediaTypeNames.Application.Octet });
-            });
+            services.AddResponseCompression(options =>
+             {
+                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                     new[] { MediaTypeNames.Application.Octet });
+             });
 
             //services.AddCors();
             services.AddMemoryCache();
