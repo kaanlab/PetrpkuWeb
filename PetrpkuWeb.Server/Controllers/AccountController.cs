@@ -63,9 +63,13 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
             if (appUserIdentity is null)
             {
-                //return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
+
+#if DEBUG
                 appUserIdentity = await AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
+#else
+                return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
+#endif
             }
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);

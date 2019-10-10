@@ -18,13 +18,15 @@
             {
                 var rand = new Random(3);
                 <li class="list-group-item img-container">
+                    
                     @foreach (var attachment in article.Attachments.Where(a => a.IsImage == true))
                     {
                         int index = rand.Next(imgCssClass.Length);
-                        <a class="spotlight" href="@attachment.Path">
-                            <img class=@imgCssClass[index] src="@attachment.Path" />
+                        <a class="spotlight @imgCssClass[index]" href="@attachment.Path">
+                            <img src="@attachment.Path" />
                         </a>
                     }
+                   
                 </li>
                 <li class="list-group-item">
                     <table class="table">

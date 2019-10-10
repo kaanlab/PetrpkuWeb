@@ -26,7 +26,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     BuildingId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -39,7 +39,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     DepartmentId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -52,7 +52,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -73,7 +73,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     ArticleId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(nullable: false),
                     Content = table.Column<string>(nullable: false),
                     PublishDate = table.Column<DateTime>(nullable: false),
@@ -90,7 +90,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     AttachmentId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Length = table.Column<long>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Extension = table.Column<string>(nullable: true),
@@ -115,7 +115,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     AppUserId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DisplayName = table.Column<string>(nullable: true),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
@@ -193,7 +193,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     DutyId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DayOfDuty = table.Column<DateTime>(nullable: false),
                     AppUserId = table.Column<int>(nullable: false)
                 },
@@ -213,7 +213,7 @@ namespace PetrpkuWeb.Server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -322,7 +322,8 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true);
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -354,7 +355,8 @@ namespace PetrpkuWeb.Server.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true);
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_ArticleId",

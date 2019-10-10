@@ -28,6 +28,70 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
+        [HttpPost("avatar"), DisableRequestSizeLimit]
+        public async Task<ActionResult<List<Attachment>>> UploadAvatar(IFormFile file)
+        {
+            try
+            {
+                var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
+
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath);
+                }
+
+                var extension = Path.GetExtension(file.FileName);
+                var path = Path.Combine(dirPath, file.FileName);
+
+                if (System.IO.File.Exists(path))
+                {
+                    dirPath = CreateRandomNameDirectory();
+                    path = Path.Combine(dirPath, file.FileName);
+                }
+
+                await using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                
+                using (MagickImage image = new MagickImage(path))
+                {
+                    image.AutoOrient();
+
+                    if (image.Width > 450)
+                    {
+                        image.Resize(450,0);
+                        image.Crop(420, 420, Gravity.North);
+                        image.RePage();
+                    }
+
+                    image.Quality = 40;
+                    image.Write(path);
+                    
+                }
+
+                var length = new System.IO.FileInfo(path).Length;
+
+                var attachment = new Attachment()
+                {
+                    Name = file.FileName,
+                    Length = length,
+                    Path = path,
+                    Extension = extension,
+                    IsImage = true
+                };
+
+                _db.Attachments.Add(attachment);
+                await _db.SaveChangesAsync();
+
+                return Ok(attachment);
+            }
+            catch (NotSupportedException ex)
+            {
+                return BadRequest(new { Message = $"Error: {ex.Message}" });
+            }
+        }
+
         [HttpPost("files"), DisableRequestSizeLimit]
         public async Task<ActionResult<List<Attachment>>> UploadFiles(List<IFormFile> files)
         {
@@ -63,21 +127,22 @@ namespace PetrpkuWeb.Server.Controllers
                         isImage = true;
                         using (MagickImage image = new MagickImage(path))
                         {
-                            if (image.Width > 1920)
-                            {
-                                image.AutoOrient();
-                                image.Quality = 40;
-                                image.Resize(1920, 0);
-                                image.Write(path);
-                            }
+                            image.AutoOrient();
+                            image.Quality = 40;
 
+                            if (image.Width > 1920)
+                                image.Resize(1920, 0);
+                            
+                            image.Write(path);
                         }
                     }
+
+                    var length = new System.IO.FileInfo(path).Length;
 
                     var attachment = new Attachment()
                     {
                         Name = file.FileName,
-                        Length = file.Length,
+                        Length = length,
                         Path = path,
                         Extension = extension,
                         IsImage = isImage

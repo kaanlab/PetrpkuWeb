@@ -59,7 +59,7 @@
                                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
                                         </div>
                                     }
-                                
+
                                     <MatButton Icon="remove_red_eye" Link="@($"/article/show/{article.ArticleId}")" />
                                     <MatButton Icon="edit" Link="@($"/article/edit/{article.ArticleId}")" />
                                 </div>
@@ -100,9 +100,11 @@
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>Профиль @user.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <img src="@user.Avatar.Path" />
+                <div class="col-12 mb-2">
+                    <img class="img-thumbnail img-fluid" src="@user.Avatar.Path" />
+                </div>
                 <div class="alert alert-danger" role="alert">
-                    Для профиля желательно изображение размером 400х400px!
+                    <p>Для профиля желательно изображение размером 400х400px!</p>
                     @if (ListFileInfoVM.Any())
                     {
                         <table class="table">
@@ -116,14 +118,17 @@
                                 </tr>
                             }
                         </table>
-                        <div class="row">
-                            <button @onclick="ClearFileInfo" class="btn btn-primary">Очистить</button>
+                        <hr />
+                        <div class="col-12">
+                            <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
                             <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
                         </div>
+                        <hr />
                     }
+                    <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
+                    <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить" />
                 </div>
-                <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
-                <MatButton OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить" />
+
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
                 <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
                 <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
@@ -147,7 +152,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
+    private Attachment Avatar { get; set; } = new Attachment();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     AppUser user;
@@ -208,13 +213,13 @@
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
         {
             multipartFormDataContent.Add(
-                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+                new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
         }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
-        user.Avatar = listOfAttachments.FirstOrDefault();
+        Avatar = JsonConvert.DeserializeObject<Attachment>(content);
+        user.Avatar = Avatar;
         await ClearFileInfo();
     }
 }
