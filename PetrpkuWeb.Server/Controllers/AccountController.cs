@@ -187,6 +187,7 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
+                NormalizedUserName = authUser.UserName.ToUpperInvariant(),
                 DisplayName = authUser.DisplayName,
                 AssosiateUser = new AppUser()
                 {

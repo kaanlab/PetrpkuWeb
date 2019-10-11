@@ -33,6 +33,7 @@ namespace PetrpkuWeb.Server.Data
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = "icer",
+                NormalizedUserName = "ICER",
                 DisplayName = "Кантышев А.В.",
                 AssosiateUser = new AppUser()
                 {

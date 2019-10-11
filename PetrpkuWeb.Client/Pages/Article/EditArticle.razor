@@ -16,10 +16,10 @@
 
     <div class="row">
         <div class="col-12">
-            <EditForm Model="article" OnValidSubmit="@UpdateArticle" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+            <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12 mb-2">
                     <DataAnnotationsValidator />
-                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" />
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle"/>
                     <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
                 </div>
                 <div class="col-12 mb-2">

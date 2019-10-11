@@ -169,7 +169,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             ILdapSearchResults lsc = _connection.Search(
                 _config.SearchBase,
                 LdapConnection.ScopeSub,
-                "(&(objectClass=user)(objectClass=person)(sAMAccountName=*)(!(ou=students)))",
+                "(&(objectClass=user)(objectClass=person)(sAMAccountName=*)(!(ou=students,ou=users)))",
                 new[] {
                 DisplayNameAttribute,
                 SAMAccountNameAttribute,

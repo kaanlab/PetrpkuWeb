@@ -34,7 +34,7 @@ namespace PetrpkuWeb.Client.Extensions
 
         public static string Img(string extension)
         {
-            switch (extension)
+            switch (extension.ToLower())
             {
                 case ".doc":
                 case ".docx":
