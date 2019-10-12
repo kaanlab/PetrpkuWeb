@@ -13,10 +13,11 @@ using PetrpkuWeb.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using ImageMagick;
+using PetrpkuWeb.Shared.Extensions;
 
 namespace PetrpkuWeb.Server.Controllers
 {
-    [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+    [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
     [Route("api/[controller]")]
     [ApiController]
     public class UploadController : ControllerBase

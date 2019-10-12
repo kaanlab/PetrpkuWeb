@@ -1,6 +1,6 @@
 @page "/article/create"
 
-@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
 
 @using Newtonsoft.Json
 

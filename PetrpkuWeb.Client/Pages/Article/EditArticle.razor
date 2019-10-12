@@ -1,6 +1,6 @@
 @page "/article/edit/{ArticleId:int}"
 
-@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
 
 @using Newtonsoft.Json
 
@@ -19,7 +19,7 @@
             <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12 mb-2">
                     <DataAnnotationsValidator />
-                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle"/>
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle" />
                     <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
                 </div>
                 <div class="col-12 mb-2">
@@ -92,7 +92,7 @@
 
             </div>
 
-            
+
         </div>
     </div>
 }

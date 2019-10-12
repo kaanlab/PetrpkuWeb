@@ -10,11 +10,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server.Controllers
 {
-    
+
     [Route("api/duty")]
     [ApiController]
     public class DutyController : ControllerBase
@@ -54,7 +55,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
         [HttpGet("getfile/{selectedMonth:int}/{selectedYear:int}")]
         public async Task<ActionResult> GetFileAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
         {
@@ -75,7 +76,7 @@ namespace PetrpkuWeb.Server.Controllers
             return File(file, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"API_{DateTime.Now.ToString("dd-MM-yyyy")}.docx");
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
         [HttpPost("createdutylist")]
         public async Task<ActionResult> PostDutyListAsync(List<Duty> dutyList)
         {
@@ -84,7 +85,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(dutyList);
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
         [HttpPost("create")]
         public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
         {
@@ -94,7 +95,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
         [HttpPut("update/{dutyId:int}")]
         public async Task<IActionResult> PutDutyAsync(int dutyId, Duty duty)
         {
@@ -109,7 +110,7 @@ namespace PetrpkuWeb.Server.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
         [HttpDelete("delete/{dutyId:int}")]
         public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyId)
         {

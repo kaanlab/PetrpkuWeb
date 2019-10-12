@@ -1,6 +1,6 @@
 @page "/article/show/{ArticleId:int}"
 
-@attribute [Authorize(Roles = "admin_webportal, user_webportal, kadry_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
@@ -18,7 +18,7 @@
             {
                 var rand = new Random(3);
                 <li class="list-group-item img-container">
-                    
+
                     @foreach (var attachment in article.Attachments.Where(a => a.IsImage == true))
                     {
                         int index = rand.Next(imgCssClass.Length);
@@ -26,7 +26,7 @@
                             <img src="@attachment.Path" />
                         </a>
                     }
-                   
+
                 </li>
                 <li class="list-group-item">
                     <table class="table">

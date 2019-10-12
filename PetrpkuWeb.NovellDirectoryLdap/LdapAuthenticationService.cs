@@ -30,7 +30,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             _connection.Connect(_config.Url, LdapConnection.DefaultPort);
             _connection.Bind(_config.Username, _config.Password);
 
-            var searchFilter = String.Format(_config.SearchFilter, username);
+            var searchFilter = String.Format(_config.SearchOneFilter, username);
             var result = _connection.Search(
                 _config.SearchBase,
                 LdapConnection.ScopeSub,
@@ -47,31 +47,31 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             try
             {
                 var user = result.Next();
-                if (user != null)
+                if (user is { })
                 {
                     _connection.Bind(user.Dn, password);
                     if (_connection.Bound)
                     {
                         var accountNameAttr = user.GetAttribute(SAMAccountNameAttribute);
-                        if (accountNameAttr == null)
+                        if (accountNameAttr is null)
                         {
                             throw new Exception("Your account is missing the account name.");
                         }
 
                         var displayNameAttr = user.GetAttribute(DisplayNameAttribute);
-                        if (displayNameAttr == null)
+                        if (displayNameAttr is null)
                         {
                             throw new Exception("Your account is missing the display name.");
                         }
 
                         var emailAttr = user.GetAttribute(MailAttribute);
-                        if (emailAttr == null)
+                        if (emailAttr is null)
                         {
                             throw new Exception("Your account is missing an email.");
                         }
 
                         var memberAttr = user.GetAttribute(MemberOfAttribute);
-                        if (memberAttr == null)
+                        if (memberAttr is null)
                         {
                             throw new Exception("Your account is missing roles.");
                         }
@@ -103,7 +103,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             _connection.Connect(_config.Url, LdapConnection.DefaultPort);
             _connection.Bind(_config.Username, _config.Password);
 
-            var searchFilter = String.Format(_config.SearchFilter, username);
+            var searchFilter = String.Format(_config.SearchOneFilter, username);
             var result = _connection.Search(
                 _config.SearchBase,
                 LdapConnection.ScopeSub,
@@ -119,24 +119,24 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             try
             {
                 var user = result.Next();
-                if (user != null)
+                if (user is { })
                 {
                     if (_connection.Bound)
                     {
                         var accountNameAttr = user.GetAttribute(SAMAccountNameAttribute);
-                        if (accountNameAttr == null)
+                        if (accountNameAttr is null)
                         {
                             throw new Exception("Your account is missing the account name.");
                         }
 
                         var displayNameAttr = user.GetAttribute(DisplayNameAttribute);
-                        if (displayNameAttr == null)
+                        if (displayNameAttr is null)
                         {
                             throw new Exception("Your account is missing the display name.");
                         }
 
                         var emailAttr = user.GetAttribute(MailAttribute);
-                        if (emailAttr == null)
+                        if (emailAttr is null)
                         {
                             throw new Exception("Your account is missing an email.");
                         }
@@ -169,7 +169,7 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             ILdapSearchResults lsc = _connection.Search(
                 _config.SearchBase,
                 LdapConnection.ScopeSub,
-                "(&(objectClass=user)(objectClass=person)(sAMAccountName=*)(!(ou=students,ou=users)))",
+                _config.SearchAllFilter,
                 new[] {
                 DisplayNameAttribute,
                 SAMAccountNameAttribute,

@@ -1,6 +1,6 @@
 @page "/dutymanager"
 
-@attribute [Authorize(Roles = "admin_webportal, kadry_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
 
 @using PetrpkuWeb.Client.Extensions
 
@@ -35,14 +35,14 @@
                 <tbody>
                     @foreach (var dutyUser in ListOfDuty)
                     {
-                    <tr>
-                        <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                        <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
-                        <td>@dutyUser.AssignedTo.Department.Name</td>
-                        <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                        <td>@dutyUser.AssignedTo.MobPhone</td>
-                        <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" /></td>
-                    </tr>
+                        <tr>
+                            <th scope="row">@dutyUser.DayOfDuty.Day</th>
+                            <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
+                            <td>@dutyUser.AssignedTo.Department.Name</td>
+                            <td>@dutyUser.AssignedTo.WorkingPosition</td>
+                            <td>@dutyUser.AssignedTo.MobPhone</td>
+                            <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" /></td>
+                        </tr>
                     }
                 </tbody>
             </table>

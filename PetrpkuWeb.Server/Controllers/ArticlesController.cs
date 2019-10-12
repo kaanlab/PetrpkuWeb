@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Shared.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using PetrpkuWeb.Shared.Extensions;
 
 namespace PetrpkuWeb.Server.Controllers
 {
@@ -39,7 +40,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
         {
@@ -63,7 +64,6 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [AllowAnonymous]
-        //[Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
         [HttpGet("show/{articleId:int}")]
         public async Task<ActionResult<Article>> GetArticle(int articleId)
         {
@@ -80,7 +80,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(article);
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
         [HttpPut("update/{articleId:int}")]
         public async Task<ActionResult> PutUserAsync(int articleId, Article article)
         {
@@ -95,7 +95,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = "admin_webportal, kadry_webportal, user_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
         [HttpDelete("delete/{articleId:int}")]
         public async Task<IActionResult> Delete(int articleId)
         {

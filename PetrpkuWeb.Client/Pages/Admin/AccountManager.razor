@@ -1,6 +1,6 @@
 @page "/accountmanager"
 
-@attribute [Authorize(Roles = "admin_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN)]
 
 @using Newtonsoft.Json
 

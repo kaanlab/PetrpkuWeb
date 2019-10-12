@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
@@ -63,13 +64,20 @@ namespace PetrpkuWeb.Server.Controllers
             var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
             if (appUserIdentity is null)
             {
-
 #if DEBUG
                 appUserIdentity = await AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
 #else
                 return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
 #endif
+            }
+
+            if (appUserIdentity.Email != ldapUser.Email)
+            {
+                appUserIdentity.Email = ldapUser.Email;
+                appUserIdentity.NormalizedEmail = ldapUser.Email.ToUpperInvariant();
+
+                await _userManager.UpdateAsync(appUserIdentity);
             }
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
@@ -101,7 +109,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpGet("search/{ldapUserName}")]
         public ActionResult<IAuthUser> SearchUser(string ldapUserName)
         {
@@ -113,7 +121,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(ldapUser);
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpGet("ldap/all")]
         public async Task<ActionResult<List<LdapUser>>> GetAll()
         {
@@ -128,7 +136,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(new { Message = "Пользователи отсутствуют" });
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpPost("identity/add")]
         public async Task<ActionResult> AddAccount(LdapUser authUser)
         {
@@ -146,14 +154,14 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpGet("identity/all")]
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
             return await _db.Users.ToListAsync();
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpDelete("identity/delete/{userName}")]
         public async Task<ActionResult> Delete(string userName)
         {
@@ -188,6 +196,8 @@ namespace PetrpkuWeb.Server.Controllers
             {
                 UserName = authUser.UserName,
                 NormalizedUserName = authUser.UserName.ToUpperInvariant(),
+                Email = authUser.Email,
+                NormalizedEmail = authUser.Email.ToUpperInvariant(),
                 DisplayName = authUser.DisplayName,
                 AssosiateUser = new AppUser()
                 {

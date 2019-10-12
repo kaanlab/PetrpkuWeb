@@ -1,6 +1,6 @@
 @page "/phonebookmanager"
 
-@attribute [Authorize(Roles = "admin_webportal")]
+@attribute [Authorize(Roles = AuthRole.ADMIN)]
 
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
