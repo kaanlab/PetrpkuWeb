@@ -8,7 +8,10 @@
         <MatFAB Icon="menu" OnClick="() => ToggleSidebarMenu()" Id="toggle-sidebar-fab" Style="@SidebarCssStyle"></MatFAB>
         <!-- Sidebar -->
         <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading">@context.User.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault()</div>
+            <div class="sidebar-heading">
+                <img src="/img/site/logo.png" width="80" height="80" alt="">
+                <p>@context.User.Claims.Where(c => c.Type == ClaimTypes.WindowsAccountName).Select(c => c.Value).FirstOrDefault()</p>
+            </div>
             <div class="list-group list-group-flush">
                 <a href="/user/@context.User.Claims.Where(c => c.Type == ClaimTypes.UserData).Select(c => c.Value).FirstOrDefault()" class="list-group-item list-group-item-action bg-light">Профиль</a>
                 <a href="/article/create" class="list-group-item list-group-item-action bg-light">Новое объявление</a>
@@ -37,7 +40,7 @@
                         <p class="text-left">Лаборатория ИОТ &copy; 2019</p>
                     </div>
                     <div class="col-6">
-                        <p class="text-right">v: @AppVersionService.Version</p>
+                        <p class="text-right">v. @AppVersionService.Version</p>
                     </div>
                 </div>
             </div>
@@ -58,9 +61,9 @@
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)        
+        if (firstRender)
             await JSRuntime.InvokeVoidAsync("stickyNav");
-        
+
     }
 
     void ToggleSidebarMenu()

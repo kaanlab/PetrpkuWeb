@@ -14,11 +14,14 @@ body {
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
+    position: fixed;
+    z-index: 7;
 }
 
     #sidebar-wrapper .sidebar-heading {
-        padding: 4rem 1.25rem;
+        padding: 1.25rem;
         font-size: 1.2rem;
+        text-align:center;
     }
 
     #sidebar-wrapper .list-group {
@@ -26,7 +29,7 @@ body {
     }
 
 #page-content-wrapper {
-    min-width: 100vw;
+    min-width: 110vw;
 }
 
 #wrapper.toggled #sidebar-wrapper {

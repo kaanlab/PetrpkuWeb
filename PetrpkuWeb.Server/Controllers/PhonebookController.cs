@@ -23,7 +23,7 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpGet("departments/all")]
         public async Task<ActionResult<List<Department>>> GetDepartments()
         {
@@ -32,7 +32,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpPost("department/create")]
         public async Task<ActionResult<Department>> AddDepartmentAsync(Department department)
         {
@@ -45,7 +45,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(department);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpPut("department/update/{departmentId:int}")]
         public async Task<ActionResult> PutDepartmentAsync(int departmentId, Department department)
         {
@@ -60,7 +60,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpDelete("department/delete/{departmentId:int}")]
         public async Task<IActionResult> DeleteDepartmentAsync(int departmentId)
         {
@@ -82,7 +82,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(ModelState);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpGet("buildings/all")]
         public async Task<ActionResult<List<Building>>> GetBuildings()
         {
@@ -91,7 +91,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpPost("building/create")]
         public async Task<ActionResult<Building>> AddBuildingAsync(Building building)
         {
@@ -104,7 +104,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(building);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpPut("building/update/{buildingId:int}")]
         public async Task<ActionResult> PutBuildingAsync(int buildingId, Building building)
         {
@@ -119,7 +119,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
         [HttpDelete("building/delete/{buildingId:int}")]
         public async Task<IActionResult> DeleteBuildingAsync(int buildingId)
         {

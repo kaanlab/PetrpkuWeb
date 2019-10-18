@@ -40,7 +40,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
         {
@@ -80,7 +80,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(article);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpPut("update/{articleId:int}")]
         public async Task<ActionResult> PutUserAsync(int articleId, Article article)
         {
@@ -95,7 +95,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpDelete("delete/{articleId:int}")]
         public async Task<IActionResult> Delete(int articleId)
         {

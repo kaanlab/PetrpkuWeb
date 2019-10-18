@@ -12,7 +12,8 @@ namespace PetrpkuWeb.NovellDirectoryLdap
             {
                 DisplayName = "Иванов И.И.",
                 UserName = "fakeuser",
-                Roles = new[] { "admin_webportal" }
+                Email = "mee@mee.ru",
+                Roles = new[] { "webportal_admin" }
             };
         }
 
@@ -28,17 +29,20 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                 new FakeUser() {
                     DisplayName = "Васечкин В.В.",
                     UserName = "vasechkin",
+                    Email = "mee@mee.ru",
                     Roles = new[] { "admin" }
                 },
                 new FakeUser() {
                     DisplayName = "Петров П.П.",
                     UserName = "petrov",
+                    Email = "mee@mee.ru",
                     Roles = new[] { "admin" }
                 },
                 new FakeUser()
                 {
                     DisplayName = "Иванов И.И.",
                     UserName = "fakeuser3",
+                    Email = "mee@mee.ru",
                     Roles = new[] { "admin" }
                 }
             };

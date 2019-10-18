@@ -37,7 +37,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpGet("duty/active")]
         public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
         {
@@ -50,7 +50,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = "admin_webportal")]
+        [Authorize(Roles = AuthRole.ADMIN)]
         [HttpGet("all/disabled")]
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {
@@ -61,7 +61,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpGet("user/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> GetUser(int appUserId)
         {
@@ -94,7 +94,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+        [Authorize(Roles = AuthRole.ANY)]
         [HttpPut("user/update/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser appUser)
         {

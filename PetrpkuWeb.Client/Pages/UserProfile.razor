@@ -1,6 +1,6 @@
 @page "/user/{AppUserId:int}"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+@attribute [Authorize(Roles = AuthRole.ANY)]
 
 @using Newtonsoft.Json
 

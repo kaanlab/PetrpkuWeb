@@ -17,7 +17,7 @@ using PetrpkuWeb.Shared.Extensions;
 
 namespace PetrpkuWeb.Server.Controllers
 {
-    [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+    [Authorize(Roles = AuthRole.ANY)]
     [Route("api/[controller]")]
     [ApiController]
     public class UploadController : ControllerBase

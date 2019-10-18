@@ -1,6 +1,6 @@
 @page "/usermanager"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY)]
+@attribute [Authorize(Roles = AuthRole.ADMIN_KADRY)]
 
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
