@@ -23,11 +23,12 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        [Authorize(Roles = AuthRole.ANY)]
+        //[Authorize(Roles = AuthRole.ANY)]
         [HttpGet("departments/all")]
         public async Task<ActionResult<List<Department>>> GetDepartments()
         {
             return await _db.Departments
+                .Include(u => u.ListOfUsers)
                 .AsNoTracking()
                 .ToListAsync();
         }

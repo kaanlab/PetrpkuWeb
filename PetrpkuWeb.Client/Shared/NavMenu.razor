@@ -1,3 +1,6 @@
+@inject HttpClient HttpClient
+
+
 <nav class="navbar navbar-dark navbar-expand-lg nav-bgfoto" id="sticky-nav">
     <a class="navbar-brand mr-3">
         <img src="/img/site/logo.png" width="30" height="30" alt="">
@@ -6,7 +9,7 @@
     <button class="navbar-toggler" aria-label="Toggle navigation" @onclick="() => ToggleNavMenu()">
         <MatIcon id="toggler-button">apps</MatIcon>
     </button>
-    <div class="@NavMenuCssClass navbar-collapse">
+    <div class="@navMenuCssClass">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Главная</NavLink>
@@ -17,6 +20,25 @@
             <li class="nav-item">
                 <NavLink class="nav-link" href="phonebook" Match="NavLinkMatch.All">Справочник телефонов</NavLink>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" role="button" @onclick="() => ShowDropdownMenu()">
+                    Dropdown button
+                </a>
+                <div class="dropdown-menu @dropDownCssClass">
+                    @if (departments is null)
+                    {
+                        <a class="dropdown-item">Список пуст</a>
+                    }
+                    else
+                    {
+                        @foreach (var department in departments)
+                        {
+                            var dep = "/department/" + @department.DepartmentId;
+                            <a class="dropdown-item" href="@dep"> @department.Name</a>
+                        }
+                    }
+                </div>
+            </li>
         </ul>
         <LoginMenu />
     </div>
@@ -26,11 +48,25 @@
 @code {
 
     bool collapseNavMenu = true;
+    bool collapseDropdownMenu = true;
 
-    string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    string dropDownCssClass => collapseDropdownMenu ? null : "show";
+    string navMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : null;
+    List<Department> departments;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+    }
 
     void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    void ShowDropdownMenu()
+    {
+        collapseDropdownMenu = !collapseDropdownMenu;
     }
 }
