@@ -30,20 +30,20 @@ namespace PetrpkuWeb.NovellDirectoryLdap
                     DisplayName = "Васечкин В.В.",
                     UserName = "vasechkin",
                     Email = "mee@mee.ru",
-                    Roles = new[] { "admin" }
+                    Roles = new[] { "webportal_admin" }
                 },
                 new FakeUser() {
                     DisplayName = "Петров П.П.",
                     UserName = "petrov",
                     Email = "mee@mee.ru",
-                    Roles = new[] { "admin" }
+                    Roles = new[] { "webportal_admin" }
                 },
                 new FakeUser()
                 {
-                    DisplayName = "Иванов И.И.",
-                    UserName = "fakeuser3",
+                    DisplayName = "Смирнов С.С.",
+                    UserName = "smirnov",
                     Email = "mee@mee.ru",
-                    Roles = new[] { "admin" }
+                    Roles = new[] { "webportal_admin" }
                 }
             };
             return list;

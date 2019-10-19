@@ -140,7 +140,7 @@ else
     protected async override Task OnInitializedAsync()
     {
         AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
-        departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
         buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
 
@@ -157,5 +157,6 @@ else
         var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
         AppUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
+       
     }
 }

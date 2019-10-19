@@ -193,7 +193,7 @@
     protected async override Task OnInitializedAsync()
     {
         AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
-        departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
         buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
 

@@ -107,6 +107,7 @@ namespace PetrpkuWeb.Server.Controllers
                 appUser.Department = department;
                 _db.Update(appUser);
                 await _db.SaveChangesAsync();
+                return Ok(appUser);
             }
             return BadRequest();
         }

@@ -1,0 +1,48 @@
+@page "/department/{DepartmentId:int}"
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+@inject HttpClient HttpClient
+@inject IMatToaster Toaster
+
+
+@if (department is { })
+{
+    <h2 class="col-12 mb-4 text-center">@department.Name</h2>
+    
+    @if (department.ListOfUsers.Any())
+    {
+        <ul class="user-profiles-list-small">
+            @foreach (var user in department.ListOfUsers)
+            {
+                <li>
+                    <div class="user-avatar">
+                        <a href="#">
+                            <img src="@user.Avatar.Path" width="48" />
+                        </a>
+                    </div>
+                    <p class="user-name">
+                        <a href="">@user.DisplayName</a>
+                        <span>@user.WorkingPosition</span>
+                    </p>
+                </li>
+            }
+        </ul>
+    }
+}
+
+
+@code {
+
+    [Parameter]
+    public int DepartmentId { get; set; }
+
+    Department department;
+
+    protected async override Task OnInitializedAsync()
+    {
+        department = await HttpClient.GetJsonAsync<Department>($"api/departments/show/{DepartmentId}");
+    }
+
+}

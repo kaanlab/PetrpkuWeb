@@ -23,66 +23,6 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
-        //[Authorize(Roles = AuthRole.ANY)]
-        [HttpGet("departments/all")]
-        public async Task<ActionResult<List<Department>>> GetDepartments()
-        {
-            return await _db.Departments
-                .Include(u => u.ListOfUsers)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPost("department/create")]
-        public async Task<ActionResult<Department>> AddDepartmentAsync(Department department)
-        {
-            if (department is null)
-                return BadRequest();
-
-            _db.Departments.Add(department);
-            await _db.SaveChangesAsync();
-
-            return Ok(department);
-        }
-
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPut("department/update/{departmentId:int}")]
-        public async Task<ActionResult> PutDepartmentAsync(int departmentId, Department department)
-        {
-            if (departmentId == department.DepartmentId)
-            {
-                _db.Attach(department).State = EntityState.Modified;
-                await _db.SaveChangesAsync();
-
-                return Ok(department);
-            }
-
-            return BadRequest();
-        }
-
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpDelete("department/delete/{departmentId:int}")]
-        public async Task<IActionResult> DeleteDepartmentAsync(int departmentId)
-        {
-            if (ModelState.IsValid)
-            {
-                var department = await _db.Departments
-                    .SingleOrDefaultAsync(d => d.DepartmentId == departmentId);
-
-                if (department is null)
-                {
-                    return NotFound();
-                }
-
-                _db.Departments.Remove(department);
-                await _db.SaveChangesAsync();
-                return Ok(department);
-            }
-
-            return BadRequest(ModelState);
-        }
-
         [Authorize(Roles = AuthRole.ANY)]
         [HttpGet("buildings/all")]
         public async Task<ActionResult<List<Building>>> GetBuildings()

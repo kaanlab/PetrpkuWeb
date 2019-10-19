@@ -6,7 +6,7 @@
 @inject IJSRuntime JSRuntime
 
 
-@if (article != null)
+@if (article is { })
 {
     <div class="card @CssExtension.Border(article)">
         <div class="card-body @CssExtension.Text(article)">

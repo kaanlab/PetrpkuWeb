@@ -30,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [HttpPost("avatar"), DisableRequestSizeLimit]
-        public async Task<ActionResult<List<Attachment>>> UploadAvatar(IFormFile file)
+        public async Task<ActionResult<Attachment>> UploadAvatar(IFormFile file)
         {
             try
             {

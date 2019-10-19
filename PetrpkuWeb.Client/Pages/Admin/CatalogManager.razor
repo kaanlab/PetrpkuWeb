@@ -170,14 +170,14 @@
 
     protected async override Task OnInitializedAsync()
     {
-        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
         Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
 
     async Task AddNewDepartment()
     {
         newDepartmentDialogIsOpen = false;
-        var response = await HttpClient.PostJsonAsync<Department>("api/phonebook/department/create", NewDepartment);
+        var response = await HttpClient.PostJsonAsync<Department>("api/departments/create", NewDepartment);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         Departments.Add(response);
     }
@@ -191,14 +191,14 @@
     async Task UpdateDepartment(int departmentId)
     {
         editDepartmentDialogIsOpen = false;
-        await HttpClient.PutJsonAsync<Department>($"api/phonebook/department/update/{departmentId}", currentDepartment);
+        await HttpClient.PutJsonAsync<Department>($"api/departments/update/{departmentId}", currentDepartment);
         Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
     }
 
     async Task DeleteDepartment(int departmentId)
     {
         editDepartmentDialogIsOpen = false;
-        var response = await HttpClient.DeleteAsync($"api/phonebook/department/delete/{departmentId}");
+        var response = await HttpClient.DeleteAsync($"api/departments/delete/{departmentId}");
         var content = await response.Content.ReadAsStringAsync();
         Departments.Remove(JsonConvert.DeserializeObject<Department>(content));
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");

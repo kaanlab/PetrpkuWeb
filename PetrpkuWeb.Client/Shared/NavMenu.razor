@@ -22,7 +22,7 @@
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" role="button" @onclick="() => ShowDropdownMenu()">
-                    Dropdown button
+                    Подразделения
                 </a>
                 <div class="dropdown-menu @dropDownCssClass">
                     @if (departments is null)
@@ -57,7 +57,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        departments = await HttpClient.GetJsonAsync<List<Department>>("api/phonebook/departments/all");
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
     }
 
     void ToggleNavMenu()
