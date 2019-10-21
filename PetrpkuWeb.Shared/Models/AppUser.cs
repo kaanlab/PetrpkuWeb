@@ -6,6 +6,7 @@ namespace PetrpkuWeb.Shared.Models
     public class AppUser
     {
         public int AppUserId { get; set; }
+        public string Avatar { get; set; } = @"/img/user/default_avatar.png";
         public string DisplayName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -24,9 +25,7 @@ namespace PetrpkuWeb.Shared.Models
         public AppUserIdentity AuthIdentity { get; set; }
         public IEnumerable<Duty> DaysOfDuty { get; set; }
         public IEnumerable<Article> Articles { get; set; }
-
-        public int? AttachmentId { get; set; }
-        public Attachment Avatar { get; set; }
+        public IEnumerable<Post> Posts { get; set; }
 
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }

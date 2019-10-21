@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
@@ -29,7 +27,6 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<List<AppUser>>> GetActiveUsers()
         {
             return await _db.AppUsers
-                .Include(a => a.Avatar)
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Where(u => u.IsActive)
@@ -42,7 +39,6 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<List<AppUser>>> GetActiveDuties()
         {
             return await _db.AppUsers
-                .Include(a => a.Avatar)
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Where(u => u.IsActive && u.IsDuty)
@@ -55,7 +51,6 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
         {
             return await _db.AppUsers
-                .Include(a => a.Avatar)
                 .Where(u => u.IsActive == false)
                 .AsNoTracking()
                 .ToListAsync();
@@ -67,7 +62,6 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return await _db.AppUsers
                 .Include(d => d.DaysOfDuty)
-                .Include(a => a.Avatar)
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Include(a => a.Articles)
@@ -86,7 +80,6 @@ namespace PetrpkuWeb.Server.Controllers
             var lastDayOfWeek = DateTime.Now.LastDayOfWeek().AddDays(1);
 
             return await _db.AppUsers
-                .Include(a => a.Avatar)
                 .Include(d =>d.Department)
                 .Where(d => (d.Birthday.DayOfYear >= firstDayOfWeek.DayOfYear && d.Birthday.DayOfYear <= lastDayOfWeek.DayOfYear))
                 .OrderBy(o => o.Birthday.DayOfYear)

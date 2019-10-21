@@ -29,63 +29,101 @@ namespace PetrpkuWeb.Server.Controllers
             _db = db;
         }
 
+        [HttpPost("poster"), DisableRequestSizeLimit]
+        public async Task<ActionResult<string>> UploadPoster(IFormFile file)
+        {
+            try
+            {
+                var extension = Path.GetExtension(file.FileName);
+
+                if (extension.ToLower().StartsWith(".jp") || extension.ToLower().StartsWith(".png"))
+                {
+                    var dirPath = UploadPath();
+                    var path = Path.Combine(dirPath, file.FileName);
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        dirPath = CreateRandomNameDirectory();
+                        path = Path.Combine(dirPath, file.FileName);
+                    }
+
+                    await using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    using (MagickImage image = new MagickImage(path))
+                    {
+                        if (image.Width > 600)
+                        {
+                            MagickGeometry size = new MagickGeometry(600, 600);
+                            size.IgnoreAspectRatio = true;
+                            image.Resize(size);
+                            //image.Crop(220, 220, Gravity.Center);
+                            //image.RePage();
+                        }
+
+                        image.Quality = 40;
+                        image.Write(path);
+
+                    }
+
+                    return Ok(path);
+                }
+
+                return BadRequest();
+            }
+            catch (NotSupportedException ex)
+            {
+                return BadRequest(new { Message = $"Error: {ex.Message}" });
+            }
+        }
+
         [HttpPost("avatar"), DisableRequestSizeLimit]
         public async Task<ActionResult<Attachment>> UploadAvatar(IFormFile file)
         {
             try
             {
-                var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
-
-                if (!Directory.Exists(dirPath))
-                {
-                    Directory.CreateDirectory(dirPath);
-                }
-
                 var extension = Path.GetExtension(file.FileName);
-                var path = Path.Combine(dirPath, file.FileName);
 
-                if (System.IO.File.Exists(path))
+                if (extension.ToLower().StartsWith(".jp") || extension.ToLower().StartsWith(".png"))
                 {
-                    dirPath = CreateRandomNameDirectory();
-                    path = Path.Combine(dirPath, file.FileName);
-                }
+                    var dirPath = UploadPath();
+                    var path = Path.Combine(dirPath, file.FileName);
 
-                await using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-                
-                using (MagickImage image = new MagickImage(path))
-                {
-                    image.AutoOrient();
-
-                    if (image.Width > 450)
+                    if (System.IO.File.Exists(path))
                     {
-                        image.Resize(450,0);
-                        image.Crop(420, 420, Gravity.North);
-                        image.RePage();
+                        dirPath = CreateRandomNameDirectory();
+                        path = Path.Combine(dirPath, file.FileName);
                     }
 
-                    image.Quality = 40;
-                    image.Write(path);
-                    
+                    await using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    using (MagickImage image = new MagickImage(path))
+                    {
+                        image.AutoOrient();
+                        
+                        if (image.Width > 450)
+                        {
+                            MagickGeometry size = new MagickGeometry(450, 450);
+                            size.IgnoreAspectRatio = true;
+                            image.Resize(size);
+                            //image.Crop(420, 420, Gravity.North);
+                            //image.RePage();
+                        }
+
+                        image.Quality = 40;
+                        image.Write(path);
+
+                    }
+
+                    return Ok(path);
                 }
 
-                var length = new System.IO.FileInfo(path).Length;
-
-                var attachment = new Attachment()
-                {
-                    Name = file.FileName,
-                    Length = length,
-                    Path = path,
-                    Extension = extension,
-                    IsImage = true
-                };
-
-                _db.Attachments.Add(attachment);
-                await _db.SaveChangesAsync();
-
-                return Ok(attachment);
+                return BadRequest();
             }
             catch (NotSupportedException ex)
             {
@@ -99,12 +137,7 @@ namespace PetrpkuWeb.Server.Controllers
             try
             {
                 var result = new List<Attachment>();
-                var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
-
-                if (!Directory.Exists(dirPath))
-                {
-                    Directory.CreateDirectory(dirPath);
-                }
+                var dirPath = UploadPath();
 
                 foreach (var file in files)
                 {
@@ -133,7 +166,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                             if (image.Width > 1920)
                                 image.Resize(1920, 0);
-                            
+
                             image.Write(path);
                         }
                     }
@@ -154,6 +187,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                     result.Add(attachment);
                 }
+
                 return Ok(result);
             }
             catch (NotSupportedException ex)
@@ -196,6 +230,16 @@ namespace PetrpkuWeb.Server.Controllers
             var uniqueDir = Path.Combine("uploadfolder", Path.GetRandomFileName().Substring(0, 6));
             Directory.CreateDirectory(uniqueDir);
             return uniqueDir;
+        }
+
+        private string UploadPath()
+        {
+            var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
+
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+
+            return dirPath;
         }
     }
 }

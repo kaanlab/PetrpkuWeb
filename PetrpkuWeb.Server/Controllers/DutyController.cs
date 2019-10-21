@@ -33,8 +33,6 @@ namespace PetrpkuWeb.Server.Controllers
         {
             return await _db.Duties
                 .Include(u => u.AssignedTo)
-                    .ThenInclude(a => a.Avatar)
-                .Include(u => u.AssignedTo)
                     .ThenInclude(b => b.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear);
@@ -49,7 +47,6 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(u => u.AssignedTo)
                     .ThenInclude(b => b.Department)
                 .Include(u => u.AssignedTo)
-                    .ThenInclude(a => a.Avatar)
                 .OrderBy(d => d.DayOfDuty)
                 .AsNoTracking()
                 .ToListAsync();

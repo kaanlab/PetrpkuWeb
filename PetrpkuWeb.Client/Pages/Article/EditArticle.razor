@@ -1,6 +1,6 @@
 @page "/article/edit/{ArticleId:int}"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+@attribute [Authorize(Roles = AuthRole.ANY)]
 
 @using Newtonsoft.Json
 
@@ -12,89 +12,96 @@
 
 @if (article is { })
 {
-    <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
+    @if (identityUserId == article.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
+    {
+        <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
 
-    <div class="row">
-        <div class="col-12">
-            <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
-                <div class="col-12 mb-2">
-                    <DataAnnotationsValidator />
-                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle" />
-                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
-                </div>
-                <div class="col-12 mb-2">
-                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
-                    <ValidationMessage For="() => article.Title" />
-                </div>
-                <div class="col-12 mb-2">
-                    <label>Текст</label>
-                    <textarea class="form-control" rows="15" @bind="@article.Content"></textarea>
-                    <ValidationMessage For="() => article.Content" />
-                </div>
-                <div class="col-12 mb-2">
-                    Выберете важность сообщения
-                    <select @bind="article.Type">
-                        @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
-                        {
-                            <option value="@styleType">@styleType.DisplayName()</option>
-                        }
-                    </select>
-                </div>
-                <table class="table">
-                    @foreach (var attachment in article.Attachments)
-                    {
-                        var index = article.Attachments.IndexOf(attachment);
-                        <tr>
-                            <td>@(article.Attachments.IndexOf(attachment) + 1)</td>
-                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
-                            <td>@attachment.Description</td>
-                            <td>@attachment.Name</td>
-                            <td>@attachment.Length</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
-                        </tr>
-                    }
-                </table>
-            </EditForm>
-        </div>
-
-        <br />
-
-        <div class="col-12 mb-2">
-            <div class="alert alert-danger" role="alert">
-                <h4 class="alert-heading">Добавте файлы для загрузки</h4>
-                <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
-
-                @if (ListFileInfoVM.Any())
-                {
+        <div class="row">
+            <div class="col-12">
+                <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+                    <div class="col-12 mb-2">
+                        <DataAnnotationsValidator />
+                        <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle" />
+                        <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
+                    </div>
+                    <div class="col-12 mb-2">
+                        <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
+                        <ValidationMessage For="() => article.Title" />
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label>Текст</label>
+                        <textarea class="form-control" rows="15" @bind="@article.Content"></textarea>
+                        <ValidationMessage For="() => article.Content" />
+                    </div>
+                    <div class="col-12 mb-2">
+                        Выберете важность сообщения
+                        <select @bind="article.Type">
+                            @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
+                            {
+                                <option value="@styleType">@styleType.DisplayName()</option>
+                            }
+                        </select>
+                    </div>
                     <table class="table">
-                        @foreach (var fileInfo in ListFileInfoVM)
+                        @foreach (var attachment in article.Attachments)
                         {
+                            var index = article.Attachments.IndexOf(attachment);
                             <tr>
-                                <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
-                                <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
-                                <td>@fileInfo.Name</td>
-                                <td>@fileInfo.Size</td>
+                                <td>@(article.Attachments.IndexOf(attachment) + 1)</td>
+                                <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                                <td>@attachment.Description</td>
+                                <td>@attachment.Name</td>
+                                <td>@attachment.Length</td>
+                                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
                             </tr>
                         }
-
                     </table>
-                    <div class="col-12">
-                        <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
-                        <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
-                    </div>
-                }
-
-                <hr>
-                <input type="file" multiple @ref="inputElement" />
-                <hr>
-
-                <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
-
+                </EditForm>
             </div>
 
+            <br />
 
+            <div class="col-12 mb-2">
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Добавте файлы для загрузки</h4>
+                    <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
+                    @if (ListFileInfoVM.Any())
+                    {
+                        <table class="table">
+                            @foreach (var fileInfo in ListFileInfoVM)
+                            {
+                                <tr>
+                                    <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                    <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                    <td>@fileInfo.Name</td>
+                                    <td>@fileInfo.Size</td>
+                                </tr>
+                            }
+
+                        </table>
+                        <div class="col-12">
+                            <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                            <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                        </div>
+                    }
+
+                    <hr>
+                    <input type="file" multiple @ref="inputElement" />
+                    <hr>
+
+                    <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
+                </div>
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="row">
+            <MatButton Outlined="true" Link="/" Label="На главную" Icon="home" />
+        </div>
+    }
 }
 
 <EditForm Model="@CurrentAttachment">
@@ -123,6 +130,7 @@
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     Article article;
+    ClaimsPrincipal identityUser;
     int identityUserId;
 
     ElementReference inputElement;
@@ -134,7 +142,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var identityUser = (await authenticationStateTask).User;
+        identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
 
         article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");

@@ -10,14 +10,6 @@ namespace PetrpkuWeb.Server.Data
     {
         public static void Initialize(AppDbContext _db)
         {
-            var avatar = new Attachment()
-            {
-                Name = "default_avatar.png",
-                Extension = ".png",
-                Path = @"/img/user/default_avatar.png"
-            };
-            //_db.Attachments.Add(avatar);
-
             var building = new Building()
             {
                 Name = "пусто"
@@ -28,8 +20,6 @@ namespace PetrpkuWeb.Server.Data
                 Name = "пусто"
             };
 
-            //_db.SaveChanges();
-
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = "icer",
@@ -38,7 +28,6 @@ namespace PetrpkuWeb.Server.Data
                 AssosiateUser = new AppUser()
                 {
                     DisplayName = "Кантышев А.В.",
-                    Avatar = avatar,
                     Building = building,
                     Department = department,
                     IsActive = true,

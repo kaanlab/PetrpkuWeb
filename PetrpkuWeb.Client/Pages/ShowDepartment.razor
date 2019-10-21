@@ -1,5 +1,7 @@
 @page "/department/{DepartmentId:int}"
 
+@attribute [Authorize(Roles = AuthRole.ANY)]
+
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
@@ -10,7 +12,7 @@
 @if (department is { })
 {
     <h2 class="col-12 mb-4 text-center">@department.Name</h2>
-    
+
     @if (department.ListOfUsers.Any())
     {
         <ul class="user-profiles-list-small">
@@ -18,19 +20,77 @@
             {
                 <li>
                     <div class="user-avatar">
-                        <a href="#">
-                            <img src="@user.Avatar.Path" width="48" />
+                        <a href="/user/@user.AppUserId">
+                            <img src="@user.Avatar" width="48" />
                         </a>
                     </div>
                     <p class="user-name">
-                        <a href="">@user.DisplayName</a>
+                        <a href="/user/@user.AppUserId">@user.DisplayName</a>
                         <span>@user.WorkingPosition</span>
                     </p>
                 </li>
             }
         </ul>
     }
+
+    <div class="row">
+        @if (department.ListOfUsers.Where(u => u.AppUserId == identityUserId).Any())
+        {
+
+        }
+    </div>
 }
+
+@if (posts is null)
+{
+    <div class="spinner-border text-primary text-center" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+}
+else if (posts.Count == 0)
+{
+    <div class="card border-danger mb-3">
+        <div class="card-body">
+            <p class="card-text">новостей нет</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card-deck">
+        @foreach (var post in posts)
+        {
+            <div class="card">
+                <img class="card-img-top" src="@post.Poster">
+                <div class="card-body">
+                    <h5 class="card-title">@post.Title</h5>
+                    <p class="card-text">@post.Content</p>
+                    <p class="card-text"><small class="text-muted">@post.PublishDate</small></p>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="media col-8">
+                            <div class="media-body">
+                                <p class="mt-0">@post.Author.FirstName @post.Author.LastName</p>
+                                <p class="card-text"><small class="text-muted"> @post.PublishDate</small></p>
+                            </div>
+                        </div>
+                        @if (post.Attachments.Any())
+                        {
+                            <div class="col-4">
+                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.Attachments.Count()</span></small>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <a class="stretched-link" href="/post/show/@post.PostId"></a>
+            </div>
+        }
+    </div>
+}
+
+
+
 
 
 @code {
@@ -38,11 +98,20 @@
     [Parameter]
     public int DepartmentId { get; set; }
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    int identityUserId;
     Department department;
+    List<Post> posts;
 
     protected async override Task OnInitializedAsync()
     {
+        var identityUser = (await authenticationStateTask).User;
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+
         department = await HttpClient.GetJsonAsync<Department>($"api/departments/show/{DepartmentId}");
+        posts = await HttpClient.GetJsonAsync<List<Post>>($"api/posts/bydepartment/{DepartmentId}");
     }
 
 }

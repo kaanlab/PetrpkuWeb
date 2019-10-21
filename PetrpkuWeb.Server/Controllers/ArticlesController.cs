@@ -34,7 +34,6 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.Articles
                 .Include(a => a.Attachments)
                 .Include(a => a.Author)
-                    .ThenInclude(a => a.Avatar)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
                 .ToListAsync();
@@ -70,7 +69,6 @@ namespace PetrpkuWeb.Server.Controllers
             var article = await _db.Articles
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
-                    .ThenInclude(a => a.Avatar)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
@@ -82,13 +80,13 @@ namespace PetrpkuWeb.Server.Controllers
 
         [Authorize(Roles = AuthRole.ANY)]
         [HttpPut("update/{articleId:int}")]
-        public async Task<ActionResult> PutUserAsync(int articleId, Article article)
+        public async Task<ActionResult<Post>> PutUserAsync(int articleId, Article article)
         {
             if (articleId == article.ArticleId)
             {
-                article.PublishDate = DateTime.Now;
+                article.UpdateDate = DateTime.Now;
                 //_db.Attach(article).State = EntityState.Modified;
-                _db.Update(article);
+                _db.Articles.Update(article);
                 await _db.SaveChangesAsync();
                 return Ok(article);
             }
@@ -104,7 +102,6 @@ namespace PetrpkuWeb.Server.Controllers
                 var article = await _db.Articles
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
-                    .ThenInclude(a => a.Avatar)
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
                 if (article is null)

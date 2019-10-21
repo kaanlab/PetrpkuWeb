@@ -11,5 +11,6 @@ namespace PetrpkuWeb.Shared.Models
 
         // relationship
         public List<AppUser> ListOfUsers { get; set; }
+        public List<Post> Posts { get; set; }
     }
 }

@@ -51,7 +51,11 @@
         </ul>
         <div class="card-footer text-muted">
             <p>@article.Author.FirstName @article.Author.LastName</p>
-            <p>@article.PublishDate.ToShortDateString()</p>
+            <p>Опубликовано: @article.PublishDate.ToShortDateString()</p>
+            @if (article.UpdateDate.HasValue)
+            {
+                <p>Обновлено: @article.UpdateDate.Value.ToShortDateString()</p>
+            }
         </div>
     </div>
 }

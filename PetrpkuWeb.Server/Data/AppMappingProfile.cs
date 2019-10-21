@@ -14,6 +14,7 @@ namespace PetrpkuWeb.Server.Data
         {
             //CreateMap<List<AttachmentViewModel>, List<Attachment>>();
             CreateMap<ArticleViewModel, Article>();
+            CreateMap<PostViewModel, Post>();
             //.ForMember(dest => dest.Attachments, act => act.MapFrom(src => src.Attachments));
 
         }

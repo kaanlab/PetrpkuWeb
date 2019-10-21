@@ -11,85 +11,88 @@
 <div class="row">
     @if (user is { })
     {
-        @if (identityUserId == user.AppUserId)
-        {
-            <div class="col-4">
-                <div class="card">
-                    <img src="@user.Avatar.Path" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">@user.DisplayName</h5>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
-                        <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
-                        <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department.Name</span></li>
-                        <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
-                        <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building.Name</span></li>
-                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
-                        <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
-                        <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
-                    </ul>
+
+        <div class="col-4">
+            <div class="card">
+                <img src="@user.Avatar" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">@user.DisplayName</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
+                    <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
+                    <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department.Name</span></li>
+                    <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
+                    <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building.Name</span></li>
+                    <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
+                    <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
+                    <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
+                    <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
+                </ul>
+                @if (identityUserId == user.AppUserId)
+                {
                     <div class="card-body">
                         <span class="ml-3"><MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" /></span>
                     </div>
-                </div>
+                }
             </div>
-            <div class="col-4 border-right">
+        </div>
+        <div class="col-4 border-right">
 
-                @if (user.Articles.Any())
+            @if (user.Articles.Any())
+            {
+                <h3 class="text-center">Мои объявления</h3>
+
+                @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
                 {
-                    <h3 class="text-center">Мои объявления</h3>
-
-                    @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
-                    {
-                        <div class="card @CssExtension.Border(article) mb-2">
-                            <div class="card-body @CssExtension.Text(article)">
-                                <h5 class="card-title">@article.Title</h5>
-                                <p class="card-text">@article.Content</p>
-                            </div>
-                            <div class="card-footer">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="card-text"><small class="text-muted"> @article.PublishDate</small></p>
-                                    </div>
-                                    @if (article.Attachments.Any())
+                    <div class="card @CssExtension.Border(article) mb-2">
+                        <div class="card-body @CssExtension.Text(article)">
+                            <h5 class="card-title">@article.Title</h5>
+                            <p class="card-text">@article.Content</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="card-text"><small class="text-muted">Опубликовано: @article.PublishDate</small></p>
+                                    @if (article.UpdateDate.HasValue)
                                     {
-                                        <div class="col-4">
-                                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
-                                        </div>
+                                        <small class="text-muted">Обновлено: @article.UpdateDate.Value</small>
                                     }
-
-                                    <MatButton Icon="remove_red_eye" Link="@($"/article/show/{article.ArticleId}")" />
-                                    <MatButton Icon="edit" Link="@($"/article/edit/{article.ArticleId}")" />
                                 </div>
+                                @if (article.Attachments.Any())
+                                {
+                                    <div class="col-4">
+                                        <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
+                                    </div>
+                                }
+
+                                <MatButton Icon="remove_red_eye" Link="@($"/article/show/{article.ArticleId}")" />
+                                @if (identityUserId == user.AppUserId)
+                                {
+                                    <MatButton Icon="edit" Link="@($"/article/edit/{article.ArticleId}")" />
+                                }
                             </div>
                         </div>
-                    }
+                    </div>
                 }
-            </div>
-            <div class="col-4">
-                @if (user.DaysOfDuty.Any())
-                {
+            }
+        </div>
+        <div class="col-4">
+            @if (user.DaysOfDuty.Any())
+            {
 
-                    <h3 class="text-center">Мои дежурства</h3>
-                    <table class="table table-striped">
-                        @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
-                        {
-                            <tr>
-                                <td>@duty.DayOfDuty.ToShortDateString()</td>
-                            </tr>
-                        }
-                    </table>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="row">
-                <MatButton Outlined="true" Link="/" Label="На главную" Icon="home" />
-            </div>
-        }
+                <h3 class="text-center">Мои дежурства</h3>
+                <table class="table table-striped">
+                    @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
+                    {
+                        <tr>
+                            <td>@duty.DayOfDuty.ToShortDateString()</td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+
     }
 </div>
 <div class="row" style="height: 10px;"></div>
@@ -101,32 +104,28 @@
             <MatDialogTitle>Профиль @user.DisplayName</MatDialogTitle>
             <MatDialogContent>
                 <div class="col-12 mb-2">
-                    <img class="img-thumbnail img-fluid" src="@user.Avatar.Path" />
+                    <img class="img-thumbnail img-fluid" src="@user.Avatar" />
                 </div>
                 <div class="alert alert-danger" role="alert">
                     <p>Для профиля желательно изображение размером 400х400px!</p>
-                    @if (ListFileInfoVM.Any())
+                    @if (AvatarFileInfoVM is { })
                     {
                         <table class="table">
-                            @foreach (var fileInfo in ListFileInfoVM)
-                            {
-                                <tr>
-                                    <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
-                                    <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
-                                    <td>@fileInfo.Name</td>
-                                    <td>@fileInfo.Size</td>
-                                </tr>
-                            }
+                            <tr>
+                                <td><img src="@CssExtension.Img(AvatarFileInfoVM.Type)" /></td>
+                                <td>@AvatarFileInfoVM.Name</td>
+                                <td>@AvatarFileInfoVM.Size</td>
+                            </tr>                            
                         </table>
                         <hr />
                         <div class="col-12">
                             <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
-                            <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                            <button @onclick="UploadFile" class="btn btn-primary">Загрузить</button>
                         </div>
                         <hr />
                     }
                     <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
-                    <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить" />
+                    <MatButton Raised="true" OnClick="ShowFileInfo" Label="Добавить" />
                 </div>
 
                 <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
@@ -152,8 +151,8 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private Attachment Avatar { get; set; } = new Attachment();
-    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+    //private Attachment Avatar { get; set; } = new Attachment();
+    private FileInfoViewModel AvatarFileInfoVM { get; set; }
 
     AppUser user;
     int identityUserId;
@@ -182,17 +181,16 @@
         {
             var fileInfo = await file.ReadFileInfoAsync();
 
-            var fileData = new FileInfoViewModel();
-            fileData.Name = fileInfo.Name;
-            fileData.Size = fileInfo.Size;
-            fileData.Type = fileInfo.Type;
-            ListFileInfoVM.Add(fileData);
+            AvatarFileInfoVM = new FileInfoViewModel();
+            AvatarFileInfoVM.Name = fileInfo.Name;
+            AvatarFileInfoVM.Size = fileInfo.Size;
+            AvatarFileInfoVM.Type = fileInfo.Type;
         }
     }
 
     async Task ClearFileInfo()
     {
-        ListFileInfoVM.Clear();
+        AvatarFileInfoVM = null;
         await fileReaderReference.ClearValue();
     }
 
@@ -207,7 +205,7 @@
         await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{user.AppUserId}", user);
     }
 
-    async Task UploadFiles()
+    async Task UploadFile()
     {
         var multipartFormDataContent = new MultipartFormDataContent();
         foreach (var file in await fileReaderReference.EnumerateFilesAsync())
@@ -217,9 +215,7 @@
         }
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: multipartFormDataContent);
-        var content = await response.Content.ReadAsStringAsync();
-        Avatar = JsonConvert.DeserializeObject<Attachment>(content);
-        user.Avatar = Avatar;
+        user.Avatar = await response.Content.ReadAsStringAsync();        
         await ClearFileInfo();
     }
 }

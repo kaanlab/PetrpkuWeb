@@ -34,11 +34,10 @@ namespace PetrpkuWeb.Server.Controllers
 
         [AllowAnonymous]
         [HttpGet("show/{departmentId:int}")]
-        public async Task<ActionResult<Department>> GetDEpartment(int departmentId)
+        public async Task<ActionResult<Department>> GetDepartment(int departmentId)
         {
             var department = await _db.Departments
                  .Include(u => u.ListOfUsers)
-                    .ThenInclude(a => a.Avatar)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.DepartmentId == departmentId);
 

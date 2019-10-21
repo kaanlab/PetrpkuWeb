@@ -12,7 +12,7 @@
 else
 {
     <div class="card mb-2">
-        <img src="@duty.AssignedTo.Avatar.Path" class="card-img-top" />
+        <img src="@duty.AssignedTo.Avatar" class="card-img-top" />
         <div class="card-body">
             <h5 class="card-title">@duty.AssignedTo.DisplayName</h5>
             <p class="card-text"><small class="text-muted">@duty.AssignedTo.WorkingPosition</small></p>
@@ -28,10 +28,6 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var apiUrl = "/api/duty/today";
-        //var response = await HttpClient.GetAsync(apiUrl);
-
-        //if ((int)response.StatusCode == 200)
-            duty = await HttpClient.GetJsonAsync<Duty>(apiUrl);
+        duty = await HttpClient.GetJsonAsync<Duty>("/api/duty/today");
     }
 }

@@ -182,8 +182,7 @@ namespace PetrpkuWeb.Server.Controllers
 
 
         private async Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
-        {
-            var avatar = await _db.Attachments.SingleOrDefaultAsync(a => a.Path == @"/img/user/default_avatar.png");
+        {            
             var building = await _db.Buildings.SingleOrDefaultAsync(b => b.Name == "пусто");
             var department = await _db.Departments.SingleOrDefaultAsync(d => d.Name == "пусто");
 
@@ -196,8 +195,7 @@ namespace PetrpkuWeb.Server.Controllers
                 DisplayName = authUser.DisplayName,
                 AssosiateUser = new AppUser()
                 {
-                    DisplayName = authUser.DisplayName,
-                    Avatar = avatar,
+                    DisplayName = authUser.DisplayName,                    
                     Building = building,
                     Department = department,
                     IsActive = true,
