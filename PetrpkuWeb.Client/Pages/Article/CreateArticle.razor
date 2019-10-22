@@ -1,6 +1,6 @@
 @page "/article/create"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+@attribute [Authorize(Roles = AuthRole.ANY)]
 
 @using Newtonsoft.Json
 
@@ -30,7 +30,7 @@
             </div>
             <div class="col-12 mb-2">
                 <label>Выберете важность сообщения</label>
-                <select @bind="NewArticle.Type">
+                <select class="form-control" @bind="NewArticle.Type">
                     @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                     {
                         <option value="@styleType">@styleType.DisplayName()</option>
@@ -121,7 +121,7 @@
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
-    string[] imgCssClass = { "big", "vertical", String.Empty };
+    //string[] imgCssClass = { "big", "vertical", String.Empty };
 
 
     protected override async Task OnInitializedAsync()

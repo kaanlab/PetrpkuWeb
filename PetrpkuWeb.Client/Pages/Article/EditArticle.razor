@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-12 mb-2">
                         Выберете важность сообщения
-                        <select @bind="article.Type">
+                        <select class="form-control" @bind="article.Type">
                             @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                             {
                                 <option value="@styleType">@styleType.DisplayName()</option>

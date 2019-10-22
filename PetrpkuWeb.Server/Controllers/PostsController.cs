@@ -60,6 +60,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (postVM is null)
                 return BadRequest();
+            if(string.IsNullOrEmpty(postVM.Poster))
+                postVM.Poster = "/img/site/default_post.png";
 
             var post = _mapper.Map<Post>(postVM);
 

@@ -1,6 +1,6 @@
-@page "/post/create"
+@page "/department/{DepartmentId:int}/post/create"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN + ", " + AuthRole.KADRY + ", " + AuthRole.USER)]
+@attribute [Authorize(Roles = AuthRole.ANY)]
 
 @using Newtonsoft.Json
 
@@ -10,13 +10,25 @@
 @inject IMatToaster Toaster
 
 
+@if (department is { })
+{
+    <h2 class="col-12 mb-4 text-center">@department.Name</h2>
+}
+
 <h2 class="col-12 mb-4 text-center">Новая статья</h2>
 
 <div class="row">
     <div class="col-12">
-        <EditForm Model="NewPost" OnValidSubmit="@AddPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+        <EditForm Model="NewPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+            <div class="col-12 mb-2">
+                <DataAnnotationsValidator />
+                <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" OnClick="AddPost"/>
+            </div>
+
+            <hr>
+            <img src=@(string.IsNullOrEmpty(NewPost.Poster) ? "/img/site/default_post.png": NewPost.Poster) class="img-fluid" alt="Responsive image">
             <div class="alert alert-danger" role="alert">
-                <p>Для профиля желательно изображение размером 400х400px!</p>
+                <p>Добавте изображение для статьи</p>
                 @if (PosterFileInfoVM is { })
                 {
                     <table class="table">
@@ -34,21 +46,27 @@
                     <hr />
                 }
                 <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
-                <MatButton Raised="true" OnClick="ShowPosterFileInfo"  Label="Добавить" />
+                <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" />
             </div>
 
+            
             <div class="col-12 mb-2">
-                <DataAnnotationsValidator />
-                <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
-            </div>
-            <div class="col-12 mb-2">
-                <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewPost.Title"></MatTextField>
+                <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="NewPost.Title"></MatTextField>
                 <ValidationMessage For="() => NewPost.Title" />
             </div>
-            <div class="col-12 mb-2">
-                <label>Текст</label>
-                <textarea class="form-control" rows="15" @bind="@NewPost.Content"></textarea>
-                <ValidationMessage For="() => NewPost.Content" />
+            <div class="form-group">
+                <label>Аннотация</label>
+                <input class="form-control" type="text" placeholder=@NewPost.Content.Truncate(200) readonly>
+            </div>
+            <label>Текст</label>
+            <div class="row">
+                <div class="col-6">
+                    <textarea class="form-control" rows="15" @bind-value="NewPost.Content" @bind-value:event="oninput"></textarea>
+                    <ValidationMessage For="() => NewPost.Content" />
+                </div>
+                <div class="col-6 alert alert-info" role="alert">
+                    <MarkdownView Content="@NewPost.Content" />
+                </div>
             </div>
 
             <table class="table">
@@ -119,6 +137,9 @@
 
 @code {
 
+    [Parameter]
+    public int DepartmentId { get; set; }
+
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
@@ -131,6 +152,8 @@
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
     private FileInfoViewModel PosterFileInfoVM { get; set; }
 
+    private Department department;
+
     bool dialogIsOpen = false;
 
     ElementReference inputElement;
@@ -139,17 +162,18 @@
     ElementReference inputElements;
     IFileReaderRef filesReaderReference;
 
-    string[] imgCssClass = { "big", "vertical", String.Empty };
+    //string[] imgCssClass = { "big", "vertical", String.Empty };
 
 
     protected override async Task OnInitializedAsync()
     {
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        department = await HttpClient.GetJsonAsync<Department>($"api/departments/show/{DepartmentId}");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
-    {        
+    {
         fileReaderReference = fileReaderService.CreateReference(inputElement);
         filesReaderReference = fileReaderService.CreateReference(inputElements);
     }
@@ -171,7 +195,7 @@
     async Task ClearFileInfo()
     {
         ListFileInfoVM.Clear();
-        await fileReaderReference.ClearValue();
+        await filesReaderReference.ClearValue();
     }
 
     async Task UploadFiles()
@@ -208,7 +232,7 @@
             PosterFileInfoVM.Type = fileInfo.Type;
         }
     }
-    
+
     async Task UploadFile()
     {
         var multipartFormDataContent = new MultipartFormDataContent();
@@ -219,18 +243,19 @@
         }
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/poster", content: multipartFormDataContent);
-        NewPost.Poster = await response.Content.ReadAsStringAsync();        
+        NewPost.Poster = await response.Content.ReadAsStringAsync();
         await ClearPosterFileInfo();
     }
 
     async Task AddPost()
     {
         NewPost.AppUserId = identityUserId;
+        NewPost.DepartmentId = DepartmentId;
         NewPost.Attachments = new List<Attachment>();
         NewPost.Attachments.AddRange(listOfAttachments);
         var response = await HttpClient.PostJsonAsync<PostViewModel>("api/posts/create", NewPost);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo($"/department/{DepartmentId}");
     }
 
     void OpenDialog(int attachmentId)

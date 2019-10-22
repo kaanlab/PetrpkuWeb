@@ -33,12 +33,12 @@
         </ul>
     }
 
-    <div class="row">
-        @if (department.ListOfUsers.Where(u => u.AppUserId == identityUserId).Any())
-        {
-
-        }
-    </div>
+<div class="row">
+    @if (department.ListOfUsers.Where(u => u.AppUserId == identityUserId).Any())
+    {
+        <MatButton Icon="edit" Link="@($"/department/{DepartmentId}/post/create")" />
+    }
+</div>
 }
 
 @if (posts is null)
@@ -57,15 +57,16 @@ else if (posts.Count == 0)
 }
 else
 {
-    <div class="card-deck">
+    <div class="card-columns">
         @foreach (var post in posts)
         {
             <div class="card">
                 <img class="card-img-top" src="@post.Poster">
                 <div class="card-body">
                     <h5 class="card-title">@post.Title</h5>
-                    <p class="card-text">@post.Content</p>
-                    <p class="card-text"><small class="text-muted">@post.PublishDate</small></p>
+                    <p class="card-text">
+                        <MarkdownView Content="@post.Content" />
+                    </p>                    
                 </div>
                 <div class="card-footer">
                     <div class="row">

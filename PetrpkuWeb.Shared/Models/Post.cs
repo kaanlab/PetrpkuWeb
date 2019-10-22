@@ -9,7 +9,7 @@ namespace PetrpkuWeb.Shared.Models
     {
         public int PostId { get; set; }
 
-        public string Poster { get; set; } = "@/img/site/post.png";
+        public string Poster { get; set; }
 
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }

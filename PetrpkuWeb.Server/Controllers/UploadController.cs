@@ -54,11 +54,22 @@ namespace PetrpkuWeb.Server.Controllers
 
                     using (MagickImage image = new MagickImage(path))
                     {
-                        if (image.Width > 600)
+                        if(image.Width > image.Height)
                         {
-                            MagickGeometry size = new MagickGeometry(600, 600);
-                            size.IgnoreAspectRatio = true;
-                            image.Resize(size);
+                            image.Crop(image.Height, image.Height, Gravity.Center);
+                            image.RePage();
+                        }
+                        else 
+                        {
+                            image.Crop(image.Width, image.Width, Gravity.Center);
+                            image.RePage();
+                        }
+
+                        if (image.Width > 500)
+                        {                            
+                            //MagickGeometry size = new MagickGeometry(600, 600);
+                            //size.IgnoreAspectRatio = true;
+                            image.Resize(400, 0);
                             //image.Crop(220, 220, Gravity.Center);
                             //image.RePage();
                         }
@@ -105,12 +116,23 @@ namespace PetrpkuWeb.Server.Controllers
                     using (MagickImage image = new MagickImage(path))
                     {
                         image.AutoOrient();
-                        
-                        if (image.Width > 450)
+
+                        if (image.Width > image.Height)
                         {
-                            MagickGeometry size = new MagickGeometry(450, 450);
-                            size.IgnoreAspectRatio = true;
-                            image.Resize(size);
+                            image.Crop(image.Height, image.Height, Gravity.Center);
+                            image.RePage();
+                        }
+                        else
+                        {
+                            image.Crop(image.Width, image.Width, Gravity.Center);
+                            image.RePage();
+                        }
+
+                        if (image.Width > 400)
+                        {
+                            //MagickGeometry size = new MagickGeometry(450, 450);
+                            //size.IgnoreAspectRatio = true;
+                            image.Resize(350,350);
                             //image.Crop(420, 420, Gravity.North);
                             //image.RePage();
                         }

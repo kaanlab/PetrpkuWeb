@@ -6,6 +6,7 @@ using PetrpkuWeb.Client.Extensions;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
 using MatBlazor;
+using Ganss.XSS;
 
 namespace PetrpkuWeb.Client
 {
@@ -27,6 +28,14 @@ namespace PetrpkuWeb.Client
                 config.ShowCloseButton = true;
                 config.MaximumOpacity = 93;
                 //config.VisibleStateDuration = 7000;
+            });
+            services.AddScoped<IHtmlSanitizer, HtmlSanitizer>(x =>
+            {
+                // Configure sanitizer rules as needed here.
+                // For now, just use default rules + allow class attributes
+                var sanitizer = new Ganss.XSS.HtmlSanitizer();
+                sanitizer.AllowedAttributes.Add("class");
+                return sanitizer;
             });
         }
 
