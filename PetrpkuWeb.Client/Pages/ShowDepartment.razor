@@ -33,10 +33,10 @@
         </ul>
     }
 
-<div class="row">
+<div class="row mb-2">
     @if (department.ListOfUsers.Where(u => u.AppUserId == identityUserId).Any())
     {
-        <MatButton Icon="edit" Link="@($"/department/{DepartmentId}/post/create")" />
+        <MatButton Icon="edit" Raised="true" Label="Создать" Link="@($"/department/{DepartmentId}/post/create")" />
     }
 </div>
 }
@@ -64,9 +64,9 @@ else
                 <img class="card-img-top" src="@post.Poster">
                 <div class="card-body">
                     <h5 class="card-title">@post.Title</h5>
-                    <p class="card-text">
-                        <MarkdownView Content="@post.Content" />
-                    </p>                    
+                    <span class="card-text">
+                        <MarkdownView Content="@post.Content.Truncate(240)" />
+                    </span>                    
                 </div>
                 <div class="card-footer">
                     <div class="row">
@@ -84,7 +84,7 @@ else
                         }
                     </div>
                 </div>
-                <a class="stretched-link" href="/post/show/@post.PostId"></a>
+                <a class="stretched-link" href="/posts/show/@post.PostId"></a>
             </div>
         }
     </div>

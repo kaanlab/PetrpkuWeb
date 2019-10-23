@@ -28,11 +28,23 @@
                         <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
                         <ValidationMessage For="() => article.Title" />
                     </div>
-                    <div class="col-12 mb-2">
-                        <label>Текст</label>
-                        <textarea class="form-control" rows="15" @bind="@article.Content"></textarea>
-                        <ValidationMessage For="() => article.Content" />
+
+                    <div class="form-group">
+                        <label>Аннотация</label>
+                        <input class="form-control" type="text" placeholder=@article.Content.Truncate(200) readonly>
                     </div>
+
+                    <label>Текст</label>
+                    <div class="row">
+                        <div class="col-6">
+                            <textarea class="form-control" rows="15" @bind-value="article.Content" @bind-value:event="oninput"></textarea>
+                            <ValidationMessage For="() => article.Content" />
+                        </div>
+                        <div class="col-6 alert alert-info" role="alert">
+                            <MarkdownView Content="@article.Content" />
+                        </div>
+                    </div>
+
                     <div class="col-12 mb-2">
                         Выберете важность сообщения
                         <select class="form-control" @bind="article.Type">

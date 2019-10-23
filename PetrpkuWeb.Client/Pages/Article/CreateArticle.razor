@@ -23,11 +23,23 @@
                 <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewArticle.Title"></MatTextField>
                 <ValidationMessage For="() => NewArticle.Title" />
             </div>
-            <div class="col-12 mb-2">
-                <label>Текст</label>
-                <textarea class="form-control" rows="15" @bind="@NewArticle.Content"></textarea>
-                <ValidationMessage For="() => NewArticle.Content" />
+            
+            <div class="form-group">
+                <label>Аннотация</label>
+                <input class="form-control" type="text" placeholder=@NewArticle.Content.Truncate(200) readonly>
             </div>
+            
+            <label>Текст</label>
+            <div class="row">
+                <div class="col-6">
+                    <textarea class="form-control" rows="15" @bind-value="NewArticle.Content" @bind-value:event="oninput"></textarea>
+                    <ValidationMessage For="() => NewArticle.Content" />
+                </div>
+                <div class="col-6 alert alert-info" role="alert">
+                    <MarkdownView Content="@NewArticle.Content" />
+                </div>
+            </div>
+
             <div class="col-12 mb-2">
                 <label>Выберете важность сообщения</label>
                 <select class="form-control" @bind="NewArticle.Type">
@@ -120,8 +132,6 @@
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
-
-    //string[] imgCssClass = { "big", "vertical", String.Empty };
 
 
     protected override async Task OnInitializedAsync()

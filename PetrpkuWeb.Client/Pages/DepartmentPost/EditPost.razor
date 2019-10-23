@@ -1,0 +1,297 @@
+@page "/post/edit/{PostId:int}"
+
+@attribute [Authorize(Roles = AuthRole.ANY)]
+
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IFileReaderService fileReaderService
+@inject IMatToaster Toaster
+
+
+@if (post is { })
+{
+    @if (identityUserId == post.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
+    {
+        <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
+
+
+        <EditForm Model="post" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+            <div class="row">
+
+                <div class="col-12 mb-2">
+                    <DataAnnotationsValidator />
+                </div>
+                <div class="alert alert-danger" role="alert">
+                    <img src=@(string.IsNullOrEmpty(post.Poster) ? "/img/site/default_poster.jpg" : post.Poster) class="img-fluid img-thumbnail" alt="Responsive image">
+                    <p>Добавте изображение для статьи</p>
+                    @if (PosterFileInfoVM is { })
+                    {
+                        <table class="table">
+                            <tr>
+                                <td><img src="@CssExtension.Img(PosterFileInfoVM.Type)" /></td>
+                                <td>@PosterFileInfoVM.Name</td>
+                                <td>@PosterFileInfoVM.Size</td>
+                            </tr>
+                        </table>
+                        <hr />
+                        <div class="col-12">
+                            <button @onclick="ClearPosterFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                            <button @onclick="UploadFile" class="btn btn-primary">Загрузить</button>
+                        </div>
+                        <hr />
+                    }
+                    <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
+                    <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" Disabled=@(PosterFileInfoVM is { }) />
+                </div>
+
+                <div class="form-group col-12 mb-2">
+                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="post.Title"></MatTextField>
+                    <ValidationMessage For="() => post.Title" />
+                </div>
+
+                <div class="form-group col-12 mb-2">
+                    <label>Аннотация</label>
+                    <textarea class="form-control" rows="2" readonly>@post.Content.Truncate(240)</textarea>
+                </div>
+
+                <div class="form-group col-12 mb-2">
+                    <label>Текст</label>
+                    <div class="row">
+                        <div class="col-6">
+                            <textarea class="form-control" rows="15" @bind-value="post.Content" @bind-value:event="oninput"></textarea>
+                            <ValidationMessage For="() => post.Content" />
+                        </div>
+                        <div class="col-6 alert alert-info" role="alert">
+                            <MarkdownView Content="@post.Content" />
+                        </div>
+                    </div>
+                </div>
+                <table class="table">
+                    @foreach (var attachment in post.Attachments)
+                    {
+                        var index = post.Attachments.IndexOf(attachment);
+                        <tr>
+                            <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
+                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                        </tr>
+                    }
+                </table>
+
+                <br />
+
+                <div class="col-12 mb-2">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">Добавте файлы для загрузки</h4>
+                        <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
+                        @if (ListFileInfoVM.Any())
+                        {
+                            <table class="table">
+                                @foreach (var fileInfo in ListFileInfoVM)
+                                {
+                                    <tr>
+                                        <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                        <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                        <td>@fileInfo.Name</td>
+                                        <td>@fileInfo.Size</td>
+                                    </tr>
+                                }
+
+                            </table>
+                            <div class="col-12">
+                                <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                            </div>
+                        }
+
+                        <hr>
+                        <input type="file" multiple @ref="inputElements" />
+                        <hr>
+
+                        <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
+                    </div>
+                </div>
+                <div class="col-12 text-right mb-2">
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdatePost" />
+                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeletePost" />
+                </div>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <div class="row">
+            <MatButton Outlined="true" Link="/" Label="На главную" Icon="home" />
+        </div>
+    }
+}
+
+<EditForm Model="@CurrentAttachment">
+    <MatDialog @bind-IsOpen="@dialogIsOpen">
+        <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+            <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int PostId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private Attachment CurrentAttachment { get; set; } = new Attachment();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+    private FileInfoViewModel PosterFileInfoVM { get; set; }
+
+    Post post;
+    ClaimsPrincipal identityUser;
+    int identityUserId;
+
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
+
+    ElementReference inputElements;
+    IFileReaderRef filesReaderReference;
+
+    //string[] imgCssClass = { "big", "vertical", String.Empty };
+    bool dialogIsOpen = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        identityUser = (await authenticationStateTask).User;
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+
+        post = await HttpClient.GetJsonAsync<Post>($"api/posts/show/{PostId}");
+    }
+
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+        filesReaderReference = fileReaderService.CreateReference(inputElements);
+    }
+
+    async Task UpdatePost()
+    {
+        await HttpClient.PutJsonAsync<Article>($"api/posts/update/{post.PostId}", post);
+        Toaster.Add($"Объявление успешно обновлено", MatToastType.Success, "Успех!");
+        NavigationManager.NavigateTo("/");
+    }
+
+    async Task DeletePost()
+    {
+        await HttpClient.DeleteAsync($"api/posts/delete/{post.PostId}");
+        Toaster.Add($"Новость {post.Title} удалена", MatToastType.Warning, "Внимание!");
+        NavigationManager.NavigateTo("/");
+    }
+
+    void OpenDialog(int attachmentId)
+    {
+        CurrentAttachment = post.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+
+        dialogIsOpen = true;
+    }
+
+    async Task ShowFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
+        await fileReaderReference.ClearValue();
+    }
+
+    async Task UploadFiles()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await filesReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var content = await response.Content.ReadAsStringAsync();
+        post.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+
+        await ClearFileInfo();
+    }
+
+    async Task UpdateAttachmentInfo()
+    {
+        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+
+    async Task DeleteAttachment()
+    {
+        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        post.Attachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
+
+        dialogIsOpen = false;
+    }
+
+    async Task ClearPosterFileInfo()
+    {
+        PosterFileInfoVM = null;
+        await fileReaderReference.ClearValue();
+    }
+
+    async Task ShowPosterFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            PosterFileInfoVM = new FileInfoViewModel();
+            PosterFileInfoVM.Name = fileInfo.Name;
+            PosterFileInfoVM.Size = fileInfo.Size;
+            PosterFileInfoVM.Type = fileInfo.Type;
+        }
+    }
+
+    async Task UploadFile()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/poster", content: multipartFormDataContent);
+        post.Poster = await response.Content.ReadAsStringAsync();
+        await ClearPosterFileInfo();
+    }
+}
+

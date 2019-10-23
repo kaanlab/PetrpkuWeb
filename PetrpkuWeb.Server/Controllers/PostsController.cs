@@ -101,7 +101,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (postId == post.PostId)
             {
-                post.PublishDate = DateTime.Now;
+                post.UpdateDate = DateTime.Now;
                 //_db.Attach(article).State = EntityState.Modified;
                 _db.Posts.Update(post);
                 await _db.SaveChangesAsync();
