@@ -26,8 +26,9 @@
             </div>
 
             <hr>
-            <img src=@(string.IsNullOrEmpty(NewPost.Poster) ? "/img/site/default_post.png": NewPost.Poster) class="img-fluid" alt="Responsive image">
+            
             <div class="alert alert-danger" role="alert">
+                <img src=@(string.IsNullOrEmpty(NewPost.Poster) ? "/img/site/default_poster.jpg": NewPost.Poster) class="img-fluid" alt="Responsive image">
                 <p>Добавте изображение для статьи</p>
                 @if (PosterFileInfoVM is { })
                 {
@@ -46,7 +47,7 @@
                     <hr />
                 }
                 <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
-                <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" />
+                <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" Disabled=@(PosterFileInfoVM is { })/>
             </div>
 
             
