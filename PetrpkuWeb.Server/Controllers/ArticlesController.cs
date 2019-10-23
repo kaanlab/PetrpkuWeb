@@ -41,22 +41,19 @@ namespace PetrpkuWeb.Server.Controllers
 
         [Authorize(Roles = AuthRole.ANY)]
         [HttpPost("create")]
-        public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel newArticle)
+        public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel articleVM)
         {
-            if (newArticle is null)
+            if (articleVM is null)
                 return BadRequest();
 
-            var article = _mapper.Map<Article>(newArticle);
+            var article = _mapper.Map<Article>(articleVM);
 
             article.PublishDate = DateTime.Now;
-            article.Attachments = new List<Attachment>();
 
-            _db.Articles.Add(article);
+            _db.Attachments.UpdateRange(article.Attachments);
             _db.SaveChanges();
 
-            article.Attachments.AddRange(newArticle.Attachments);
-            _db.Articles.Update(article);
-
+            await _db.Articles.AddAsync(article);
             await _db.SaveChangesAsync();
 
             return Ok(article);

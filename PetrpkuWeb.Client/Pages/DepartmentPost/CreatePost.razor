@@ -17,7 +17,7 @@
 
 <h2 class="col-12 mb-4 text-center">Новая статья</h2>
 
-<EditForm Model="NewPost" OnValidSubmit="AddPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+<EditForm Model="NewPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
     <div class="row">
         <div class="col-12 mb-2">
             <DataAnnotationsValidator />
@@ -116,7 +116,7 @@
             </div>
         </div>
         <div class="col-12 text-right mb-2">
-            <MatButton Raised="true" Icon="done" Type="submit" Label="Сохранить" />
+            <MatButton Raised="true" Icon="done" Type="submit" Label="Сохранить" OnClick="AddPost"/>
         </div>
     </div>
 </EditForm>

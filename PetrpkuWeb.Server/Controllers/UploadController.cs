@@ -65,16 +65,16 @@ namespace PetrpkuWeb.Server.Controllers
                             image.RePage();
                         }
 
-                        if (image.Width > 500)
+                        if (image.Width > 300)
                         {                            
                             //MagickGeometry size = new MagickGeometry(600, 600);
                             //size.IgnoreAspectRatio = true;
-                            image.Resize(400, 0);
+                            image.Resize(280, 0);
                             //image.Crop(220, 220, Gravity.Center);
                             //image.RePage();
                         }
 
-                        image.Quality = 40;
+                        image.Quality = 55;
                         image.Write(path);
 
                     }
@@ -128,16 +128,16 @@ namespace PetrpkuWeb.Server.Controllers
                             image.RePage();
                         }
 
-                        if (image.Width > 400)
+                        if (image.Width > 300)
                         {
                             //MagickGeometry size = new MagickGeometry(450, 450);
                             //size.IgnoreAspectRatio = true;
-                            image.Resize(350,350);
+                            image.Resize(240,240);
                             //image.Crop(420, 420, Gravity.North);
                             //image.RePage();
                         }
 
-                        image.Quality = 40;
+                        image.Quality = 60;
                         image.Write(path);
 
                     }
@@ -184,11 +184,10 @@ namespace PetrpkuWeb.Server.Controllers
                         using (MagickImage image = new MagickImage(path))
                         {
                             image.AutoOrient();
-                            image.Quality = 40;
-
                             if (image.Width > 1920)
                                 image.Resize(1920, 0);
 
+                            image.Quality = 55;
                             image.Write(path);
                         }
                     }

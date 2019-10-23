@@ -1,7 +1,5 @@
 @page "/posts/show/{PostId:int}"
 
-@attribute [Authorize(Roles = AuthRole.ANY)]
-
 @inject HttpClient HttpClient
 
 
@@ -9,8 +7,10 @@
 {
     <div class="card">
         <div class="card-body">
+            <img src=@post.Poster class="rounded img-fluid float-left mr-4">
             <h5 class="card-title">@post.Title</h5>
             <span class="card-text">
+
                 <MarkdownView Content="@post.Content" />
             </span>
         </div>
@@ -53,14 +53,14 @@
         <div class="card-footer text-muted">
             @if (identityUserId == post.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
             {
-                <MatButton Icon="edit" Link="@($"/posts/edit/{post.PostId}")" />
+                <MatButton Icon="edit" Link="@($"/post/edit/{post.PostId}")" />
             }
             <p>@post.Author.FirstName @post.Author.LastName</p>
-            <p>Опубликовано: @post.PublishDate.ToShortDateString()</p>
             @if (post.UpdateDate.HasValue)
             {
                 <p>Обновлено: @post.UpdateDate.Value.ToShortDateString()</p>
             }
+            <p>Опубликовано: @post.PublishDate.ToShortDateString()</p>
         </div>
     </div>
 }

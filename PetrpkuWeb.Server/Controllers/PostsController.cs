@@ -60,20 +60,18 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (postVM is null)
                 return BadRequest();
+
             if(string.IsNullOrEmpty(postVM.Poster))
                 postVM.Poster = "/img/site/default_poster.jpg";
 
             var post = _mapper.Map<Post>(postVM);
 
             post.PublishDate = DateTime.Now;
-            post.Attachments = new List<Attachment>();
 
-            _db.Posts.Add(post);
+            _db.Attachments.UpdateRange(post.Attachments);
             _db.SaveChanges();
 
-            post.Attachments.AddRange(post.Attachments);
-            _db.Posts.Update(post);
-
+            await _db.Posts.AddAsync(post);
             await _db.SaveChangesAsync();
 
             return Ok(post);
