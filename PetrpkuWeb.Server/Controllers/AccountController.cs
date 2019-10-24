@@ -183,8 +183,8 @@ namespace PetrpkuWeb.Server.Controllers
 
         private async Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
         {            
-            var building = await _db.Buildings.SingleOrDefaultAsync(b => b.Name == "пусто");
-            var department = await _db.Departments.SingleOrDefaultAsync(d => d.Name == "пусто");
+            var building = await _db.Buildings.SingleOrDefaultAsync(b => b.IsHidden == true);
+            var department = await _db.Departments.SingleOrDefaultAsync(d => d.IsHidden == true);
 
             var appUserIdentity = new AppUserIdentity()
             {

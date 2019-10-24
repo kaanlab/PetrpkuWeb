@@ -44,9 +44,9 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var department in Departments.Where(d => d.ByDefault == false))
+                @foreach (var department in Departments.Where(d => d.IsHidden == false))
                 {
-                    <tr>
+                    <tr @key="department">
                         <td>@department.Name</td>
                         <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department.DepartmentId))" Label="Редактировать" /></td>
                     </tr>
@@ -79,9 +79,9 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var building in Buildings)
+                @foreach (var building in Buildings.Where(b => b.IsHidden == false))
                 {
-                    <tr>
+                    <tr @key="building">
                         <td>@building.Name</td>
                         <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building.BuildingId))" Label="Редактировать" /></td>
                     </tr>
@@ -113,9 +113,9 @@
                 <MatTextField Label="Подразделение" @bind-Value="@currentDepartment.Name"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(() => CancelUpdateDepartment(currentDepartment.DepartmentId))" Label="Отмена" />
+                <MatButton Icon="undo" OnClick="@CancelUpdateDepartment" Label="Отмена" />
                 <MatButton Icon="" Type="submit" OnClick="@(() => UpdateDepartment(currentDepartment.DepartmentId))" Label="Обновить" />
-                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteDepartment(currentDepartment.DepartmentId))" Label="Удалить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteDepartment(currentDepartment.DepartmentId))" Label="Удалить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -143,9 +143,9 @@
                 <MatTextField Label="Название" @bind-Value="@currentBuilding.Name"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(() => CancelUpdateBuilding(currentBuilding.BuildingId))" Label="Отмена" />
+                <MatButton Icon="undo" OnClick="@CancelUpdateBuilding" Label="Отмена" />
                 <MatButton Icon="" Type="submit" OnClick="@(() => UpdateBuilding(currentBuilding.BuildingId))" Label="Обновить" />
-                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteBuilding(currentBuilding.BuildingId))" Label="Удалить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteBuilding(currentBuilding.BuildingId))" Label="Удалить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -171,14 +171,13 @@
 
     protected async override Task OnInitializedAsync()
     {
-        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all/default");
-        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all/default");
+        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
+        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
     }
 
     async Task AddNewDepartment()
     {
         newDepartmentDialogIsOpen = false;
-        NewDepartment.ByDefault = false;
         var response = await HttpClient.PostJsonAsync<Department>("api/departments/create", NewDepartment);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         Departments.Add(response);
@@ -190,10 +189,12 @@
         currentDepartment = Departments.FirstOrDefault(d => d.DepartmentId == departmentId);
     }
 
-    void CancelUpdateDepartment(int departmentId)
+    void CancelUpdateDepartment()
     {
-        editBuildingDialogIsOpen = false;
-        currentDepartment.Name = Departments.SingleOrDefault(d => d.DepartmentId == departmentId).Name;
+        editDepartmentDialogIsOpen = false;
+        //currentDepartment = null;
+
+        //currentDepartment.Name = Departments.SingleOrDefault(d => d.DepartmentId == departmentId).Name;
     }
 
     async Task UpdateDepartment(int departmentId)
@@ -215,7 +216,6 @@
     async Task AddNewBuilding()
     {
         newBuildingDialogIsOpen = false;
-        NewBuilding.ByDefault = false;
         var response = await HttpClient.PostJsonAsync<Building>("api/phonebook/building/create", NewBuilding);
         Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         Buildings.Add(response);
@@ -227,10 +227,10 @@
         currentBuilding = Buildings.FirstOrDefault(d => d.BuildingId == buildingId);
     }
 
-    void CancelUpdateBuilding(int buildingId)
+    void CancelUpdateBuilding()
     {
         editBuildingDialogIsOpen = false;
-        currentBuilding.Name = Buildings.SingleOrDefault(b => b.BuildingId == buildingId).Name;
+        //currentBuilding.Name = Buildings.SingleOrDefault(b => b.BuildingId == buildingId).Name;
     }
 
     async Task UpdateBuilding(int buildingId)

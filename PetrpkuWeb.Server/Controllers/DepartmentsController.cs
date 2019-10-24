@@ -54,6 +54,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (department is null)
                 return BadRequest();
 
+            department.IsHidden = false;
             _db.Departments.Add(department);
             await _db.SaveChangesAsync();
 

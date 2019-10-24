@@ -39,6 +39,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (building is null)
                 return BadRequest();
 
+            building.IsHidden = false;
             _db.Buildings.Add(building);
             await _db.SaveChangesAsync();
 
