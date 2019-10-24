@@ -12,12 +12,14 @@ namespace PetrpkuWeb.Server.Data
         {
             var building = new Building()
             {
-                Name = "пусто"
+                Name = "пусто",
+                ByDefault = true
             };
 
             var department = new Department()
             {
-                Name = "пусто"
+                Name = "пусто",
+                ByDefault = true
             };
 
             var appUserIdentity = new AppUserIdentity()

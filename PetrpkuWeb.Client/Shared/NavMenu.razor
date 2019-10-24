@@ -31,7 +31,7 @@
                     }
                     else
                     {
-                        @foreach (var department in departments)
+                        @foreach (var department in departments.Where(d => d.ByDefault == false))
                         {
                             <a class="dropdown-item" href="/department/@department.DepartmentId" @onclick="() => ToggleDropdownMenu()"> @department.Name</a>
                         }

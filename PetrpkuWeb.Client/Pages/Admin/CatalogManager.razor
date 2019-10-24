@@ -44,7 +44,7 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var department in Departments)
+                @foreach (var department in Departments.Where(d => d.ByDefault == false))
                 {
                     <tr>
                         <td>@department.Name</td>
@@ -113,7 +113,7 @@
                 <MatTextField Label="Подразделение" @bind-Value="@currentDepartment.Name"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(e => { editDepartmentDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="undo" OnClick="@(() => CancelUpdateDepartment(currentDepartment.DepartmentId))" Label="Отмена" />
                 <MatButton Icon="" Type="submit" OnClick="@(() => UpdateDepartment(currentDepartment.DepartmentId))" Label="Обновить" />
                 <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteDepartment(currentDepartment.DepartmentId))" Label="Удалить" />
             </MatDialogActions>
@@ -143,7 +143,7 @@
                 <MatTextField Label="Название" @bind-Value="@currentBuilding.Name"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(e => { editBuildingDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="undo" OnClick="@(() => CancelUpdateBuilding(currentBuilding.BuildingId))" Label="Отмена" />
                 <MatButton Icon="" Type="submit" OnClick="@(() => UpdateBuilding(currentBuilding.BuildingId))" Label="Обновить" />
                 <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => DeleteBuilding(currentBuilding.BuildingId))" Label="Удалить" />
             </MatDialogActions>
@@ -171,13 +171,14 @@
 
     protected async override Task OnInitializedAsync()
     {
-        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
+        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all/default");
+        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all/default");
     }
 
     async Task AddNewDepartment()
     {
         newDepartmentDialogIsOpen = false;
+        NewDepartment.ByDefault = false;
         var response = await HttpClient.PostJsonAsync<Department>("api/departments/create", NewDepartment);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         Departments.Add(response);
@@ -187,6 +188,12 @@
     {
         editDepartmentDialogIsOpen = true;
         currentDepartment = Departments.FirstOrDefault(d => d.DepartmentId == departmentId);
+    }
+
+    void CancelUpdateDepartment(int departmentId)
+    {
+        editBuildingDialogIsOpen = false;
+        currentDepartment.Name = Departments.SingleOrDefault(d => d.DepartmentId == departmentId).Name;
     }
 
     async Task UpdateDepartment(int departmentId)
@@ -208,6 +215,7 @@
     async Task AddNewBuilding()
     {
         newBuildingDialogIsOpen = false;
+        NewBuilding.ByDefault = false;
         var response = await HttpClient.PostJsonAsync<Building>("api/phonebook/building/create", NewBuilding);
         Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         Buildings.Add(response);
@@ -217,6 +225,12 @@
     {
         editBuildingDialogIsOpen = true;
         currentBuilding = Buildings.FirstOrDefault(d => d.BuildingId == buildingId);
+    }
+
+    void CancelUpdateBuilding(int buildingId)
+    {
+        editBuildingDialogIsOpen = false;
+        currentBuilding.Name = Buildings.SingleOrDefault(b => b.BuildingId == buildingId).Name;
     }
 
     async Task UpdateBuilding(int buildingId)

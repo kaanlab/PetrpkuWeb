@@ -48,7 +48,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(a => a.Attachments)
                 .Include(a => a.Author)
                 .Include(d => d.Department)                
-                .Where(d => d.Department.DepartmentId == departmentId)
+                    .Where(d => d.Department.DepartmentId == departmentId)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
                 .ToListAsync();
