@@ -103,10 +103,8 @@
         <MatDialog @bind-IsOpen="@dialogIsOpen">
             <MatDialogTitle>Профиль @user.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <div class="col-12 mb-2">
+                <div class="alert alert-danger mb-2" role="alert">
                     <img class="img-thumbnail img-fluid" src="@user.Avatar" />
-                </div>
-                <div class="alert alert-danger" role="alert">
                     <p>Для профиля желательно изображение размером 400х400px!</p>
                     @if (AvatarFileInfoVM is { })
                     {
@@ -115,7 +113,7 @@
                                 <td><img src="@CssExtension.Img(AvatarFileInfoVM.Type)" /></td>
                                 <td>@AvatarFileInfoVM.Name</td>
                                 <td>@AvatarFileInfoVM.Size</td>
-                            </tr>                            
+                            </tr>
                         </table>
                         <hr />
                         <div class="col-12">
@@ -215,7 +213,7 @@
         }
 
         var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: multipartFormDataContent);
-        user.Avatar = await response.Content.ReadAsStringAsync();        
+        user.Avatar = await response.Content.ReadAsStringAsync();
         await ClearFileInfo();
     }
 }

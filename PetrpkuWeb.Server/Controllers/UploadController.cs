@@ -56,6 +56,7 @@ namespace PetrpkuWeb.Server.Controllers
                     {
                         if(image.Width > image.Height)
                         {
+                            
                             image.Crop(image.Height, image.Height, Gravity.Center);
                             image.RePage();
                         }
@@ -66,17 +67,12 @@ namespace PetrpkuWeb.Server.Controllers
                         }
 
                         if (image.Width > 300)
-                        {                            
-                            //MagickGeometry size = new MagickGeometry(600, 600);
-                            //size.IgnoreAspectRatio = true;
+                        { 
                             image.Resize(280, 0);
-                            //image.Crop(220, 220, Gravity.Center);
-                            //image.RePage();
                         }
 
                         image.Quality = 55;
                         image.Write(path);
-
                     }
 
                     return Ok(path);
@@ -124,17 +120,14 @@ namespace PetrpkuWeb.Server.Controllers
                         }
                         else
                         {
-                            image.Crop(image.Width, image.Width, Gravity.Center);
+                            var n = new MagickGeometry(0, -image.Height / 10, image.Width, image.Width);
+                            image.Crop(n,Gravity.Center);
                             image.RePage();
                         }
 
                         if (image.Width > 300)
                         {
-                            //MagickGeometry size = new MagickGeometry(450, 450);
-                            //size.IgnoreAspectRatio = true;
-                            image.Resize(240,240);
-                            //image.Crop(420, 420, Gravity.North);
-                            //image.RePage();
+                            image.Resize(240,0);
                         }
 
                         image.Quality = 60;
