@@ -34,7 +34,7 @@
     }
 
 <div class="row mb-2">
-    @if (department.ListOfUsers.Where(u => u.AppUserId == identityUserId).Any())
+    @if (department.ListOfUsers.SingleOrDefault(u => u.AppUserId == identityUserId) is { })
     {
         <MatButton Icon="edit" Raised="true" Label="Создать" Link="@($"/department/{DepartmentId}/post/create")" />
     }
@@ -91,9 +91,6 @@ else
 }
 
 
-
-
-
 @code {
 
     [Parameter]
@@ -110,7 +107,10 @@ else
     {
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+    }
 
+    protected override async Task OnParametersSetAsync()
+    {
         department = await HttpClient.GetJsonAsync<Department>($"api/departments/show/{DepartmentId}");
         posts = await HttpClient.GetJsonAsync<List<Post>>($"api/posts/bydepartment/{DepartmentId}");
     }

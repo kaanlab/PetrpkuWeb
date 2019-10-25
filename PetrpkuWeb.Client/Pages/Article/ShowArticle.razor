@@ -71,7 +71,7 @@
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         article = await HttpClient.GetJsonAsync<Article>($"api/articles/show/{ArticleId}");
     }

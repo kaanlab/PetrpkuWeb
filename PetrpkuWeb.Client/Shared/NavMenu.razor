@@ -33,7 +33,7 @@
                     {
                         @foreach (var department in departments.Where(d => d.IsHidden == false))
                         {
-                            <a class="dropdown-item" href="/department/@department.DepartmentId" @onclick="() => ToggleDropdownMenu()"> @department.Name</a>
+                            <a class="dropdown-item" href="/department/@department.DepartmentId" @onclick="() => ToggleDropdownMenu()" @key="department"> @department.Name</a>
                         }
                     }
                 </div>

@@ -84,8 +84,12 @@
     {
         identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+    }
 
+    protected override async Task OnParametersSetAsync()
+    {
         post = await HttpClient.GetJsonAsync<Post>($"api/posts/show/{PostId}");
+
     }
 
 }
