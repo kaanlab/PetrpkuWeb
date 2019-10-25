@@ -8,7 +8,7 @@
 @inject IMatToaster Toaster
 
 
-    <h2 class="col-12 mb-4 text-center">Справочники</h2>
+<h2 class="col-12 mb-4 text-center">Справочники</h2>
 
 <div class="row md-2">
     <div class="col-6">
@@ -83,7 +83,7 @@
                 {
                     <tr @key="building">
                         <td>@building.Name</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building.BuildingId))" Label="Редактировать" /></td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building))" Label="Редактировать" /></td>
                     </tr>
                 }
             </table>
@@ -110,12 +110,13 @@
         <MatDialog @bind-IsOpen="@editDepartmentDialogIsOpen">
             <MatDialogTitle>Редактировать подразделение</MatDialogTitle>
             <MatDialogContent>
+                @currentDepartment.DepartmentId
                 <MatTextField Label="Подразделение" @bind-Value="@DepatrmentName"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@CancelUpdateDepartment" Label="Отмена" />
-                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateDepartment(currentDepartment))" Label="Обновить" />
-                <MatButton Icon="delete_forever" OnClick="@(() => DeleteDepartment(currentDepartment))" Label="Удалить" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateDepartment())" Label="Обновить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteDepartment())" Label="Удалить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -140,12 +141,12 @@
         <MatDialog @bind-IsOpen="@editBuildingDialogIsOpen">
             <MatDialogTitle>Редактировать здание</MatDialogTitle>
             <MatDialogContent>
-                <MatTextField Label="Название" @bind-Value="@DepatrmentName"></MatTextField>
+                <MatTextField Label="Название" @bind-Value="@BuildingName"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@CancelUpdateBuilding" Label="Отмена" />
-                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateBuilding(currentBuilding.BuildingId))" Label="Обновить" />
-                <MatButton Icon="delete_forever" OnClick="@(() => DeleteBuilding(currentBuilding.BuildingId))" Label="Удалить" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateBuilding())" Label="Обновить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteBuilding())" Label="Удалить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -174,6 +175,17 @@
     }
 
     Building currentBuilding;
+
+    private string _buildingName;
+    public string BuildingName
+    {
+        get => _buildingName;
+        set
+        {
+            _buildingName = value;
+            this.StateHasChanged();
+        }
+    }
 
     bool newDepartmentDialogIsOpen = false;
     bool newBuildingDialogIsOpen = false;
@@ -207,27 +219,22 @@
     {
         editDepartmentDialogIsOpen = false;
         currentDepartment = null;
-        DepatrmentName = null;
-
-    //currentDepartment.Name = Departments.SingleOrDefault(d => d.DepartmentId == departmentId).Name;
     }
 
-    async Task UpdateDepartment(Department department)
+    async Task UpdateDepartment()
     {
         editDepartmentDialogIsOpen = false;
-        department.Name = DepatrmentName;
-        await HttpClient.PutJsonAsync<Department>($"api/departments/update/{department.DepartmentId}", department);
+        currentDepartment.Name = DepatrmentName;
+        await HttpClient.PutJsonAsync<Department>($"api/departments/update/{currentDepartment.DepartmentId}", currentDepartment);
         Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
         currentDepartment = null;
     }
 
-    async Task DeleteDepartment(Department department)
+    async Task DeleteDepartment()
     {
         editDepartmentDialogIsOpen = false;
-        department.Name = DepatrmentName;
-        var response = await HttpClient.DeleteAsync($"api/departments/delete/{department.DepartmentId}");
-        var content = await response.Content.ReadAsStringAsync();
-        Departments.Remove(JsonConvert.DeserializeObject<Department>(content));
+        var response = await HttpClient.DeleteAsync($"api/departments/delete/{currentDepartment.DepartmentId}");
+        Departments.Remove(currentDepartment);
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         currentDepartment = null;
     }
@@ -240,32 +247,34 @@
         Buildings.Add(response);
     }
 
-    void OpenEditBuildingDialog(int buildingId)
+    void OpenEditBuildingDialog(Building building)
     {
         editBuildingDialogIsOpen = true;
-        currentBuilding = Buildings.FirstOrDefault(d => d.BuildingId == buildingId);
+        currentBuilding = building;
+        BuildingName = currentBuilding.Name;
     }
 
     void CancelUpdateBuilding()
     {
         editBuildingDialogIsOpen = false;
-        //currentBuilding.Name = Buildings.SingleOrDefault(b => b.BuildingId == buildingId).Name;
+        currentBuilding = null;
     }
 
-    async Task UpdateBuilding(int buildingId)
+    async Task UpdateBuilding()
     {
         editBuildingDialogIsOpen = false;
-        await HttpClient.PutJsonAsync<Building>($"api/phonebook/building/update/{buildingId}", currentBuilding);
+        currentBuilding.Name = BuildingName;
+        await HttpClient.PutJsonAsync<Building>($"api/phonebook/building/update/{currentBuilding.BuildingId}", currentBuilding);
         Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
         currentBuilding = null;
     }
 
-    async Task DeleteBuilding(int buildingId)
+    async Task DeleteBuilding()
     {
         editBuildingDialogIsOpen = false;
-        var response = await HttpClient.DeleteAsync($"api/phonebook/building/delete/{buildingId}");
-        var content = await response.Content.ReadAsStringAsync();
-        Buildings.Remove(JsonConvert.DeserializeObject<Building>(content));
+        var response = await HttpClient.DeleteAsync($"api/phonebook/building/delete/{currentBuilding.BuildingId}");
+        Buildings.Remove(currentBuilding);
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
+        currentBuilding = null;
     }
 }

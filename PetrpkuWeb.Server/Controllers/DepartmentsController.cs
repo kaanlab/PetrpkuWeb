@@ -92,7 +92,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                 _db.Departments.Remove(department);
                 await _db.SaveChangesAsync();
-                return Ok(department);
+                return NoContent();
             }
 
             return BadRequest(ModelState);

@@ -77,7 +77,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                 _db.Buildings.Remove(building);
                 await _db.SaveChangesAsync();
-                return Ok(building);
+                return NoContent();
             }
 
             return BadRequest(ModelState);
