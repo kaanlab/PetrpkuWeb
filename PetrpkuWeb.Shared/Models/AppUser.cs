@@ -26,6 +26,7 @@ namespace PetrpkuWeb.Shared.Models
         public IEnumerable<Duty> DaysOfDuty { get; set; }
         public IEnumerable<Article> Articles { get; set; }
         public IEnumerable<Post> Posts { get; set; }
+        public IEnumerable<Message> Messages { get; set; }
 
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }

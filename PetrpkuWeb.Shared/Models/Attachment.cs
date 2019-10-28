@@ -19,5 +19,7 @@ namespace PetrpkuWeb.Shared.Models
         public Article Article { get; set; }
         public int? PostId { get; set; }
         public Post Post { get; set; }
+        public int? MessageId { get; set; }
+        public Message Message { get; set; }
     }
 }
