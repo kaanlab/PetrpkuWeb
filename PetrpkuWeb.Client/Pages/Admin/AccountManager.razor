@@ -102,7 +102,7 @@
                 }
                 else
                 {
-                    <MatOption Value="-1" Disabled="true" />
+                    <MatOption Value="-1" Disabled="true" >Выберете пользователя...</MatOption>
                     @foreach (var user in LdapUsers)
                     {
                         <MatOption Value="@user.UserName">@user.DisplayName</MatOption>

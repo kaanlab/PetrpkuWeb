@@ -18,7 +18,9 @@
         <div class="card @CssExtension.Border(item) mb-2">
             <div class="card-body @CssExtension.Text(item)">
                 <h5 class="card-title">@item.Title</h5>
-                <p class="card-text">@item.Content</p>
+                <span class="card-text">
+                    <MarkdownView Content="@item.Content.Truncate(200)" />
+                </span>
             </div>
             <div class="card-footer">
                 <div class="row">
@@ -40,7 +42,7 @@
                         <div class="col-4">
                             <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.Attachments.Count()</span></small>
                         </div>
-                    }                    
+                    }
                 </div>
             </div>
             <a class="stretched-link" href="/article/show/@item.ArticleId"></a>

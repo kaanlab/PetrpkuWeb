@@ -173,7 +173,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
+        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/user/{AppUserId}");
     }
 
     async Task ShowFileInfo()

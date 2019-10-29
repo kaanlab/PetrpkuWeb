@@ -49,23 +49,23 @@ else
                     TrCssClass = null;
                 }
 
-            <tr class="@TrCssClass">
-                @if (string.IsNullOrEmpty(user.LastName))
-                {
-                    <td>@user.DisplayName</td>
-                }
-                else
-                {
-                    <td>@user.LastName @user.FirstName @user.MidleName</td>
-                }
-                <td>@user.Department?.Name</td>
-                <td>@user.WorkingPosition</td>
-                <td>@user.Building?.Name</td>
-                <td>@user.Room</td>
-                <td>@user.MobPhone</td>
-                <td>@user.Birthday.ToShortDateString()</td>
-                <td><MatButton Icon="edit" OnClick="@(() => OpenDialog(user.AppUserId))" /></td>
-            </tr>
+                <tr class="@TrCssClass">
+                    @if (string.IsNullOrEmpty(user.LastName))
+                    {
+                        <td>@user.DisplayName</td>
+                    }
+                    else
+                    {
+                        <td>@user.LastName @user.FirstName @user.MidleName</td>
+                    }
+                    <td>@user.Department?.Name</td>
+                    <td>@user.WorkingPosition</td>
+                    <td>@user.Building?.Name</td>
+                    <td>@user.Room</td>
+                    <td>@user.MobPhone</td>
+                    <td>@user.Birthday.ToShortDateString()</td>
+                    <td><MatButton Icon="edit" OnClick="@(() => OpenDialog(user.AppUserId))" /></td>
+                </tr>
             }
         </tbody>
     </table>
@@ -88,6 +88,7 @@ else
                     }
                     else
                     {
+                        <option value="-1" disabled>Выберете подразделение...</option>
                         @foreach (var department in departments)
                         {
                             <option value="@department.DepartmentId"> @department.Name</option>
@@ -103,6 +104,7 @@ else
                     }
                     else
                     {
+                        <option value="-1" disabled >Выберете корпус...</option>
                         @foreach (var building in buildings)
                         {
                             <option value="@building.BuildingId">@building.Name</option>
@@ -146,17 +148,17 @@ else
 
     void OpenDialog(int appUserId)
     {
-        dialogIsOpen = true;       
+        dialogIsOpen = true;
         EditAppUser = AppUsersList.FirstOrDefault(u => u.AppUserId == appUserId);
     }
 
     async Task OkClick()
     {
         dialogIsOpen = false;
-        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{EditAppUser.AppUserId}", EditAppUser);
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{EditAppUser.AppUserId}", EditAppUser);
         var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
         AppUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
-       
+
     }
 }

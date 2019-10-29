@@ -206,6 +206,7 @@
         var response = await HttpClient.PostJsonAsync<Department>("api/departments/create", NewDepartment);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         Departments.Add(response);
+        NewDepartment = new Department();
     }
 
     void OpenEditDepartmentDialog(Department department)
@@ -245,6 +246,7 @@
         var response = await HttpClient.PostJsonAsync<Building>("api/buildings/create", NewBuilding);
         Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         Buildings.Add(response);
+        NewBuilding = new Building();
     }
 
     void OpenEditBuildingDialog(Building building)
