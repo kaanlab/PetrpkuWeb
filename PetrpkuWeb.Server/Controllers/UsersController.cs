@@ -88,7 +88,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ANY)]
-        [HttpPut("user/update/{appUserId:int}")]
+        [HttpPut("update/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUser appUser)
         {
             if (appUserId == appUser.AppUserId)

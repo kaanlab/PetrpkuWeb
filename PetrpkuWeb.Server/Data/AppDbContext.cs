@@ -22,6 +22,12 @@ namespace PetrpkuWeb.Server.Data
         public DbSet<Duty> Duties { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Building> Buildings { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<SiteSection> SiteSections { get; set; }
+        public DbSet<SiteSubsection> SiteSubsections { get; set; }
+        public DbSet<Sent> Sents { get; set; }
+        public DbSet<Checked> Checkeds { get; set; }
+        public DbSet<Published> Publisheds { get; set; }
     }
     
 }

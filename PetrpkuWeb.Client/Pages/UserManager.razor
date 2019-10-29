@@ -58,9 +58,9 @@ else
                 {
                     <td>@user.LastName @user.FirstName @user.MidleName</td>
                 }
-                <td>@user.Department.Name</td>
+                <td>@user.Department?.Name</td>
                 <td>@user.WorkingPosition</td>
-                <td>@user.Building.Name</td>
+                <td>@user.Building?.Name</td>
                 <td>@user.Room</td>
                 <td>@user.MobPhone</td>
                 <td>@user.Birthday.ToShortDateString()</td>
@@ -141,7 +141,7 @@ else
     {
         AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
         departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
+        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
     }
 
     void OpenDialog(int appUserId)

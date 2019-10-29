@@ -23,10 +23,6 @@ namespace PetrpkuWeb.Server
             using (var scope = scopeFactory.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-#if DEBUG
-                // Create db and add data 
-                db.Database.Migrate();
-#endif
                 if(!db.AppUsers.Any())
                     SeedData.Initialize(db);
             }

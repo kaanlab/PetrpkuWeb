@@ -10,28 +10,28 @@ namespace PetrpkuWeb.Server.Data
     {
         public static void Initialize(AppDbContext _db)
         {
-            var building = new Building()
-            {
-                Name = "отсутствует",
-                IsHidden = true
-            };
+            //var building = new Building()
+            //{
+            //    Name = "отсутствует",
+            //    //IsHidden = true
+            //};
 
-            var department = new Department()
-            {
-                Name = "отсутствует",
-                IsHidden = true
-            };
+            //var department = new Department()
+            //{
+            //    Name = "отсутствует",
+            //    //IsHidden = true
+            //};
 
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = "icer",
                 NormalizedUserName = "ICER",
                 DisplayName = "Кантышев А.В.",
-                AssosiateUser = new AppUser()
+                AssosiatedUser = new AppUser()
                 {
                     DisplayName = "Кантышев А.В.",
-                    Building = building,
-                    Department = department,
+                    //Building = building,
+                    //Department = department,
                     IsActive = true,
                     IsDuty = false
                 }

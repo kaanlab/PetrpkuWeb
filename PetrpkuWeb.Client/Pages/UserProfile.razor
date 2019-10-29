@@ -173,7 +173,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/user/{AppUserId}");
+        user = await HttpClient.GetJsonAsync<AppUser>($"api/users/{AppUserId}");
     }
 
     async Task ShowFileInfo()
@@ -203,7 +203,7 @@
     async Task OkClick()
     {
         dialogIsOpen = false;
-        await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{user.AppUserId}", user);
+        await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
     }
 
     async Task UploadFile()

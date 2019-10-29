@@ -12,6 +12,6 @@ namespace PetrpkuWeb.Shared.Models
 
         // relationship
         public int AppUserId { get; set; }
-        public AppUser User { get; set; }
+        public AppUser AssosiatedUser { get; set; }
     }
 }

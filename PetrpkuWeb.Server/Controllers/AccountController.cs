@@ -60,7 +60,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (appUserIdentity is null)
             {
 #if DEBUG
-                appUserIdentity = await AddIdentityUser(ldapUser);
+                appUserIdentity = AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
 #else
                 return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
@@ -137,7 +137,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (authUser is { })
             {
-                var appUserIdentity = await AddIdentityUser(authUser);
+                var appUserIdentity = AddIdentityUser(authUser);
                 var result = await _userManager.CreateAsync(appUserIdentity);
 
                 if (result.Succeeded)
@@ -181,10 +181,10 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
 
-        private async Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
+        private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {            
-            var building = await _db.Buildings.SingleOrDefaultAsync(b => b.IsHidden == true);
-            var department = await _db.Departments.SingleOrDefaultAsync(d => d.IsHidden == true);
+            //var building = await _db.Buildings.SingleOrDefaultAsync(b => b.IsHidden == true);
+            //var department = await _db.Departments.SingleOrDefaultAsync(d => d.IsHidden == true);
 
             var appUserIdentity = new AppUserIdentity()
             {
@@ -193,11 +193,11 @@ namespace PetrpkuWeb.Server.Controllers
                 Email = authUser.Email,
                 NormalizedEmail = authUser.Email.ToUpperInvariant(),
                 DisplayName = authUser.DisplayName,
-                AssosiateUser = new AppUser()
+                AssosiatedUser = new AppUser()
                 {
                     DisplayName = authUser.DisplayName,                    
-                    Building = building,
-                    Department = department,
+                    //Building = building,
+                    //Department = department,
                     IsActive = true,
                     IsDuty = false
                 }

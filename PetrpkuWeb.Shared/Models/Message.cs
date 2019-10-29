@@ -7,7 +7,7 @@ namespace PetrpkuWeb.Shared.Models
 {
     public class Message
     {
-        public int MassageId { get; set; }
+        public int MessageId { get; set; }
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
         [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]

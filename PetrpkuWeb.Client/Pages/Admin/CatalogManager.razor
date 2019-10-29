@@ -44,7 +44,7 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var department in Departments.Where(d => d.IsHidden == false))
+                @foreach (var department in Departments)
                 {
                     <tr @key="department">
                         <td>@department.Name</td>
@@ -79,7 +79,7 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var building in Buildings.Where(b => b.IsHidden == false))
+                @foreach (var building in Buildings)
                 {
                     <tr @key="building">
                         <td>@building.Name</td>
@@ -197,7 +197,7 @@
     protected async override Task OnInitializedAsync()
     {
         Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
+        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
     }
 
     async Task AddNewDepartment()
@@ -242,7 +242,7 @@
     async Task AddNewBuilding()
     {
         newBuildingDialogIsOpen = false;
-        var response = await HttpClient.PostJsonAsync<Building>("api/phonebook/building/create", NewBuilding);
+        var response = await HttpClient.PostJsonAsync<Building>("api/buildings/create", NewBuilding);
         Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         Buildings.Add(response);
     }
@@ -264,7 +264,7 @@
     {
         editBuildingDialogIsOpen = false;
         currentBuilding.Name = BuildingName;
-        await HttpClient.PutJsonAsync<Building>($"api/phonebook/building/update/{currentBuilding.BuildingId}", currentBuilding);
+        await HttpClient.PutJsonAsync<Building>($"api/buildings/update/{currentBuilding.BuildingId}", currentBuilding);
         Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
         currentBuilding = null;
     }
@@ -272,7 +272,7 @@
     async Task DeleteBuilding()
     {
         editBuildingDialogIsOpen = false;
-        var response = await HttpClient.DeleteAsync($"api/phonebook/building/delete/{currentBuilding.BuildingId}");
+        var response = await HttpClient.DeleteAsync($"api/buildings/delete/{currentBuilding.BuildingId}");
         Buildings.Remove(currentBuilding);
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         currentBuilding = null;

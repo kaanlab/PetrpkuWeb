@@ -14,17 +14,17 @@ namespace PetrpkuWeb.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PhonebookController : ControllerBase
+    public class BuildingsController : ControllerBase
     {
         private readonly AppDbContext _db;
 
-        public PhonebookController(AppDbContext db)
+        public BuildingsController(AppDbContext db)
         {
             _db = db;
         }
 
         [Authorize(Roles = AuthRole.ANY)]
-        [HttpGet("buildings/all")]
+        [HttpGet("all")]
         public async Task<ActionResult<List<Building>>> GetBuildings()
         {
             return await _db.Buildings
@@ -33,13 +33,13 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPost("building/create")]
+        [HttpPost("create")]
         public async Task<ActionResult<Building>> AddBuildingAsync(Building building)
         {
             if (building is null)
                 return BadRequest();
 
-            building.IsHidden = false;
+            //building.IsHidden = false;
             _db.Buildings.Add(building);
             await _db.SaveChangesAsync();
 
@@ -47,7 +47,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPut("building/update/{buildingId:int}")]
+        [HttpPut("update/{buildingId:int}")]
         public async Task<ActionResult> PutBuildingAsync(int buildingId, Building building)
         {
             if (buildingId == building.BuildingId)
@@ -62,7 +62,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpDelete("building/delete/{buildingId:int}")]
+        [HttpDelete("delete/{buildingId:int}")]
         public async Task<IActionResult> DeleteBuildingAsync(int buildingId)
         {
             if (ModelState.IsValid)

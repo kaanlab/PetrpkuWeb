@@ -194,7 +194,7 @@
     {
         AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
         departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/phonebook/buildings/all");
+        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
     }
 
     void OpenEditAppUserDialog(int appUserId)
@@ -206,7 +206,7 @@
     async Task UpdateAppUser(int appUserId)
     {
         editAppUserDialogIsOpen = false;
-        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/user/update/{appUserId}", EditAppUser);
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{appUserId}", EditAppUser);
         var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
         AppUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");

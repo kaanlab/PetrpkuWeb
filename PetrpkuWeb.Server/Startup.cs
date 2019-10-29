@@ -37,24 +37,19 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
-
 #if DEBUG
+            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
             services.AddDbContext<AppDbContext>(
-                options => options.UseSqlite(Configuration.GetConnectionString("SqLiteConnection")));
+                options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
 #else
+            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
+            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
             services.AddDbContext<AppDbContext>(
-                options => options.UseSqlServer(Configuration.GetConnectionString("MsSqlConnection")));
+                options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
 #endif
 
             services.AddDefaultIdentity<AppUserIdentity>()
                 .AddEntityFrameworkStores<AppDbContext>();
-
-#if DEBUG
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
-#else
-            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
-            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
-#endif
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
