@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PetrpkuWeb.Server.Data;
+using Serilog;
 
 namespace PetrpkuWeb.Server
 {
@@ -16,18 +17,42 @@ namespace PetrpkuWeb.Server
     {
         public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
 
-           // Initialize the database
-           var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-            using (var scope = scopeFactory.CreateScope())
+#if RELEASE
+            // Init Serilog configuration
+            var configuration = new ConfigurationBuilder()
+              .AddJsonFile("appsettings.log.json")
+              .Build();
+
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
+            try
             {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                if(!db.AppUsers.Any())
-                    SeedData.Initialize(db);
-            }
+                Log.Information("Starting web host");
+#endif
+                var host = CreateHostBuilder(args).Build();
 
-            host.Run();
+                // Initialize the database
+                var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    if (!db.AppUsers.Any())
+                        SeedData.Initialize(db);
+                }
+
+                host.Run();
+
+#if RELEASE
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+#endif
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -35,6 +60,10 @@ namespace PetrpkuWeb.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+#if RELEASE
+                }).UseSerilog();
+#else
                 });
+#endif
     }
 }

@@ -117,7 +117,7 @@ else
                 <InputDate @bind-Value="@EditAppUser.Birthday"></InputDate>
                 <hr />
                 <label>Дежурный</label>
-                <MatCheckbox @bind-Checked="@EditAppUser.IsDuty"></MatCheckbox>
+                <MatSlideToggle @bind-Checked="@EditAppUser.IsDuty"></MatSlideToggle>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />

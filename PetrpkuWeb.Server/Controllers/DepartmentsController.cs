@@ -23,6 +23,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         //[Authorize(Roles = AuthRole.ANY)]
+        [AllowAnonymous]
         [HttpGet("all")]
         public async Task<ActionResult<List<Department>>> GetDepartments()
         {

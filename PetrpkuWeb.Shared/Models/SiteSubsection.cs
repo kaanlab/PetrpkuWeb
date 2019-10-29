@@ -11,6 +11,6 @@ namespace PetrpkuWeb.Shared.Models
 
         //
         public int SiteSectionId { get; set; }
-        public SiteSection Section { get; set; }
+        public SiteSection SiteSection { get; set; }
     }
 }
