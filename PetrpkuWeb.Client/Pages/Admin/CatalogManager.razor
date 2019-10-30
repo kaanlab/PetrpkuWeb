@@ -96,6 +96,8 @@
         <MatDialogTitle>Выберете пользователя</MatDialogTitle>
         <MatDialogContent>
             <MatTextField Label="Подразделение" @bind-Value="@NewDepartment.Name"></MatTextField>
+            <label>Отображать в меню</label>
+            <MatSlideToggle @bind-Checked="@NewDepartment.IsVisible"></MatSlideToggle>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { newDepartmentDialogIsOpen = false; })" Label="Отмена" />
@@ -110,8 +112,9 @@
         <MatDialog @bind-IsOpen="@editDepartmentDialogIsOpen">
             <MatDialogTitle>Редактировать подразделение</MatDialogTitle>
             <MatDialogContent>
-                @currentDepartment.DepartmentId
                 <MatTextField Label="Подразделение" @bind-Value="@DepatrmentName"></MatTextField>
+                <label>Отображать в меню</label>
+                <MatSlideToggle @bind-Checked="@currentDepartment.IsVisible"></MatSlideToggle>
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@CancelUpdateDepartment" Label="Отмена" />

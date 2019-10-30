@@ -10,7 +10,7 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191029145926_InitMigration")]
+    [Migration("20191030073331_InitMigration")]
     partial class InitMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -415,6 +415,9 @@ namespace PetrpkuWeb.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -798,8 +801,8 @@ namespace PetrpkuWeb.Server.Migrations
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.SiteSubsection", b =>
                 {
-                    b.HasOne("PetrpkuWeb.Shared.Models.SiteSection", "Section")
-                        .WithMany("Subsections")
+                    b.HasOne("PetrpkuWeb.Shared.Models.SiteSection", "SiteSection")
+                        .WithMany("SiteSubsections")
                         .HasForeignKey("SiteSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -413,6 +413,9 @@ namespace PetrpkuWeb.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -796,8 +799,8 @@ namespace PetrpkuWeb.Server.Migrations
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.SiteSubsection", b =>
                 {
-                    b.HasOne("PetrpkuWeb.Shared.Models.SiteSection", "Section")
-                        .WithMany("Subsections")
+                    b.HasOne("PetrpkuWeb.Shared.Models.SiteSection", "SiteSection")
+                        .WithMany("SiteSubsections")
                         .HasForeignKey("SiteSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

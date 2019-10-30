@@ -8,7 +8,7 @@ namespace PetrpkuWeb.Shared.Models
     {
         public int DepartmentId { get; set; }
         public string Name { get; set; }
-        //public bool IsHidden { get; set; }
+        public bool IsVisible { get; set; }
 
         // relationship
         public List<AppUser> ListOfUsers { get; set; }
