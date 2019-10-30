@@ -166,44 +166,37 @@ namespace PetrpkuWeb.NovellDirectoryLdap
 
             var listOfLdapUsers = new List<IAuthUser>();
 
-            ILdapSearchResults lsc = _connection.Search(
-                _config.SearchBase,
+            LdapSearchQueue queue = _connection.Search(
+                _config.SearchBase, 
                 LdapConnection.ScopeSub,
-                _config.SearchAllFilter,
-                new[] {
-                DisplayNameAttribute,
-                SAMAccountNameAttribute,
-                MailAttribute},
-                false);
+                _config.SearchAllFilter, 
+                null, 
+                false, 
+                (LdapSearchQueue) null, 
+                (LdapSearchConstraints) null);
 
-            while (lsc.HasMore())
+            LdapMessage message;
+            while ((message = queue.GetResponse()) != null)
             {
-                LdapEntry nextEntry = null;
-                try
+                if (message is LdapSearchResult)
                 {
-                    nextEntry = lsc.Next();
-                }
-                catch (LdapException e)
-                {
-                    Console.WriteLine("Error: " + e.LdapErrorMessage);
-                    //Exception is thrown, go for next entry
-                    continue;
-                }
+                    LdapEntry entry = ((LdapSearchResult)message).Entry;
+                    LdapAttributeSet attributeSet = entry.GetAttributeSet();
 
-                // Get the attribute set of the entry
-                LdapAttributeSet attributeSet = nextEntry.GetAttributeSet();
-
-                listOfLdapUsers.Add(
-                    new LdapUser
-                    {
-                        DisplayName = attributeSet.GetAttribute("displayName")?.StringValue,
-                        UserName = attributeSet.GetAttribute("sAMAccountName")?.StringValue
-                    });
+                    listOfLdapUsers.Add(
+                        new LdapUser
+                        {
+                            DisplayName = attributeSet.GetAttribute(DisplayNameAttribute)?.StringValue,
+                            UserName = attributeSet.GetAttribute(SAMAccountNameAttribute)?.StringValue,
+                            Email = attributeSet.GetAttribute(MailAttribute)?.StringValue
+                        });
+                }
             }
-
+            
             _connection.Disconnect();
 
-            return listOfLdapUsers;
+            var sortedList = listOfLdapUsers.OrderBy(d => d.DisplayName).ToList();
+            return sortedList;
         }
 
         private string GetGroup(string value)
