@@ -54,7 +54,7 @@
     <div class="col-3">
         <div class="row mb-2">
             <div class="col-12">
-                <MatDatePicker Label="Выберете месяц" Outlined="true" @bind-Value="PikDate" DateFormat="d-m-Y" />
+                <MatDatePicker Label="Выберите месяц" Outlined="true" @bind-Value="PikDate" DateFormat="d-m-Y" />
             </div>
         </div>
         <div class="row mb-4 border-bottom">
@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="row">
-            <EditForm Model="@DutyVM" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберете дату и назначте на эту дату дежурного",MatToastType.Danger,"Ошибка!"))">
+            <EditForm Model="@DutyVM" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберите дату и назначте дежурного",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12">
                     <DataAnnotationsValidator />
                 </div>
@@ -238,5 +238,4 @@
     }
 
     #endregion
-
 }

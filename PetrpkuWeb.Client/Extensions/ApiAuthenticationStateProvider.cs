@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+//using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,33 +54,43 @@ namespace PetrpkuWeb.Client.Extensions
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwtToken)
         {
-            string[] tokenSegments = jwtToken.Split('.');
-            if (tokenSegments.Length != 3)
-                throw new ArgumentException("JWT Token should have three segments");
-
-            var payload = tokenSegments[1];
+            var claims = new List<Claim>();
+            var payload = jwtToken.Split('.')[1];
             var jsonBytes = ParseBase64WithoutPadding(payload);
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
-            var claims = new List<Claim>();
-            if ((keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles)) && (roles != null) && (roles is JsonElement))
-            {
-                JsonElement jsonRoles = (JsonElement)roles;
-                if (jsonRoles.ValueKind == JsonValueKind.Array)
-                    claims.AddRange(jsonRoles.EnumerateArray().Select(role => new Claim(ClaimTypes.Role, role.GetString())));
-                else
-                    claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
+            keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
 
-                // remove the roles claim from the  
+            if (roles != null)
+            {
+                if (roles.ToString().Trim().StartsWith("["))
+                {
+                    var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
+
+                    foreach (var parsedRole in parsedRoles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, parsedRole));
+                    }
+                }
+                else
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
+                }
+
                 keyValuePairs.Remove(ClaimTypes.Role);
             }
-            //add other claims as well
+
             claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
+
             return claims;
         }
 
         private byte[] ParseBase64WithoutPadding(string base64)
         {
+
+            base64 = base64.Replace('-', '+'); // 62nd char of encoding
+            base64 = base64.Replace('_', '/'); // 63rd char of encoding
+
             switch (base64.Length % 4)
             {
                 case 2:

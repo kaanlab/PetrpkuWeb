@@ -45,7 +45,7 @@ namespace PetrpkuWeb.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginViewModel model)
+        public async Task<ActionResult<LoginResult>> Login(LoginViewModel model)
         {
 
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
@@ -90,13 +90,13 @@ namespace PetrpkuWeb.Server.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt")["Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecurityKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration.GetSection("Jwt")["ExpireDays"]));
+            var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration["JwtExpireInDays"]));
 
             var token = new JwtSecurityToken(
-                _configuration.GetSection("Jwt")["Issuer"],
-                _configuration.GetSection("Jwt")["Audience"],
+                _configuration["JwtIssuer"],
+                _configuration["JwtAudience"],
                 claims,
                 expires: expiry,
                 signingCredentials: creds
@@ -184,9 +184,6 @@ namespace PetrpkuWeb.Server.Controllers
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
         {            
-            //var building = await _db.Buildings.SingleOrDefaultAsync(b => b.IsHidden == true);
-            //var department = await _db.Departments.SingleOrDefaultAsync(d => d.IsHidden == true);
-
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -197,8 +194,6 @@ namespace PetrpkuWeb.Server.Controllers
                 AssosiatedUser = new AppUser()
                 {
                     DisplayName = authUser.DisplayName,                    
-                    //Building = building,
-                    //Department = department,
                     IsActive = true,
                     IsDuty = false
                 }
