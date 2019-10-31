@@ -21,9 +21,9 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
                     <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
-                    <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department.Name</span></li>
+                    <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department?.Name</span></li>
                     <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
-                    <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building.Name</span></li>
+                    <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building?.Name</span></li>
                     <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
                     <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
                     <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>

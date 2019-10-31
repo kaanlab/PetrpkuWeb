@@ -162,7 +162,8 @@
         var content = await response.Content.ReadAsStringAsync();
         UsersIdentity.Add(JsonConvert.DeserializeObject<AppUserIdentity>(content));
         Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
-        StateHasChanged();
+        LdapUser = new LdapUser();
+        //StateHasChanged();
     }
 
     void OpenEditUserDialog(string userName)

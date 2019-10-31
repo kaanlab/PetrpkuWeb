@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -153,7 +154,7 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("identity/all")]
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
-            return await _db.Users.ToListAsync();
+            return await _db.Users.OrderBy(u => u.AppUserId).ToListAsync();
         }
 
         [Authorize(Roles = AuthRole.ADMIN)]
