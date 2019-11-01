@@ -42,7 +42,7 @@
                         </div>
                         <hr />
                     }
-                    <input type="file" accept="image/jpeg, image/png" @ref="inputElement" />
+                    <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" />
                     <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" Disabled=@(PosterFileInfoVM is { }) />
                 </div>
 
@@ -111,7 +111,7 @@
                         }
 
                         <hr>
-                        <input type="file" multiple @ref="inputElements" />
+                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" />
                         <hr>
 
                         <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />

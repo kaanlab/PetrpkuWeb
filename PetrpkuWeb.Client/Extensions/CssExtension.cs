@@ -34,37 +34,49 @@ namespace PetrpkuWeb.Client.Extensions
 
         public static string Img(string extension)
         {
+            var extentionImg = String.Empty;
+
             switch (extension.ToLower())
             {
                 case ".doc":
                 case ".docx":
                 case "application/msword":
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                    return @"/img/site/word.png";
+                    extentionImg = @"/img/site/word.png";
+                    break;
                 case ".xls":
                 case ".xlsx":
                 case "application/vnd.ms-excel":
-                    return @"/img/site/excel.png";
+                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                    extentionImg = @"/img/site/excel.png";
+                    break;
                 case ".pdf":
                 case "application/pdf":
-                    return @"/img/site/pdf.png";
+                    extentionImg = @"/img/site/pdf.png";
+                    break;
                 case ".rtf":
-                    return @"/img/site/rtf.png";
+                case "application/rtf":
+                    extentionImg = @"/img/site/rtf.png";
+                    break;
                 case ".jpeg":
                 case ".jpg":
                 case "image/jpeg":
-                    return @"/img/site/jpeg.png";
+                    extentionImg = @"/img/site/jpeg.png";
+                    break;
                 case ".png":
                 case "image/png":
-                    return @"/img/site/png.png";
+                    extentionImg = @"/img/site/png.png";
+                    break;
                 case ".pptx":
                 case ".ppt":
                 case ".pps":
                 case "application/vnd.ms-powerpoint":
                 case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-                    return @"/img/site/pptx.png";
+                    extentionImg = @"/img/site/pptx.png";
+                    break;
             }
-            return String.Empty;
+
+            return extentionImg;
         }
     }
 }
