@@ -214,7 +214,7 @@
 
     async Task ShowFileInfo()
     {
-        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        foreach (var file in await filesReaderReference.EnumerateFilesAsync())
         {
             var fileInfo = await file.ReadFileInfoAsync();
 
@@ -229,7 +229,7 @@
     async Task ClearFileInfo()
     {
         ListFileInfoVM.Clear();
-        await fileReaderReference.ClearValue();
+        await filesReaderReference.ClearValue();
     }
 
     async Task UploadFiles()
