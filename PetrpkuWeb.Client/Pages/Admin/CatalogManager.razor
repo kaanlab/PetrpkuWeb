@@ -44,13 +44,24 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var department in Departments)
-                {
-                    <tr @key="department">
-                        <td>@department.Name</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department))" Label="Редактировать" /></td>
-                    </tr>
-                }
+                <tbody>
+                    @foreach (var department in Departments)
+                    {
+                        @if (!department.IsVisible)
+                        {
+                            TrCssClass = "table-danger";
+                        }
+                        else
+                        {
+                            TrCssClass = null;
+                        }
+
+                        <tr @key="department" class="@TrCssClass">
+                            <td>@department.Name</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department))" Label="Редактировать" /></td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
     </div>
@@ -160,6 +171,8 @@
 
     private List<Department> Departments { get; set; }
     private List<Building> Buildings { get; set; }
+
+    string TrCssClass;
 
     Department NewDepartment { get; set; } = new Department();
     Building NewBuilding { get; set; } = new Building();
