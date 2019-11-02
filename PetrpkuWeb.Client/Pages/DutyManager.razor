@@ -35,7 +35,7 @@
                 <tbody>
                     @foreach (var dutyUser in ListOfDuty)
                     {
-                        <tr>
+                        <tr @key="dutyUser">
                             <th scope="row">@dutyUser.DayOfDuty.Day</th>
                             <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
                             <td>@dutyUser.AssignedTo.Department.Name</td>

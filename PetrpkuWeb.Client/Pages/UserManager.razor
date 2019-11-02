@@ -49,7 +49,7 @@ else
                     TrCssClass = null;
                 }
 
-                <tr class="@TrCssClass">
+                <tr @key="user" class="@TrCssClass">
                     @if (string.IsNullOrEmpty(user.LastName))
                     {
                         <td>@user.DisplayName</td>

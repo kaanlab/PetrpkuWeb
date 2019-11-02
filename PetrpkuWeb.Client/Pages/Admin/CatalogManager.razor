@@ -90,13 +90,15 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var building in Buildings)
-                {
-                    <tr @key="building">
-                        <td>@building.Name</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building))" Label="Редактировать" /></td>
-                    </tr>
-                }
+                <tbody>
+                    @foreach (var building in Buildings)
+                    {
+                        <tr @key="building">
+                            <td>@building.Name</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building))" Label="Редактировать" /></td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
     </div>

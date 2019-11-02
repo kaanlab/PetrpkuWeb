@@ -45,7 +45,7 @@
 
                 @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
                 {
-                    <div class="card @CssExtension.Border(article) mb-2">
+                    <div @key="article" class="card @CssExtension.Border(article) mb-2">
                         <div class="card-body @CssExtension.Text(article)">
                             <h5 class="card-title">@article.Title</h5>
                             <span class="card-text">
@@ -87,7 +87,7 @@
                 <table class="table table-striped">
                     @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
                     {
-                        <tr>
+                        <tr @key="duty">
                             <td>@duty.DayOfDuty.ToShortDateString()</td>
                         </tr>
                     }

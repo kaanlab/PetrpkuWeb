@@ -16,7 +16,7 @@
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div class="card mb-2">
+        <div @key="item" class="card mb-2">
             <img src="@item.Avatar" class="card-img-top" />
             <div class="card-body">
                 <h5 class="card-title">@item.DisplayName</h5>

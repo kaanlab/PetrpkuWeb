@@ -15,7 +15,7 @@
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div class="card @CssExtension.Border(item) mb-2">
+        <div @key="item" class="card @CssExtension.Border(item) mb-2">
             <div class="card-body @CssExtension.Text(item)">
                 <h5 class="card-title">@item.Title</h5>
                 <span class="card-text">

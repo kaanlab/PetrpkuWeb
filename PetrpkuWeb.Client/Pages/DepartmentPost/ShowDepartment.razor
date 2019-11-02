@@ -16,7 +16,7 @@
         <ul class="user-profiles-list-small">
             @foreach (var user in department.ListOfUsers)
             {
-                <li>
+                <li @key="user">
                     <div class="user-avatar">
                         <a href="/user/@user.AppUserId">
                             <img src="@user.Avatar" width="48" />
@@ -58,7 +58,7 @@ else
     <div class="card-columns">
         @foreach (var post in posts)
         {
-            <div class="card">
+            <div @key="post" class="card">
                 <img class="card-img-top" src="@post.Poster">
                 <div class="card-body">
                     <h5 class="card-title">@post.Title</h5>

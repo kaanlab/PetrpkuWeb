@@ -53,7 +53,7 @@
                 @foreach (var attachment in listOfAttachments)
                 {
                     var index = listOfAttachments.IndexOf(attachment);
-                    <tr>
+                    <tr @key="attachment">
                         <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
                         <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
                         <td>@attachment.Description</td>
@@ -78,7 +78,7 @@
                 <table class="table">
                     @foreach (var fileInfo in ListFileInfoVM)
                     {
-                        <tr>
+                        <tr @key="fileInfo">
                             <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
                             <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
                             <td>@fileInfo.Name</td>

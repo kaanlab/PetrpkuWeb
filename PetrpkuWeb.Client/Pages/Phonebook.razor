@@ -46,7 +46,7 @@
                 <tbody>
                     @foreach (var user in filtredAppUsers)
                     {
-                        <tr class="table-success">
+                        <tr @key="user" class="table-success">
                             <td>@user.LastName</td>
                             <td>@user.FirstName</td>
                             <td>@user.MidleName</td>
@@ -100,7 +100,7 @@
             <tbody>
                 @foreach (var user in appUsersList)
                 {
-                    <tr>
+                    <tr @key="user">
                         <th scope="row">@(appUsersList.IndexOf(user) + 1)</th>
                         <td>@user.LastName</td>
                         <td>@user.FirstName</td>

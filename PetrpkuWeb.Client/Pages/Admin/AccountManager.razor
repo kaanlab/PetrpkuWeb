@@ -41,15 +41,17 @@
                         <th scope="col"></th>
                     </tr>
                 </thead>
-                @foreach (var user in UsersIdentity)
-                {
-                    <tr>
-                        <td>@user.AppUserId</td>
-                        <td>@user.UserName</td>
-                        <td>@user.DisplayName</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(user.UserName))" Label="Удалить" /></td>
-                    </tr>
-                }
+                <tbody>
+                    @foreach (var user in UsersIdentity)
+                    {
+                        <tr @key="user">
+                            <td>@user.AppUserId</td>
+                            <td>@user.UserName</td>
+                            <td>@user.DisplayName</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(user.UserName))" Label="Удалить" /></td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
     </div>
@@ -78,14 +80,16 @@
                         <th scope="col">Ф.И.О.</th>
                     </tr>
                 </thead>
-                @foreach (var user in disabledUsers)
-                {
+                <tbody>
+                    @foreach (var user in disabledUsers)
+                    {
 
-                    <tr>
-                        <td>@user.AppUserId</td>
-                        <td>@user.DisplayName</td>
-                    </tr>
-                }
+                        <tr @key="user">
+                            <td>@user.AppUserId</td>
+                            <td>@user.DisplayName</td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
     </div>
