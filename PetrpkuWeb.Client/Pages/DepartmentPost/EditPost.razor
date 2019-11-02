@@ -193,16 +193,18 @@
 
     async Task UpdatePost()
     {
-        await HttpClient.PutJsonAsync<Article>($"api/posts/update/{post.PostId}", post);
+        var departmentId = post.Department.DepartmentId;
+        await HttpClient.PutJsonAsync<Post>($"api/posts/update/{post.PostId}", post);
         Toaster.Add($"Объявление успешно обновлено", MatToastType.Success, "Успех!");
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo($"/department/{departmentId}");
     }
 
     async Task DeletePost()
     {
+        var departmentId = post.Department.DepartmentId;
         await HttpClient.DeleteAsync($"api/posts/delete/{post.PostId}");
         Toaster.Add($"Новость {post.Title} удалена", MatToastType.Warning, "Внимание!");
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo($"/department/{departmentId}");
     }
 
     void OpenDialog(int attachmentId)

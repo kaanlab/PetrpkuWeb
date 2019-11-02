@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -84,6 +84,7 @@ namespace PetrpkuWeb.Server.Controllers
             var post = await _db.Posts
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
+                 .Include(d => d.Department)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(p => p.PostId == postId);
 
