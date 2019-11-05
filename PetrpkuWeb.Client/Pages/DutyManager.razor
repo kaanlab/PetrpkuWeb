@@ -154,6 +154,7 @@
             await HttpClient.DeleteAsync($"api/duty/delete/{deleteDutyUser.DutyId}");
             ListOfDuty.Remove(dutyUser);
             ListOfDays.Add(dutyUser.DayOfDuty);
+            ListOfDays.OrderBy(d => d.Day);
             Toaster.Add($"{deleteDutyUser.AssignedTo.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
         }
     }

@@ -191,6 +191,7 @@
         // Add to dropdown list of LdapUsers collection
         var addLdapUser = await HttpClient.GetJsonAsync<LdapUser>($"api/account/search/{appUser.UserName}");;
         ldapUsers.Add(addLdapUser);
+        ldapUsers.OrderBy(d => d.DisplayName);
 
         // Remove from UsersIdentity collection
         usersIdentity.Remove(appUser);
