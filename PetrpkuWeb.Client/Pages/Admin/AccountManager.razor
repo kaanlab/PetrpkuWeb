@@ -97,7 +97,7 @@
 
 <EditForm Model="@LdapUser">
     <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
-        <MatDialogTitle>Выберите пользователя</MatDialogTitle>
+        <MatDialogTitle>Новый пользователь</MatDialogTitle>
         <MatDialogContent>
             <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
                 @if (LdapUsers is null)

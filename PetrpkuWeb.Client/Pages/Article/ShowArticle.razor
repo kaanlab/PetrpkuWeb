@@ -34,7 +34,7 @@
         {
             var imgAttachment = article.Attachments.SingleOrDefault(a => a.IsImage == true);
             <li class="list-group-item">
-                <img class="spotlight img-thumbnail img-fluid" src="@imgAttachment.Path" />
+                <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@imgAttachment.Path" />
              </li>
         }
 
