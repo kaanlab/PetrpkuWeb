@@ -51,8 +51,8 @@
                             <td>@user.FirstName</td>
                             <td>@user.MidleName</td>
                             <td>@user.WorkingPosition</td>
-                            <td>@user.Department.Name</td>
-                            <td>@user.Building.Name</td>
+                            <td>@user.Department?.Name</td>
+                            <td>@user.Building?.Name</td>
                             <td>@user.Room</td>
                             <td>@user.IntPhone</td>
                             <td>@user.ExtPhone</td>
@@ -106,8 +106,8 @@
                         <td>@user.FirstName</td>
                         <td>@user.MidleName</td>
                         <td>@user.WorkingPosition</td>
-                        <td>@user.Department.Name</td>
-                        <td>@user.Building.Name</td>
+                        <td>@user.Department?.Name</td>
+                        <td>@user.Building?.Name</td>
                         <td>@user.Room</td>
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
@@ -120,7 +120,7 @@
 
 @code {
 
-    string SearchTerm { get; set; } = "";
+    string SearchTerm { get; set; } = String.Empty;
 
     List<AppUser> appUsersList;
     List<AppUser> filtredAppUsers;
@@ -145,6 +145,7 @@
 
     void ClearButton()
     {
+        SearchTerm = String.Empty;
         filtredAppUsers = null;
     }
 
