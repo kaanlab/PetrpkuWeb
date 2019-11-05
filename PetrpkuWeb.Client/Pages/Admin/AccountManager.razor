@@ -16,13 +16,13 @@
 <div class="row">
     <div class="col-6">
         <h2 class="text-center">Активные учетные записи</h2>
-        @if (UsersIdentity is null)
+        @if (usersIdentity is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
         }
-        else if (UsersIdentity.Count == 0)
+        else if (usersIdentity.Count == 0)
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
@@ -42,13 +42,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in UsersIdentity)
+                    @foreach (var user in usersIdentity)
                     {
                         <tr @key="user">
                             <td>@user.AppUserId</td>
                             <td>@user.UserName</td>
                             <td>@user.DisplayName</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(user.UserName))" Label="Удалить" /></td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditUserDialog(user))" Label="Удалить" /></td>
                         </tr>
                     }
                 </tbody>
@@ -100,14 +100,14 @@
         <MatDialogTitle>Новый пользователь</MatDialogTitle>
         <MatDialogContent>
             <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
-                @if (LdapUsers is null)
+                @if (ldapUsers is null)
                 {
                     <MatOption Value="">(loading...)</MatOption>
                 }
                 else
                 {
                     <MatOption Value="-1" Disabled="true" >Выберите пользователя...</MatOption>
-                    @foreach (var user in LdapUsers)
+                    @foreach (var user in ldapUsers)
                     {
                         <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
                     }
@@ -116,19 +116,19 @@
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { newUserDialogIsOpen = false; })" Label="Отмена" />
-            <MatButton Icon="check" Type="submit" OnClick="@(() =>AddAccount(LdapUser.UserName))" Label="Добавить" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddAccount" Label="Добавить" />
         </MatDialogActions>
     </MatDialog>
 </EditForm>
 
-@if (User is { })
+@if (appUser is { })
 {
-    <EditForm Model="@User">
+    <EditForm Model="@appUser">
         <MatDialog @bind-IsOpen="@editUserDialogIsOpen">
-            <MatDialogTitle>Удалить пользователя @User.DisplayName?</MatDialogTitle>
+            <MatDialogTitle>Удалить пользователя @appUser.DisplayName ?</MatDialogTitle>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { editUserDialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="delete_forever" Type="submit" OnClick="@(() => Delete(User.UserName))" Label="Да" />
+                <MatButton Icon="delete_forever" Type="submit" OnClick="@Delete" Label="Да" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
@@ -136,27 +136,32 @@
 
 @code {
 
-    private List<LdapUser> LdapUsers { get; set; }
-    private List<AppUserIdentity> UsersIdentity { get; set; }
-    private AppUserIdentity User { get; set; }
     private LdapUser LdapUser { get; set; } = new LdapUser();
+    
+    List<LdapUser> ldapUsers;
+    List<AppUserIdentity> usersIdentity;
+    AppUserIdentity appUser;
     List<AppUser> disabledUsers;
 
     bool editUserDialogIsOpen = false;
     bool newUserDialogIsOpen = false;
 
-
     protected async override Task OnInitializedAsync()
     {
         disabledUsers = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/disabled");
-        UsersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
-        LdapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
+        usersIdentity = await HttpClient.GetJsonAsync<List<AppUserIdentity>>("api/account/identity/all");
+        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
 
-    async Task AddAccount(string userName)
+    async Task AddAccount()
     {
         newUserDialogIsOpen = false;
-        var newUser = LdapUsers.FirstOrDefault(u => u.UserName == userName);
+
+        var newUser = ldapUsers.FirstOrDefault(u => u.UserName == LdapUser.UserName);
+
+        // Remove from dropdown list of LdapUsers collection
+        ldapUsers.Remove(newUser);
+
         var jsonContent = JsonConvert.SerializeObject(newUser);
         var buffer = System.Text.Encoding.UTF8.GetBytes(jsonContent);
         var byteContent = new ByteArrayContent(buffer);
@@ -164,23 +169,34 @@
 
         var response = await HttpClient.PostAsync("api/account/identity/add", byteContent);
         var content = await response.Content.ReadAsStringAsync();
-        UsersIdentity.Add(JsonConvert.DeserializeObject<AppUserIdentity>(content));
+
+        //Add to UsersIdentity collection
+        usersIdentity.Add(JsonConvert.DeserializeObject<AppUserIdentity>(content));
         Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
+        
         LdapUser = new LdapUser();
-        //StateHasChanged();
     }
 
-    void OpenEditUserDialog(string userName)
+    void OpenEditUserDialog(AppUserIdentity currentAppUser)
     {
         editUserDialogIsOpen = true;
-        User = UsersIdentity.FirstOrDefault(ui => ui.UserName == userName);
+        appUser = currentAppUser;
+    //user = usersIdentity.FirstOrDefault(ui => ui.UserName == appUser);
     }
 
-    async Task Delete(string userName)
+    async Task Delete()
     {
         editUserDialogIsOpen = false;
-        UsersIdentity.Remove(User);
-        var response = await HttpClient.DeleteAsync($"api/account/identity/delete/{userName}");
+        
+        // Add to dropdown list of LdapUsers collection
+        var addLdapUser = await HttpClient.GetJsonAsync<LdapUser>($"api/account/search/{appUser.UserName}");;
+        ldapUsers.Add(addLdapUser);
+
+        // Remove from UsersIdentity collection
+        usersIdentity.Remove(appUser);
+
+        //Add to DisabledUsers collection
+        var response = await HttpClient.DeleteAsync($"api/account/identity/delete/{appUser.UserName}");
         var content = await response.Content.ReadAsStringAsync();
         disabledUsers.Add(JsonConvert.DeserializeObject<AppUser>(content));
         Toaster.Add($"Пользователь удален", MatToastType.Warning, "Внимание!");
