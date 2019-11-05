@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using PetrpkuWeb.Client.Extensions;
-using Toolbelt.Blazor.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
 using MatBlazor;
 using Ganss.XSS;
@@ -41,9 +40,9 @@ namespace PetrpkuWeb.Client
 
         public void Configure(IComponentsApplicationBuilder app)
         {
-            //app.SetCultureInfo("ru-RU");
+            app.SetCultureInfo("ru-RU");
 
-            app.UseLocalTimeZone();
+            //app.UseLocalTimeZone();
 
             app.AddComponent<App>("app");
         }
