@@ -17,17 +17,27 @@
             @if (post.Attachments.Any())
             {
                 var rand = new Random(3);
-                <li class="list-group-item img-container">
+                @if (post.Attachments.Where(a => a.IsImage == true).Count() > 1)
+                {
+                    <li class="list-group-item img-container">
+                        @foreach (var attachment in post.Attachments.Where(a => a.IsImage == true))
+                        {
+                            int index = rand.Next(imgCssClass.Length);
+                            <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
+                                <img src="@attachment.Path" />
+                            </a>
+                        }
 
-                    @foreach (var attachment in post.Attachments.Where(a => a.IsImage == true))
-                    {
-                        int index = rand.Next(imgCssClass.Length);
-                        <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
-                            <img src="@attachment.Path" />
-                        </a>
-                    }
+                    </li>
+                }
+                else
+                {
+                    var imgAttachment = post.Attachments.SingleOrDefault(a => a.IsImage == true);
+                    <li class="list-group-item">
+                        <img class="spotlight img-thumbnail img-fluid" src="@imgAttachment.Path" />
+                    </li>
+                }
 
-                </li>
                 <li class="list-group-item">
                     <table class="table">
                         @foreach (var attachment in post.Attachments.Where(a => a.IsImage == false))

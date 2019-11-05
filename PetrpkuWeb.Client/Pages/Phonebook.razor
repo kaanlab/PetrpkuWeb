@@ -154,7 +154,8 @@
         if (!string.IsNullOrEmpty(SearchTerm))
         {
             string filter = SearchTerm.ToLower();
-            filtredAppUsers = appUsersList.Where(u => u.LastName.ToLower().Contains(filter) || u.IntPhone.ToLower().Contains(filter) || u.Department.Name.ToLower().Contains(filter)).ToList();
+            filtredAppUsers = appUsersList
+                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.Department.Name ?? "").ToLower().Contains(filter)).ToList();
             if (filtredAppUsers.Count < 1)
                 Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
         }

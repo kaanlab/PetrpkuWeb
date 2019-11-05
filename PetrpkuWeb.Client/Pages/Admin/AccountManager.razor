@@ -97,7 +97,7 @@
 
 <EditForm Model="@LdapUser">
     <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
-        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogTitle>Выберите пользователя</MatDialogTitle>
         <MatDialogContent>
             <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
                 @if (LdapUsers is null)
@@ -106,7 +106,7 @@
                 }
                 else
                 {
-                    <MatOption Value="-1" Disabled="true" >Выберете пользователя...</MatOption>
+                    <MatOption Value="-1" Disabled="true" >Выберите пользователя...</MatOption>
                     @foreach (var user in LdapUsers)
                     {
                         <MatOption Value="@user.UserName">@user.DisplayName</MatOption>

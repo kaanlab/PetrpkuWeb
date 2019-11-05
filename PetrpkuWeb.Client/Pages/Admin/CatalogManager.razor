@@ -106,7 +106,7 @@
 
 <EditForm Model="@NewDepartment">
     <MatDialog @bind-IsOpen="@newDepartmentDialogIsOpen">
-        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogTitle>Новое подразделение</MatDialogTitle>
         <MatDialogContent>
             <MatTextField Label="Подразделение" @bind-Value="@NewDepartment.Name"></MatTextField>
             <label>Отображать в меню</label>
@@ -140,7 +140,7 @@
 
 <EditForm Model="@NewBuilding">
     <MatDialog @bind-IsOpen="@newBuildingDialogIsOpen">
-        <MatDialogTitle>Выберете пользователя</MatDialogTitle>
+        <MatDialogTitle>Новое здание</MatDialogTitle>
         <MatDialogContent>
             <MatTextField Label="Подразделение" @bind-Value="@NewBuilding.Name"></MatTextField>
         </MatDialogContent>
