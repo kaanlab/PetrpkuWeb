@@ -68,6 +68,11 @@ namespace PetrpkuWeb.Server.Controllers
 #endif
             }
 
+            if (appUserIdentity.LockoutEnabled)
+            {
+                return BadRequest(new LoginResult { Successful = false, Error = $"User locked {appUserIdentity.UserName}" });
+            }
+
             if (appUserIdentity.Email != ldapUser.Email)
             {
                 appUserIdentity.Email = ldapUser.Email;
@@ -154,32 +159,43 @@ namespace PetrpkuWeb.Server.Controllers
         [HttpGet("identity/all")]
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
-            return await _db.Users.OrderBy(u => u.AppUserId).ToListAsync();
+            return await _db.Users
+                .Include(u => u.AssosiatedUser)
+                .OrderBy(u => u.AppUserId)
+                .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpDelete("identity/delete/{userName}")]
-        public async Task<ActionResult> Delete(string userName)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await _db.Users.SingleOrDefaultAsync(u => u.UserName == userName);
-                if (user is null)
-                {
-                    return NotFound();
-                }
+        //[Authorize(Roles = AuthRole.ADMIN)]
+        //[HttpPut("identity/update/{userName}")]
+        //public async Task<ActionResult> DisabledAuthUser(string userName, AppUserIdentity appUserIdentity)
+        //{
+        //    if (userName == appUserIdentity.UserName)
+        //    {
+        //        _db.Users.Update(appUserIdentity);
+        //        await _db.SaveChangesAsync();
+        //        return Ok(appUserIdentity);
+        //    }
+        //    return BadRequest();
 
-                var appUser = await _db.AppUsers.SingleOrDefaultAsync(u => u.AppUserId == user.AppUserId);
-                appUser.DisplayName += $"( удален {DateTime.Now.ToShortDateString()})";
-                appUser.IsActive = false;
+        //   // if (ModelState.IsValid)
+        //   // {
+        //       // var user = await _db.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+        //       // if (user is null)
+        //       // {
+        //       //     return NotFound();
+        //        //}
 
-                _db.Users.Remove(user);
-                await _db.SaveChangesAsync();
-                return Ok(appUser);
-            }
+        //       // var appUser = await _db.AppUsers.SingleOrDefaultAsync(u => u.AppUserId == user.AppUserId);
+        //        //appUser.DisplayName += $"( удален {DateTime.Now.ToShortDateString()})";
+        //        //appUser.IsActive = false;
 
-            return BadRequest(ModelState);
-        }
+        //        //_db.Users.Update(user);
+        //       // await _db.SaveChangesAsync();
+        //       // return Ok(appUser);
+        //    //}
+
+        //   // return BadRequest(ModelState);
+        //}
 
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)

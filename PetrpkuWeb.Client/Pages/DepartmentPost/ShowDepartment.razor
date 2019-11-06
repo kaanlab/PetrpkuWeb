@@ -1,5 +1,8 @@
 @page "/department/{DepartmentId:int}"
 
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
@@ -31,12 +34,12 @@
         </ul>
     }
 
-<div class="row mb-2">
-    @if (department.ListOfUsers.SingleOrDefault(u => u.AppUserId == identityUserId) is { })
-    {
-        <MatButton Icon="edit" Raised="true" Label="Создать" Link="@($"/department/{DepartmentId}/post/create")" />
-    }
-</div>
+    <div class="row mb-2">
+        @if (department.ListOfUsers.SingleOrDefault(u => u.AppUserId == identityUserId) is { })
+        {
+            <MatButton Icon="edit" Raised="true" Label="Создать" Link="@($"/department/{DepartmentId}/post/create")" />
+        }
+    </div>
 }
 
 @if (posts is null)
@@ -64,7 +67,7 @@ else
                     <h5 class="card-title">@post.Title</h5>
                     <span class="card-text">
                         <MarkdownView Content="@post.Content.Truncate(240)" />
-                    </span>                    
+                    </span>
                 </div>
                 <div class="card-footer">
                     <div class="row">
@@ -94,8 +97,8 @@ else
     [Parameter]
     public int DepartmentId { get; set; }
 
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    //[CascadingParameter]
+    //private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     int identityUserId;
     Department department;
@@ -103,8 +106,17 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var identityUser = (await authenticationStateTask).User;
-        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Int32.TryParse(user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value, out identityUserId);
+        }
+        else
+        {
+            identityUserId = 0;
+        }
     }
 
     protected override async Task OnParametersSetAsync()

@@ -2,8 +2,15 @@
 
 @attribute [Authorize(Roles = AuthRole.ADMIN_KADRY)]
 
+@using Newtonsoft.Json
+
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
+
+
+<div class="row mb-5">
+    <MatButton Outlined="true" Icon="add" OnClick="@(e => { newUserDialogIsOpen = true; })" Label="Добавить пользователя" />
+</div>
 
 <div class="input-group mb-3 mt-3">
     <input type="text" class="form-control" @bind-value="@SearchTerm" @bind-value:event="oninput" @onkeydown="@(e => SearchKeyDown(e))" placeholder="Введите критерии поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона" aria-label="Поиск сотрудника" aria-describedby="button-search" />
@@ -24,7 +31,6 @@
                     <p class="card-text">Пользователь не найден. Попробуйте другой критерий поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона  </p>
                 </div>
             </div>
-
         }
 
         @if (filtredAppUsers.Any())
@@ -114,15 +120,38 @@
                 {
                     @if (user.IsDuty)
                     {
-                        TrCssClass = "table-danger";
+                        TdDutyCssClass = "table-danger";
+                        isDuty = "дежурный";
                     }
                     else
                     {
-                        TrCssClass = null;
+                        TdDutyCssClass = null;
                     }
-                    <tr @key="user" class="@TrCssClass">
-                        <th scope="row">@(appUsersList.IndexOf(user) + 1)</th>
-                        <td>@user.DisplayName</td>
+                    @if (user.IsActive)
+                    {
+                        TrActiveCssClass = null;
+                    }
+                    else
+                    {
+                        TrActiveCssClass = "bg-danger";
+                        isActive = "заблокирован";
+                    }
+                    <tr @key="user" class="@TrActiveCssClass">
+                        <th scope="row" >
+                            @(appUsersList.IndexOf(user) + 1)
+                            
+                        </th>
+                        <td class="@TdDutyCssClass">
+                            @user.DisplayName
+                            @if (!user.IsActive)
+                            {
+                                <small class="text-dark">@isActive</small>
+                            }
+                            @if (user.IsDuty)
+                            {
+                                <small class="text-muted">@isDuty</small>
+                            }
+                        </td>
                         <td>@user.LastName</td>
                         <td>@user.FirstName</td>
                         <td>@user.MidleName</td>
@@ -193,9 +222,13 @@
                     <MatTextField Label="Кабинет" @bind-Value="@editAppUser.Room"></MatTextField>
                     <MatTextField Label="Внутренний телефон" @bind-Value="@editAppUser.IntPhone"></MatTextField>
                     <MatTextField Label="Городской телефон" @bind-Value="@editAppUser.ExtPhone"></MatTextField>
+                    <label>Активная учетная запись</label>
+                    <MatSlideToggle @bind-Checked="@editAppUser.IsActive"></MatSlideToggle>
+                    <hr />
                 }
                 <label>Дежурный</label>
                 <MatSlideToggle @bind-Checked="@editAppUser.IsDuty"></MatSlideToggle>
+                <hr />
                 <MatTextField Label="Моб.телефон" @bind-Value="@editAppUser.MobPhone"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
@@ -206,14 +239,43 @@
     </EditForm>
 }
 
+<EditForm Model="@LdapUser">
+    <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
+        <MatDialogTitle>Новый пользователь</MatDialogTitle>
+        <MatDialogContent>
+            <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
+                @if (ldapUsers is null)
+                {
+                    <MatOption Value="">(loading...)</MatOption>
+                }
+                else
+                {
+                    <MatOption Value="-1" Disabled="true">Выберите пользователя...</MatOption>
+                    @foreach (var user in ldapUsers)
+                    {
+                        <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
+                    }
+                }
+            </MatSelect>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newUserDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddAccount" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
 
 @code {
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    private LdapUser LdapUser { get; set; } = new LdapUser();
+
     string SearchTerm { get; set; } = String.Empty;
 
+    List<LdapUser> ldapUsers;
     ClaimsPrincipal identityUser;
     List<AppUser> appUsersList;
     AppUser editAppUser;
@@ -221,17 +283,49 @@
     List<Building> buildings;
     List<AppUser> filtredAppUsers;
 
-    string TrCssClass;
+    string TdDutyCssClass;
+    string isDuty;
+    string TrActiveCssClass;
+    string isActive;
     bool editAppUserDialogIsOpen = false;
+    bool newUserDialogIsOpen = false;
 
     protected async override Task OnInitializedAsync()
     {
         identityUser = (await authenticationStateTask).User;
 
-        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
+        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
         departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
         buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
+        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
+
+    async Task AddAccount()
+    {
+        newUserDialogIsOpen = false;
+
+        var newUser = ldapUsers.FirstOrDefault(u => u.UserName == LdapUser.UserName);
+
+        // Remove from dropdown list of LdapUsers collection
+        ldapUsers.Remove(newUser);
+
+        var jsonContent = JsonConvert.SerializeObject(newUser);
+        var buffer = System.Text.Encoding.UTF8.GetBytes(jsonContent);
+        var byteContent = new ByteArrayContent(buffer);
+        byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        var response = await HttpClient.PostAsync("api/account/identity/add", byteContent);
+        var content = await response.Content.ReadAsStringAsync();
+
+        //Add to UsersIdentity collection
+        var appUserIdentity = JsonConvert.DeserializeObject<AppUserIdentity>(content);
+        appUsersList.Add(appUserIdentity.AssosiatedUser);
+        appUsersList = appUsersList.OrderBy(d => d.DisplayName).ToList();
+        Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
+
+        LdapUser = new LdapUser();
+    }
+
 
     void OpenEditAppUserDialog(int appUserId)
     {

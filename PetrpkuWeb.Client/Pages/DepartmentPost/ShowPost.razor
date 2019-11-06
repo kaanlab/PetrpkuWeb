@@ -1,5 +1,8 @@
 @page "/posts/show/{PostId:int}"
 
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 @inject HttpClient HttpClient
 
 
@@ -79,8 +82,7 @@
     [Parameter]
     public int PostId { get; set; }
 
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
 
     ClaimsPrincipal identityUser;
     int identityUserId;
@@ -91,8 +93,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        identityUser = (await authenticationStateTask).User;
-        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        identityUser = authState.User;
+
+        if (identityUser.Identity.IsAuthenticated)
+        {
+            Int32.TryParse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value, out identityUserId);
+        }
+        else
+        {
+            identityUserId = 0;
+        }
     }
 
     protected override async Task OnParametersSetAsync()

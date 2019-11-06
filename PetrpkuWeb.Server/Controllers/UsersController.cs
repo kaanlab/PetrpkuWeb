@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,6 +30,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Where(u => u.IsActive)
+                .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -42,16 +43,19 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Where(u => u.IsActive && u.IsDuty)
+                .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpGet("all/disabled")]
-        public async Task<ActionResult<List<AppUser>>> GetDisabledUsers()
+        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [HttpGet("all")]
+        public async Task<ActionResult<List<AppUser>>> GetAllUsers()
         {
             return await _db.AppUsers
-                .Where(u => u.IsActive == false)
+                .Include(b => b.Building)
+                .Include(d => d.Department)
+                .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -98,7 +102,16 @@ namespace PetrpkuWeb.Server.Controllers
 
                 appUser.Building = building;
                 appUser.Department = department;
-                _db.Update(appUser);
+
+                if (appUser.IsActive == false)
+                {
+                   var appUserIdentity = await _db.Users.SingleOrDefaultAsync(u => u.DisplayName == appUser.DisplayName);
+                   appUserIdentity.LockoutEnabled = true;
+                   _db.Users.Update(appUserIdentity);
+                   await _db.SaveChangesAsync();
+                }
+
+                _db.AppUsers.Update(appUser);
                 await _db.SaveChangesAsync();
                 return Ok(appUser);
             }
