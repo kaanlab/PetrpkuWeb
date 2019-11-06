@@ -19,6 +19,30 @@
                 <DataAnnotationsValidator />
                 <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
             </div>
+
+            <div class="col-12 mb-2">
+                <select class="form-control" onchange="@CountryClicked">
+                    <option value="">-- Select Country --</option>
+                    @foreach (var country in countryList)
+                    {
+                        <option value="@country.CountryId">@country.CountryName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 mb-2">
+                <select class="form-control" onchange="@CityClicked">
+                    <option value="">-- Select City --</option>
+                    @if (cityList != null)
+                    {
+                        @foreach (var city in cityList)
+                        {
+                            <option value="@city.CityName">@city.CityName</option>
+                        }
+                    }
+                </select>
+            </div>
+
             <div class="col-12 mb-2">
                 <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewArticle.Title"></MatTextField>
                 <ValidationMessage For="() => NewArticle.Title" />

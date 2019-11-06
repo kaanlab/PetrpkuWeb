@@ -43,24 +43,24 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ANY)]
-        [HttpPost("create")]
-        public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel articleVM)
-        {
-            if (articleVM is null)
-                return BadRequest();
+        //[Authorize(Roles = AuthRole.ANY)]
+        //[HttpPost("create")]
+        //public async Task<ActionResult<Article>> CreateMessage(ArticleViewModel articleVM)
+        //{
+        //    if (articleVM is null)
+        //        return BadRequest();
 
-            var article = _mapper.Map<Article>(articleVM);
+        //    var article = _mapper.Map<Article>(articleVM);
 
-            article.PublishDate = DateTime.Now;
+        //    article.PublishDate = DateTime.Now;
 
-            _db.Attachments.UpdateRange(article.Attachments);
-            _db.SaveChanges();
+        //    _db.Attachments.UpdateRange(article.Attachments);
+        //    _db.SaveChanges();
 
-            await _db.Articles.AddAsync(article);
-            await _db.SaveChangesAsync();
+        //    await _db.Articles.AddAsync(article);
+        //    await _db.SaveChangesAsync();
 
-            return Ok(article);
-        }
+        //    return Ok(article);
+        //}
     }
 }
