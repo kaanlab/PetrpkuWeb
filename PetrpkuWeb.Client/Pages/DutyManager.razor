@@ -69,14 +69,14 @@
                 </div>
                 <div class="col-12 mb-2">
                     <MatSelect Label="Дата" @bind-Value="DutyVM.Day" Outlined="true">
-                        @if (ListOfDays == null)
+                        @if (listOfDays is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
                         }
                         else
                         {
                             <MatOption Value="-1" Disabled="true" />
-                            @foreach (var day in ListOfDays)
+                            @foreach (var day in listOfDays)
                             {
                                 <MatOption Value="@day.Day.ToString()">@day.Day</MatOption>
                             }
@@ -116,8 +116,8 @@
 
     private List<Duty> ListOfDuty { get; set; } = new List<Duty>();
     private DutyViewModel DutyVM { get; set; } = new DutyViewModel();
-    private List<DateTime> ListOfDays { get; set; }
-
+    
+    List<DateTime> listOfDays;
     List<AppUser> users;
     DateTime title = DateTime.Now;
 
@@ -140,9 +140,9 @@
         ListOfDuty = null;
         ListOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
 
-        ListOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day)).ToList();
+        listOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day)).ToList();
 
-        ListOfDays.RemoveAll(r => ListOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
+        listOfDays.RemoveAll(r => ListOfDuty.Exists(d => d.DayOfDuty.Day == r.Day));
         title = PikDate.Value;
     }
 
@@ -153,8 +153,10 @@
             var deleteDutyUser = ListOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
             await HttpClient.DeleteAsync($"api/duty/delete/{deleteDutyUser.DutyId}");
             ListOfDuty.Remove(dutyUser);
-            ListOfDays.Add(dutyUser.DayOfDuty);
-            ListOfDays.OrderBy(d => d.Day);
+            
+            listOfDays.Add(dutyUser.DayOfDuty);
+            listOfDays = listOfDays.OrderBy(d => d.Day).ToList();
+            
             Toaster.Add($"{deleteDutyUser.AssignedTo.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
         }
     }
@@ -181,7 +183,7 @@
                 AssignedTo = findUser
             });
 
-        ListOfDays.Remove(duty.DayOfDuty);
+        listOfDays.Remove(duty.DayOfDuty);
 
         var response = await HttpClient.PostJsonAsync<Duty>("api/duty/create", duty);
         Toaster.Add($"{response.AssignedTo.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
