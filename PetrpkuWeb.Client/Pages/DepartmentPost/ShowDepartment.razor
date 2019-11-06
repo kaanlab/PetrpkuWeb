@@ -17,7 +17,7 @@
     @if (department.ListOfUsers.Any())
     {
         <ul class="user-profiles-list-small">
-            @foreach (var user in department.ListOfUsers)
+            @foreach (var user in department.ListOfUsers.Where(u => u.IsActive))
             {
                 <li @key="user">
                     <div class="user-avatar">
