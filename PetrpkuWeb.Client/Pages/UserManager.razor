@@ -2,163 +2,379 @@
 
 @attribute [Authorize(Roles = AuthRole.ADMIN_KADRY)]
 
+@using Newtonsoft.Json
+
 @inject HttpClient HttpClient
 @inject IMatToaster Toaster
 
 
-<h2 class="col-12 mb-4 text-center"> Редактирование пользователей</h2>
+<div class="row mb-5">
+    <MatButton Outlined="true" Icon="add" OnClick="@(e => { newUserDialogIsOpen = true; })" Label="Добавить пользователя" />
+</div>
 
-@if (AppUsersList is null)
-{
-    <div class="spinner-border text-primary text-center" role="status">
-        <span class="sr-only">Loading...</span>
+<div class="input-group mb-3 mt-3">
+    <input type="text" class="form-control" @bind-value="@SearchTerm" @bind-value:event="oninput" @onkeydown="@(e => SearchKeyDown(e))" placeholder="Введите критерии поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона" aria-label="Поиск сотрудника" aria-describedby="button-search" />
+    <div class="input-group-append" id="button-search">
+        <button class="btn btn-outline-secondary" type="button" @onclick="ClearButton">Очистить</button>
+        <button class="btn btn-outline-secondary" type="button" @onclick="SearchButton">Найти</button>
     </div>
-}
-else if (AppUsersList.Count == 0)
-{
-    <div class="card border-danger mb-3">
-        <div class="card-body">
-            <p class="card-text">No users...</p>
-        </div>
-    </div>
-}
-else
-{
-    <table class="table">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Ф.И.О</th>
-                <th scope="col">Подразделение</th>
-                <th scope="col">Должность</th>
-                <th scope="col">Корпус</th>
-                <th scope="col">Кабинет</th>
-                <th scope="col">Моб.телефон</th>
-                <th scope="col">День рождения</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in AppUsersList)
-            {
-                @if (user.IsDuty)
-                {
-                    TrCssClass = "table-danger";
-                }
-                else
-                {
-                    TrCssClass = null;
-                }
+</div>
 
-                <tr @key="user" class="@TrCssClass">
-                    @if (string.IsNullOrEmpty(user.LastName))
+@if (filtredAppUsers is { })
+{
+    <div class="row mb-3">
+        <h2 class="col-12 mb-4 text-center">Результаты поиска </h2>
+        @if (filtredAppUsers.Count < 1)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">Пользователь не найден. Попробуйте другой критерий поиска. Поиск ведется по фамилии, подразделению, номеру внутреннего телефона  </p>
+                </div>
+            </div>
+        }
+
+        @if (filtredAppUsers.Any())
+        {
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr class="table-info">
+                        <th scope="col">Ф.И.О.</th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Отчество</th>
+                        <th scope="col">День рождения</th>
+                        <th scope="col">Должность</th>
+                        <th scope="col">Подразделение</th>
+                        <th scope="col">Корпус</th>
+                        <th scope="col">Кабинет</th>
+                        <th scope="col">Внутр.номер</th>
+                        <th scope="col">Гор.номер</th>
+                        <th scope="col">Моб.телефон</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in filtredAppUsers)
                     {
-                        <td>@user.DisplayName</td>
+                        <tr @key="user" class="table-success">
+                            <td>@user.DisplayName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.MidleName</td>
+                            <td>@user.Birthday.ToShortDateString()</td>
+                            <td>@user.WorkingPosition</td>
+                            <td>@user.Department?.Name</td>
+                            <td>@user.Building?.Name</td>
+                            <td>@user.Room</td>
+                            <td>@user.IntPhone</td>
+                            <td>@user.ExtPhone</td>
+                            <td>@user.MobPhone</td>
+                            <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
+
+<div class="row">
+    <h2 class="col-12 mb-4 text-center"> Редактирование пользователей</h2>
+    @if (appUsersList is null)
+    {
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+    else if (appUsersList.Count == 0)
+    {
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">No users...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <table class="table table-sm table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">№</th>
+                    <th scope="col">Ф.И.О.</th>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Отчество</th>
+                    <th scope="col">День рождения</th>
+                    <th scope="col">Должность</th>
+                    <th scope="col">Подразделение</th>
+                    <th scope="col">Корпус</th>
+                    <th scope="col">Кабинет</th>
+                    <th scope="col">Внутр.номер</th>
+                    <th scope="col">Гор.номер</th>
+                    <th scope="col">Моб.телефон</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in appUsersList)
+                {
+                    @if (user.IsDuty)
+                    {
+                        TdDutyCssClass = "table-danger";
+                        isDuty = "дежурный";
                     }
                     else
                     {
-                        <td>@user.LastName @user.FirstName @user.MidleName</td>
+                        TdDutyCssClass = null;
                     }
-                    <td>@user.Department?.Name</td>
-                    <td>@user.WorkingPosition</td>
-                    <td>@user.Building?.Name</td>
-                    <td>@user.Room</td>
-                    <td>@user.MobPhone</td>
-                    <td>@user.Birthday.ToShortDateString()</td>
-                    <td><MatButton Icon="edit" OnClick="@(() => OpenDialog(user.AppUserId))" /></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+                    @if (user.IsActive)
+                    {
+                        TrActiveCssClass = null;
+                    }
+                    else
+                    {
+                        TrActiveCssClass = "bg-danger";
+                        isActive = "заблокирован";
+                    }
+                    <tr @key="user" class="@TrActiveCssClass">
+                        <th scope="row" >
+                            @(appUsersList.IndexOf(user) + 1)
+                            
+                        </th>
+                        <td class="@TdDutyCssClass">
+                            @user.DisplayName
+                            @if (!user.IsActive)
+                            {
+                                <small class="text-dark">@isActive</small>
+                            }
+                            @if (user.IsDuty)
+                            {
+                                <small class="text-muted">@isDuty</small>
+                            }
+                        </td>
+                        <td>@user.LastName</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.MidleName</td>
+                        <td>@user.Birthday.ToShortDateString()</td>
+                        <td>@user.WorkingPosition</td>
+                        <td>@user.Department?.Name</td>
+                        <td>@user.Building?.Name</td>
+                        <td>@user.Room</td>
+                        <td>@user.IntPhone</td>
+                        <td>@user.ExtPhone</td>
+                        <td>@user.MobPhone</td>
+                        <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
 
-@if (EditAppUser is { })
+@if (editAppUser is { })
 {
-    <EditForm Model="@EditAppUser">
-        <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>Редактирование пользователя @EditAppUser.DisplayName</MatDialogTitle>
+    <EditForm Model="@editAppUser">
+        <MatDialog @bind-IsOpen="@editAppUserDialogIsOpen">
+            <MatDialogTitle>Редактирование информации о @editAppUser.DisplayName</MatDialogTitle>
             <MatDialogContent>
-                <MatTextField Label="Фамилия" @bind-Value="@EditAppUser.LastName"></MatTextField>
-                <MatTextField Label="Имя" @bind-Value="@EditAppUser.FirstName"></MatTextField>
-                <MatTextField Label="Отчество" @bind-Value="@EditAppUser.MidleName"></MatTextField>
+                <MatTextField Label="Фамилия" @bind-Value="@editAppUser.LastName"></MatTextField>
+                <MatTextField Label="Имя" @bind-Value="@editAppUser.FirstName"></MatTextField>
+                <MatTextField Label="Отчество" @bind-Value="@editAppUser.MidleName"></MatTextField>
+                <label>День рождения</label>
+                <InputDate @bind-Value="@editAppUser.Birthday"></InputDate>
+                <hr />
                 <label>Подразделение</label>
-                <select @bind="@EditAppUser.DepartmentId">
+                <select @bind="@editAppUser.DepartmentId">
                     @if (departments is null)
                     {
                         <option value="">(loading...)</option>
                     }
                     else
                     {
-                        <option value="-1" disabled>Выберете подразделение...</option>
+                        <option value="-1" disabled>Выберите подразделение...</option>
                         @foreach (var department in departments)
                         {
                             <option value="@department.DepartmentId"> @department.Name</option>
                         }
                     }
                 </select>
-                <MatTextField Label="Должность" @bind-Value="@EditAppUser.WorkingPosition"></MatTextField>
-                <label>Корпус</label>
-                <select @bind="@EditAppUser.BuildingId">
-                    @if (buildings is null)
-                    {
-                        <option value="">(loading...)</option>
-                    }
-                    else
-                    {
-                        <option value="-1" disabled >Выберете корпус...</option>
-                        @foreach (var building in buildings)
+                <MatTextField Label="Должность" @bind-Value="@editAppUser.WorkingPosition"></MatTextField>
+                @if (identityUser.IsInRole(AuthRole.ADMIN))
+                {
+                    <label>Корпус</label>
+                    <select @bind="@editAppUser.BuildingId">
+                        @if (buildings is null)
                         {
-                            <option value="@building.BuildingId">@building.Name</option>
+                            <option value="">(loading...)</option>
                         }
-                    }
-                </select>
-                <MatTextField Label="Кабинет" @bind-Value="@EditAppUser.Room"></MatTextField>
-                <MatTextField Label="Моб.телефон" @bind-Value="@EditAppUser.MobPhone"></MatTextField>
-                <label>День рождения</label>
-                <InputDate @bind-Value="@EditAppUser.Birthday"></InputDate>
-                <hr />
+                        else
+                        {
+                            <option value="-1" disabled>Выберите корпус...</option>
+                            @foreach (var building in buildings)
+                            {
+                                <option value="@building.BuildingId">@building.Name</option>
+                            }
+                        }
+                    </select>
+
+                    <hr />
+
+                    <MatTextField Label="Кабинет" @bind-Value="@editAppUser.Room"></MatTextField>
+                    <MatTextField Label="Внутренний телефон" @bind-Value="@editAppUser.IntPhone"></MatTextField>
+                    <MatTextField Label="Городской телефон" @bind-Value="@editAppUser.ExtPhone"></MatTextField>
+                    <label>Активная учетная запись</label>
+                    <MatSlideToggle @bind-Checked="@editAppUser.IsActive"></MatSlideToggle>
+                    <hr />
+                }
                 <label>Дежурный</label>
-                <MatSlideToggle @bind-Checked="@EditAppUser.IsDuty"></MatSlideToggle>
+                <MatSlideToggle @bind-Checked="@editAppUser.IsDuty"></MatSlideToggle>
+                <hr />
+                <MatTextField Label="Моб.телефон" @bind-Value="@editAppUser.MobPhone"></MatTextField>
             </MatDialogContent>
             <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
+                <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="save" Type="submit" OnClick="@(() => UpdateAppUser(editAppUser.AppUserId))" Label="Сохранить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>
 }
 
+<EditForm Model="@LdapUser">
+    <MatDialog @bind-IsOpen="@newUserDialogIsOpen">
+        <MatDialogTitle>Новый пользователь</MatDialogTitle>
+        <MatDialogContent>
+            <MatSelect @bind-Value="@LdapUser.UserName" Outlined="true">
+                @if (ldapUsers is null)
+                {
+                    <MatOption Value="">(loading...)</MatOption>
+                }
+                else
+                {
+                    <MatOption Value="-1" Disabled="true">Выберите пользователя...</MatOption>
+                    @foreach (var user in ldapUsers)
+                    {
+                        <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
+                    }
+                }
+            </MatSelect>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newUserDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddAccount" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+
 @code {
 
-    private List<AppUser> AppUsersList { get; set; }
-    private AppUser EditAppUser { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    private LdapUser LdapUser { get; set; } = new LdapUser();
+
+    string SearchTerm { get; set; } = String.Empty;
+
+    List<LdapUser> ldapUsers;
+    ClaimsPrincipal identityUser;
+    List<AppUser> appUsersList;
+    AppUser editAppUser;
     List<Department> departments;
     List<Building> buildings;
+    List<AppUser> filtredAppUsers;
 
-    string TrCssClass;
-    bool dialogIsOpen = false;
-
+    string TdDutyCssClass;
+    string isDuty;
+    string TrActiveCssClass;
+    string isActive;
+    bool editAppUserDialogIsOpen = false;
+    bool newUserDialogIsOpen = false;
 
     protected async override Task OnInitializedAsync()
     {
-        AppUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
+        identityUser = (await authenticationStateTask).User;
+
+        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
         departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
         buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
+        ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
     }
 
-    void OpenDialog(int appUserId)
+    async Task AddAccount()
     {
-        dialogIsOpen = true;
-        EditAppUser = AppUsersList.FirstOrDefault(u => u.AppUserId == appUserId);
+        newUserDialogIsOpen = false;
+
+        var newUser = ldapUsers.FirstOrDefault(u => u.UserName == LdapUser.UserName);
+
+        // Remove from dropdown list of LdapUsers collection
+        ldapUsers.Remove(newUser);
+
+        var jsonContent = JsonConvert.SerializeObject(newUser);
+        var buffer = System.Text.Encoding.UTF8.GetBytes(jsonContent);
+        var byteContent = new ByteArrayContent(buffer);
+        byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        var response = await HttpClient.PostAsync("api/account/identity/add", byteContent);
+        var content = await response.Content.ReadAsStringAsync();
+
+        //Add to UsersIdentity collection
+        var appUserIdentity = JsonConvert.DeserializeObject<AppUserIdentity>(content);
+        appUsersList.Add(appUserIdentity.AssosiatedUser);
+        appUsersList = appUsersList.OrderBy(d => d.DisplayName).ToList();
+        Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
+
+        LdapUser = new LdapUser();
     }
 
-    async Task OkClick()
+
+    void OpenEditAppUserDialog(int appUserId)
     {
-        dialogIsOpen = false;
-        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{EditAppUser.AppUserId}", EditAppUser);
-        var index = AppUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
-        AppUsersList[index] = response;
+        editAppUserDialogIsOpen = true;
+        editAppUser = appUsersList.FirstOrDefault(u => u.AppUserId == appUserId);
+    }
+
+    async Task UpdateAppUser(int appUserId)
+    {
+        editAppUserDialogIsOpen = false;
+        var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{appUserId}", editAppUser);
+        var index = appUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
+        appUsersList[index] = response;
         Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
-
     }
+
+    void SearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SearchCommand();
+        }
+    }
+
+    void SearchButton()
+    {
+        SearchCommand();
+    }
+
+    void ClearButton()
+    {
+        SearchTerm = String.Empty;
+        filtredAppUsers = null;
+    }
+
+    void SearchCommand()
+    {
+        if (!string.IsNullOrEmpty(SearchTerm))
+        {
+            string filter = SearchTerm.ToLower();
+            filtredAppUsers = appUsersList
+                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.Department.Name ?? "").ToLower().Contains(filter)).ToList();
+            if (filtredAppUsers.Count < 1)
+                Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
+        }
+        else
+        {
+            filtredAppUsers = null;
+        }
+    }
+
 }

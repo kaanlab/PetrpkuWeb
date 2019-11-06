@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,6 +60,7 @@ namespace PetrpkuWeb.Server.Controllers
 
             var listOfDuty = await _db.Duties
                 .Include(u => u.AssignedTo)
+                    .ThenInclude(d => d.Department)
                 .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
                 .OrderBy(d => d.DayOfDuty)
                 .AsNoTracking()
