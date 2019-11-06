@@ -137,9 +137,9 @@
                         isActive = "заблокирован";
                     }
                     <tr @key="user" class="@TrActiveCssClass">
-                        <th scope="row" >
+                        <th scope="row">
                             @(appUsersList.IndexOf(user) + 1)
-                            
+
                         </th>
                         <td class="@TdDutyCssClass">
                             @user.DisplayName
@@ -184,14 +184,14 @@
                 <InputDate @bind-Value="@editAppUser.Birthday"></InputDate>
                 <hr />
                 <label>Подразделение</label>
-                <select @bind="@editAppUser.DepartmentId">
+                <select class="custom-select" @bind="@editAppUser.DepartmentId">
                     @if (departments is null)
                     {
-                        <option value="">(loading...)</option>
+                        <option selected>(loading...)</option>
                     }
                     else
                     {
-                        <option value="-1" disabled>Выберите подразделение...</option>
+                        <option selected>Выберите подразделение...</option>
                         @foreach (var department in departments)
                         {
                             <option value="@department.DepartmentId"> @department.Name</option>
@@ -202,14 +202,14 @@
                 @if (identityUser.IsInRole(AuthRole.ADMIN))
                 {
                     <label>Корпус</label>
-                    <select @bind="@editAppUser.BuildingId">
+                    <select class="custom-select" @bind="@editAppUser.BuildingId">
                         @if (buildings is null)
                         {
-                            <option value="">(loading...)</option>
+                            <option selected>(loading...)</option>
                         }
                         else
                         {
-                            <option value="-1" disabled>Выберите корпус...</option>
+                            <option selected>Выберите корпус...</option>
                             @foreach (var building in buildings)
                             {
                                 <option value="@building.BuildingId">@building.Name</option>

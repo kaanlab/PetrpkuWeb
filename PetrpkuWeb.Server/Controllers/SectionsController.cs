@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +46,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(department);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpPost("sitesection/create")]
         public async Task<ActionResult<SiteSection>> AddSiteSectionAsync(SiteSection siteSection)
         {
@@ -59,7 +59,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(siteSection);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpPut("sitesection/update/{siteSectionId:int}")]
         public async Task<ActionResult> PutSiteSectionAsync(int siteSectionId, SiteSection siteSection)
         {
@@ -74,7 +74,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpDelete("sitesection/delete/{siteSectionId:int}")]
         public async Task<IActionResult> DeleteSiteSectionAsync(int siteSectionId)
         {
@@ -121,7 +121,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(department);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpPost("sitesection/create")]
         public async Task<ActionResult<SiteSubsection>> AddSiteSubSectionAsync(SiteSubsection siteSubSection)
         {
@@ -134,7 +134,7 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(siteSubSection);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpPut("sitesection/update/{siteSubSectionId:int}")]
         public async Task<ActionResult> PutSiteSectionAsync(int siteSubSectionId, SiteSubsection siteSubSection)
         {
@@ -149,7 +149,7 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+        [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpDelete("sitesection/delete/{siteSectionId:int}")]
         public async Task<IActionResult> DeleteSiteSubSectionAsync(int siteSubSectionId)
         {
