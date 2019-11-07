@@ -6,24 +6,19 @@ using System.Text;
 
 namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class ArticleViewModel
+    public class MessageViewModel
     {
-        public enum Style
-        {
-            [Display(Name = "Стандартное")] Standard,
-            [Display(Name = "Информационное")] Info,
-            [Display(Name = "Важное")] Danger,
-            [Display(Name = "Особое")] Warning
-        }
-
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
-
         [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
         public string Content { get; set; }
+        public DateTime CreateDate { get; set; }
+        public DateTime? UpdateDate { get; set; }
 
-        public Style Type { get; set; }
+        //
         public int AppUserId { get; set; }
-        public List<Attachment> Attachments { get; set; } 
+        public int SiteSectionId { get; set; }
+        public int? SiteSubsectionId { get; set; }
+        public List<Attachment> Attachments { get; set; }
     }
 }

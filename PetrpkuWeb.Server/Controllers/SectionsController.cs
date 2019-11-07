@@ -107,7 +107,18 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("sitesubsection/show/{siteSectionId:int}")]
+        [HttpGet("sitesubsections/{siteSectionId:int}")]
+        public async Task<ActionResult<List<SiteSubsection>>> GetSubSiteSectionsForSiteSection(int siteSectionId)
+        {
+            return await _db.SiteSubsections
+                .Include(s => s.SiteSection)
+                .Where(s => s.SiteSection.SiteSectionId == siteSectionId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("sitesubsection/show/{siteSubSectionId:int}")]
         public async Task<ActionResult<SiteSubsection>> GetSiteSubSection(int siteSubSectionId)
         {
             var department = await _db.SiteSubsections
@@ -150,7 +161,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
-        [HttpDelete("sitesection/delete/{siteSectionId:int}")]
+        [HttpDelete("sitesection/delete/{siteSubSectionId:int}")]
         public async Task<IActionResult> DeleteSiteSubSectionAsync(int siteSubSectionId)
         {
             if (ModelState.IsValid)

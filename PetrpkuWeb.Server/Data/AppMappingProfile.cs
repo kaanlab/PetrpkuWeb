@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +12,9 @@ namespace PetrpkuWeb.Server.Data
     {
         public AppMappingProfile()
         {
-            //CreateMap<List<AttachmentViewModel>, List<Attachment>>();
             CreateMap<ArticleViewModel, Article>();
             CreateMap<PostViewModel, Post>();
-            //.ForMember(dest => dest.Attachments, act => act.MapFrom(src => src.Attachments));
-
+            CreateMap<MessageViewModel, Message>();
         }
     }
 }

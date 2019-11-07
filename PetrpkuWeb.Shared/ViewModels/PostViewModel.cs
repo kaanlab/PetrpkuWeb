@@ -1,4 +1,4 @@
-﻿using PetrpkuWeb.Shared.Models;
+using PetrpkuWeb.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +16,6 @@ namespace PetrpkuWeb.Shared.ViewModels
         [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
         public string Content { get; set; }
 
-        public DateTime PublishDate { get; set; }
         public int AppUserId { get; set; }
         public int DepartmentId { get; set; }
         public List<Attachment> Attachments { get; set; }

@@ -10,69 +10,57 @@
 @inject IMatToaster Toaster
 
 
-<h2 class="col-12 mb-4 text-center">Новое объявление</h2>
+<h2 class="col-12 mb-4 text-center">Новая публикация на официальный сайт</h2>
 
 <div class="row">
     <div class="col-12">
-        <EditForm Model="NewArticle" OnValidSubmit="@AddArticle" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+        <EditForm Model="NewMessage" OnValidSubmit="@AddMessage" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
             <div class="col-12 mb-2">
                 <DataAnnotationsValidator />
                 <MatButton Raised="true" Icon="add" Type="submit" Label="Создать" />
             </div>
 
-            <div class="col-12 mb-2">
-                <select class="form-control" onchange="@CountryClicked">
-                    <option value="">-- Select Country --</option>
-                    @foreach (var country in countryList)
-                    {
-                        <option value="@country.CountryId">@country.CountryName</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-12 mb-2">
-                <select class="form-control" onchange="@CityClicked">
-                    <option value="">-- Select City --</option>
-                    @if (cityList != null)
-                    {
-                        @foreach (var city in cityList)
+            @if (siteSections is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <div class="col-12 mb-2">
+                    <select class="custom-select" @onchange="@SectionClicked">
+                        <option selected>--- Выберите раздел сайта ---</option>
+                        @foreach (var siteSection in siteSections)
                         {
-                            <option value="@city.CityName">@city.CityName</option>
+                            <option value="@siteSection.SiteSectionId">@siteSection.Name</option>
                         }
-                    }
-                </select>
-            </div>
+                    </select>
+                </div>
+
+                <div class="col-12 mb-2">
+                    <select class="custom-select" @onchange="@SubsectionClicked">
+                        <option selected>--- Выберите подраздел сайта ---</option>
+                        @if (siteSubsections is { })
+                        {
+                            @foreach (var subsection in siteSubsections)
+                            {
+                                <option value="@subsection.SiteSubsectionId">@subsection.Title</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
 
             <div class="col-12 mb-2">
-                <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewArticle.Title"></MatTextField>
-                <ValidationMessage For="() => NewArticle.Title" />
-            </div>
-
-            <div class="form-group">
-                <label>Аннотация</label>
-                <input class="form-control" type="text" placeholder=@NewArticle.Content.Truncate(200) readonly>
+                <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@NewMessage.Title"></MatTextField>
+                <ValidationMessage For="() => NewMessage.Title" />
             </div>
 
             <label>Текст</label>
-            <div class="row">
-                <div class="col-6">
-                    <textarea class="form-control" rows="15" @bind-value="NewArticle.Content" @bind-value:event="oninput"></textarea>
-                    <ValidationMessage For="() => NewArticle.Content" />
-                </div>
-                <div class="col-6 alert alert-info" role="alert">
-                    <MarkdownView Content="@NewArticle.Content" />
-                </div>
+            <div class="col-12 mb-2">
+                <textarea class="form-control" rows="15" @bind-value="NewMessage.Content" @bind-value:event="oninput"></textarea>
+                <ValidationMessage For="() => NewMessage.Content" />
             </div>
 
-            <div class="col-12 mb-2">
-                <label>Выберете важность сообщения</label>
-                <select class="form-control" @bind="NewArticle.Type">
-                    @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
-                    {
-                        <option value="@styleType">@styleType.DisplayName()</option>
-                    }
-                </select>
-            </div>
             <table class="table">
                 @foreach (var attachment in listOfAttachments)
                 {
@@ -146,7 +134,7 @@
 
     private int identityUserId;
 
-    private ArticleViewModel NewArticle { get; set; } = new ArticleViewModel();
+    private MessageViewModel NewMessage { get; set; } = new MessageViewModel();
     private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
     private Attachment CurrentAttachment { get; set; } = new Attachment();
 
@@ -157,11 +145,19 @@
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
+    List<SiteSection> siteSections;
+    List<SiteSubsection> siteSubsections;
+
+    string siteSectionId;
+    string siteSubSectionId;
+
 
     protected override async Task OnInitializedAsync()
     {
         var identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+
+        siteSections = await HttpClient.GetJsonAsync<List<SiteSection>>("api/sections/sitesections/all");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -205,12 +201,21 @@
         await ClearFileInfo();
     }
 
-    async Task AddArticle()
+    async Task AddMessage()
     {
-        NewArticle.AppUserId = identityUserId;
-        NewArticle.Attachments = new List<Attachment>();
-        NewArticle.Attachments.AddRange(listOfAttachments);
-        var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/articles/create", NewArticle);
+        int id, subId;
+        if (int.TryParse(siteSectionId, out id))
+        {
+            NewMessage.SiteSectionId = id;
+        }
+        if (int.TryParse(siteSubSectionId, out subId))
+        {
+            NewMessage.SiteSubsectionId = subId;
+        }
+        NewMessage.AppUserId = identityUserId;
+        NewMessage.Attachments = new List<Attachment>();
+        NewMessage.Attachments.AddRange(listOfAttachments);
+        var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/messages/create", NewMessage);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
         NavigationManager.NavigateTo("/");
     }
@@ -237,6 +242,20 @@
         Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
 
         dialogIsOpen = false;
+    }
+
+    async Task SectionClicked(ChangeEventArgs sectionEvent)
+    {
+        siteSubsections.Clear();
+        siteSectionId = sectionEvent.Value.ToString();
+        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubsection>>($"api/sections/sitesubsections/{siteSectionId}");
+        this.StateHasChanged();
+    }
+
+    void SubsectionClicked(ChangeEventArgs cityEvent)
+    {
+        siteSubSectionId = cityEvent.Value.ToString();
+        this.StateHasChanged();
     }
 }
 
