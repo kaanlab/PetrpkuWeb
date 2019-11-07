@@ -11,23 +11,29 @@
 <h2 class="col-12 mb-4 text-center">Справочники</h2>
 
 <div class="row md-2">
-    <div class="col-6">
+    <div class="col-4">
         <MatButton Outlined="true" Icon="add" OnClick="@(e => { newDepartmentDialogIsOpen = true; })" Label="Добавить подразделение" />
     </div>
-    <div class="col-6">
+    <div class="col-4">
         <MatButton Outlined="true" Icon="add" OnClick="@(e => { newBuildingDialogIsOpen = true; })" Label="Добавить здание" />
+    </div>
+    <div class="col-2">
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSectionDialogIsOpen = true; })" Label="Добавить раздел сайта" />
+    </div>
+    <div class="col-2">
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSubSectionDialogIsOpen = true; })" Label="Добавить подраздел сайта" />
     </div>
 </div>
 <div class="row">
-    <div class="col-6">
+    <div class="col-4">
         <h2 class="text-center">Список подразделений</h2>
-        @if (Departments is null)
+        @if (departments is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
         }
-        else if (Departments.Count == 0)
+        else if (departments.Count == 0)
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
@@ -45,7 +51,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var department in Departments)
+                    @foreach (var department in departments)
                     {
                         @if (!department.IsVisible)
                         {
@@ -65,15 +71,15 @@
             </table>
         }
     </div>
-    <div class="col-6">
+    <div class="col-4">
         <h2 class="text-center">Список зданий</h2>
-        @if (Buildings is null)
+        @if (buildings is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
         }
-        else if (Buildings.Count == 0)
+        else if (buildings.Count == 0)
         {
             <div class="card border-danger mb-3">
                 <div class="card-body">
@@ -91,7 +97,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var building in Buildings)
+                    @foreach (var building in buildings)
                     {
                         <tr @key="building">
                             <td>@building.Name</td>
@@ -100,6 +106,39 @@
                     }
                 </tbody>
             </table>
+        }
+    </div>
+    <div class="col-4">
+        <h2 class="text-center">Разделы официального сайта</h2>
+        @if (siteSections is null)
+        {
+            <div class="spinner-border text-primary text-center" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        }
+        else if (siteSections.Count == 0)
+        {
+            <div class="card border-danger mb-3">
+                <div class="card-body">
+                    <p class="card-text">Список пуст</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var siteSection in siteSections)
+                {
+                    <li class="list-group-item">@siteSection.Name</li>
+                    @if (siteSection.SiteSubsections.Any())
+                    {
+                        @foreach (var siteSubSection in siteSection.SiteSubsections)
+                        {
+                            <li class="list-group-item">@siteSubSection.Title</li>
+                        }
+                    }
+                }
+            </ul>
         }
     </div>
 </div>
@@ -168,18 +207,60 @@
     </EditForm>
 }
 
+<EditForm Model="@NewSiteSection">
+    <MatDialog @bind-IsOpen="@newSiteSectionDialogIsOpen">
+        <MatDialogTitle>Новый раздел сайта</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Название" @bind-Value="@NewSiteSection.Name"></MatTextField>            
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newSiteSectionDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddNewSiteSection" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
+<EditForm Model="@NewSiteSubSection">
+    <MatDialog @bind-IsOpen="@newSiteSubSectionDialogIsOpen">
+        <MatDialogTitle>Новый подраздел сайта</MatDialogTitle>
+        <MatDialogContent>
+            <label>Раздел сайта</label>
+            <select class="custom-select" @bind="@NewSiteSubSection.SiteSectionId">
+                @if (siteSections is null)
+                {
+                    <option selected>(loading...)</option>
+                }
+                else
+                {
+                    <option selected>--- Выберите раздел сайта ---</option>
+                    @foreach (var siteSection in siteSections)
+                    {
+                        <option value="@siteSection.SiteSectionId">@siteSection.Name</option>
+                    }
+                }
+            </select>
+            <MatTextField Label="Название" @bind-Value="@NewSiteSection.Name"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { newSiteSubSectionDialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="check" Type="submit" OnClick="@AddNewSiteSubSection" Label="Добавить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
+
 @code {
-
-
-    private List<Department> Departments { get; set; }
-    private List<Building> Buildings { get; set; }
-
-    string TrCssClass;
 
     Department NewDepartment { get; set; } = new Department();
     Building NewBuilding { get; set; } = new Building();
+    SiteSection NewSiteSection { get; set; } = new SiteSection();
+    SiteSubsection NewSiteSubSection { get; set; } = new SiteSubsection();
 
     Department currentDepartment;
+    List<Department> departments;
+    List<Building> buildings;
+    List<SiteSection> siteSections;
+
+    string TrCssClass;
 
     private string _departmentName;
     public string DepatrmentName
@@ -207,15 +288,20 @@
 
     bool newDepartmentDialogIsOpen = false;
     bool newBuildingDialogIsOpen = false;
+    bool newSiteSectionDialogIsOpen = false;
+    bool newSiteSubSectionDialogIsOpen = false;
 
     bool editDepartmentDialogIsOpen = false;
     bool editBuildingDialogIsOpen = false;
+    bool editSiteSectionDialogIsOpen = false;
+    bool editSiteSubSectionDialogIsOpen = false;
 
 
     protected async override Task OnInitializedAsync()
     {
-        Departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-        Buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
+        departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
+        buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
+        siteSections = await HttpClient.GetJsonAsync<List<SiteSection>>("api/sections/all");
     }
 
     async Task AddNewDepartment()
@@ -223,7 +309,7 @@
         newDepartmentDialogIsOpen = false;
         var response = await HttpClient.PostJsonAsync<Department>("api/departments/create", NewDepartment);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
-        Departments.Add(response);
+        departments.Add(response);
         NewDepartment = new Department();
     }
 
@@ -253,7 +339,7 @@
     {
         editDepartmentDialogIsOpen = false;
         var response = await HttpClient.DeleteAsync($"api/departments/delete/{currentDepartment.DepartmentId}");
-        Departments.Remove(currentDepartment);
+        departments.Remove(currentDepartment);
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         currentDepartment = null;
     }
@@ -263,7 +349,7 @@
         newBuildingDialogIsOpen = false;
         var response = await HttpClient.PostJsonAsync<Building>("api/buildings/create", NewBuilding);
         Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
-        Buildings.Add(response);
+        buildings.Add(response);
         NewBuilding = new Building();
     }
 
@@ -293,8 +379,26 @@
     {
         editBuildingDialogIsOpen = false;
         var response = await HttpClient.DeleteAsync($"api/buildings/delete/{currentBuilding.BuildingId}");
-        Buildings.Remove(currentBuilding);
+        buildings.Remove(currentBuilding);
         Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         currentBuilding = null;
+    }
+
+    async Task AddNewSiteSection()
+    {
+        newSiteSectionDialogIsOpen = false;
+        var response = await HttpClient.PostJsonAsync<SiteSection>("api/sections/sitesection/create", NewSiteSection);
+        Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+        siteSections.Add(response);
+        NewSiteSection = new SiteSection();
+    }
+
+    async Task AddNewSiteSubSection()
+    {
+        newSiteSubSectionDialogIsOpen = false;
+        var response = await HttpClient.PostJsonAsync<SiteSection>("api/sections/sitesection/create", NewSiteSection);
+        Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+        siteSections.Add(response);
+        NewSiteSubSection = new SiteSubsection();
     }
 }

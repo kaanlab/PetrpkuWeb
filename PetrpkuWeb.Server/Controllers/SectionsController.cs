@@ -33,6 +33,16 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("all")]
+        public async Task<ActionResult<List<SiteSection>>> GetSiteSectionsAndSubSections()
+        {
+            return await _db.SiteSections
+                .Include(ss => ss.SiteSubsections)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        [AllowAnonymous]
         [HttpGet("sitesection/show/{siteSectionId:int}")]
         public async Task<ActionResult<SiteSection>> GetSiteSection(int siteSectionId)
         {
