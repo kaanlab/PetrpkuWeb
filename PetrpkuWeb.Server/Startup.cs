@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,16 +38,16 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
-#if DEBUG
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
-            services.AddDbContext<AppDbContext>(
-                options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
-#else
+//#if DEBUG
+ //           services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+  //          services.AddDbContext<AppDbContext>(
+   //             options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
+//#else
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
             services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
-#endif
+//#endif
 
             services.AddDefaultIdentity<AppUserIdentity>()
                 .AddEntityFrameworkStores<AppDbContext>();
@@ -92,13 +93,17 @@ namespace PetrpkuWeb.Server
 
             //app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
+            var provider = new FileExtensionContentTypeProvider();
+            // Add new mappings
+            provider.Mappings[".m3u8"] = "application/x-mpegURL";
 
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "uploadfolder")),
-                RequestPath = "/uploadfolder"
+                RequestPath = "/uploadfolder",
+                ContentTypeProvider = provider
             });
 
             app.UseRouting();

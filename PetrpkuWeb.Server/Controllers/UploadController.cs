@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -248,7 +248,7 @@ namespace PetrpkuWeb.Server.Controllers
 
         private string UploadPath()
         {
-            var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("MMyyyy"));
+            var dirPath = Path.Combine("uploadfolder", DateTime.Now.ToString("ddMMyyyy"));
 
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);

@@ -10,7 +10,7 @@
 @inject IMatToaster Toaster
 
 
-<h2 class="col-12 mb-4 text-center">Новая публикация на официальный сайт</h2>
+<h2 class="col-12 mb-4 text-center">Заявка на официальный сайт</h2>
 
 <div class="row">
     <div class="col-12">
@@ -57,7 +57,7 @@
 
             <label>Текст</label>
             <div class="col-12 mb-2">
-                <textarea class="form-control" rows="15" @bind-value="NewMessage.Content" @bind-value:event="oninput"></textarea>
+                <textarea class="form-control" rows="15" @bind="NewMessage.Content"></textarea>
                 <ValidationMessage For="() => NewMessage.Content" />
             </div>
 

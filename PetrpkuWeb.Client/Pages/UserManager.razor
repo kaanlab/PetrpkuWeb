@@ -191,7 +191,7 @@
                     }
                     else
                     {
-                        <option selected>Выберите подразделение...</option>
+                        <option selected>--- Выберите подразделение ---</option>
                         @foreach (var department in departments)
                         {
                             <option value="@department.DepartmentId"> @department.Name</option>
@@ -209,7 +209,7 @@
                         }
                         else
                         {
-                            <option selected>Выберите корпус...</option>
+                            <option selected>--- Выберите корпус ---</option>
                             @foreach (var building in buildings)
                             {
                                 <option value="@building.BuildingId">@building.Name</option>
@@ -250,7 +250,7 @@
                 }
                 else
                 {
-                    <MatOption Value="-1" Disabled="true">Выберите пользователя...</MatOption>
+                    <MatOption Value="-1" Disabled="true">--- Выберите пользователя ---</MatOption>
                     @foreach (var user in ldapUsers)
                     {
                         <MatOption Value="@user.UserName">@user.DisplayName</MatOption>
