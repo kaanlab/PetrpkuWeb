@@ -1,14 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Shared.Models;
 
 namespace PetrpkuWeb.Server.Controllers
@@ -20,10 +17,12 @@ namespace PetrpkuWeb.Server.Controllers
         private readonly string _urlMil = "http://petrpku.mil.ru/more/Novosti/rss";
         private readonly string _urlCalend = "https://www.calend.ru/img/export/today-events.rss";
         private readonly IMemoryCache _cache;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public RssFeedController(IMemoryCache memoryCache)
+        public RssFeedController(IMemoryCache memoryCache, IHttpClientFactory clientFactory)
         {
             _cache = memoryCache;
+            _clientFactory = clientFactory;
         }
 
         [HttpGet("mil")]
@@ -43,10 +42,8 @@ namespace PetrpkuWeb.Server.Controllers
             if (!_cache.TryGetValue("ListOfRssMil", out List<RssMil> rssNews))
             {
                 string response;
-                using (var client = new HttpClient())
-                {
-                    response = await client.GetStringAsync(_urlMil);
-                }
+                var client = _clientFactory.CreateClient();
+                response = await client.GetStringAsync(_urlMil);
 
                 if (response is { })
                 {
@@ -73,23 +70,21 @@ namespace PetrpkuWeb.Server.Controllers
             if (!_cache.TryGetValue("ListOfRssCalend", out List<RssCalend> rssNews))
             {
                 string response;
-                using (var client = new HttpClient())
-                {
-                    response = await client.GetStringAsync(_urlCalend);
-                }
+                var client = _clientFactory.CreateClient();
+                response = await client.GetStringAsync(_urlCalend);
 
                 if (response is { })
                 {
                     var document = XDocument.Parse(response);
 
                     rssNews = (from descendant in document.Descendants("item")
-                        select new RssCalend()
-                        {
-                            Description = descendant.Element("description").Value,
-                            Title = descendant.Element("title").Value,
-                            Link = descendant.Element("link").Value,
-                            Guid = descendant.Element("guid").Value
-                        }).ToList();
+                               select new RssCalend()
+                               {
+                                   Description = descendant.Element("description").Value,
+                                   Title = descendant.Element("title").Value,
+                                   Link = descendant.Element("link").Value,
+                                   Guid = descendant.Element("guid").Value
+                               }).ToList();
 
                     _cache.Set("ListOfRssCalend", rssNews, TimeSpan.FromHours(1));
                 }

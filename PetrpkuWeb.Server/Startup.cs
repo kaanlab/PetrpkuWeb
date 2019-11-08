@@ -76,6 +76,7 @@ namespace PetrpkuWeb.Server
              });
 
             //services.AddCors();
+            services.AddHttpClient();
             services.AddMemoryCache();
             services.AddAutoMapper(typeof(Data.AppMappingProfile));
         }
