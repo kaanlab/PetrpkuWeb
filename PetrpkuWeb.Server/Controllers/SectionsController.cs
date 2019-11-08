@@ -132,7 +132,6 @@ namespace PetrpkuWeb.Server.Controllers
         public async Task<ActionResult<SiteSubsection>> GetSiteSubSection(int siteSubSectionId)
         {
             var department = await _db.SiteSubsections
-                .Include(s => s.SiteSection)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.SiteSubsectionId == siteSubSectionId);
 
@@ -143,23 +142,24 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
-        [HttpPost("sitesection/create")]
+        [HttpPost("sitsubesection/create")]
         public async Task<ActionResult<SiteSubsection>> AddSiteSubSectionAsync(SiteSubsection siteSubSection)
         {
             if (siteSubSection is null)
                 return BadRequest();
-
+            
             _db.SiteSubsections.Add(siteSubSection);
+            _db.SiteSections.Update(siteSubSection.SiteSection);
             await _db.SaveChangesAsync();
 
             return Ok(siteSubSection);
         }
 
         [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
-        [HttpPut("sitesection/update/{siteSubSectionId:int}")]
+        [HttpPut("sitesubsection/update/{siteSubSectionId:int}")]
         public async Task<ActionResult> PutSiteSectionAsync(int siteSubSectionId, SiteSubsection siteSubSection)
         {
-            if (siteSubSectionId == siteSubSection.SiteSectionId)
+            if (siteSubSectionId == siteSubSection.SiteSubsectionId)
             {
                 _db.Attach(siteSubSection).State = EntityState.Modified;
                 await _db.SaveChangesAsync();
@@ -171,7 +171,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
-        [HttpDelete("sitesection/delete/{siteSubSectionId:int}")]
+        [HttpDelete("sitesubsection/delete/{siteSubSectionId:int}")]
         public async Task<IActionResult> DeleteSiteSubSectionAsync(int siteSubSectionId)
         {
             if (ModelState.IsValid)

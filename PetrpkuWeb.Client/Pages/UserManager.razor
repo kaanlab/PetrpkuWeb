@@ -118,38 +118,20 @@
             <tbody>
                 @foreach (var user in appUsersList)
                 {
-                    @if (user.IsDuty)
-                    {
-                        TdDutyCssClass = "table-danger";
-                        isDuty = "дежурный";
-                    }
-                    else
-                    {
-                        TdDutyCssClass = null;
-                    }
-                    @if (user.IsActive)
-                    {
-                        TrActiveCssClass = null;
-                    }
-                    else
-                    {
-                        TrActiveCssClass = "bg-danger";
-                        isActive = "заблокирован";
-                    }
-                    <tr @key="user" class="@TrActiveCssClass">
+                    <tr @key="user">
                         <th scope="row">
                             @(appUsersList.IndexOf(user) + 1)
 
                         </th>
-                        <td class="@TdDutyCssClass">
+                        <td>
                             @user.DisplayName
                             @if (!user.IsActive)
                             {
-                                <small class="text-dark">@isActive</small>
+                                <span class="badge badge-danger">Заблокирован</span>
                             }
                             @if (user.IsDuty)
                             {
-                                <small class="text-muted">@isDuty</small>
+                                <span class="badge badge-primary">Дежурный</span>
                             }
                         </td>
                         <td>@user.LastName</td>
@@ -163,7 +145,7 @@
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
                         <td>@user.MobPhone</td>
-                        <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                        <td><MatButton Icon="edit" Outlined="true" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
                     </tr>
                 }
             </tbody>
@@ -283,10 +265,6 @@
     List<Building> buildings;
     List<AppUser> filtredAppUsers;
 
-    string TdDutyCssClass;
-    string isDuty;
-    string TrActiveCssClass;
-    string isActive;
     bool editAppUserDialogIsOpen = false;
     bool newUserDialogIsOpen = false;
 

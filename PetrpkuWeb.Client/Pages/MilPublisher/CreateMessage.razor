@@ -246,7 +246,7 @@
 
     async Task SectionClicked(ChangeEventArgs sectionEvent)
     {
-        siteSubsections.Clear();
+        //siteSubsections.Clear();
         siteSectionId = sectionEvent.Value.ToString();
         siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubsection>>($"api/sections/sitesubsections/{siteSectionId}");
         this.StateHasChanged();

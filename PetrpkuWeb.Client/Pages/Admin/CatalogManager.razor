@@ -10,23 +10,20 @@
 
 <h2 class="col-12 mb-4 text-center">Справочники</h2>
 
-<div class="row md-2">
+<div class="row mb-2">
     <div class="col-4">
-        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newDepartmentDialogIsOpen = true; })" Label="Добавить подразделение" />
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newDepartmentDialogIsOpen = true; })" Label="подразделение" />
     </div>
     <div class="col-4">
-        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newBuildingDialogIsOpen = true; })" Label="Добавить здание" />
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newBuildingDialogIsOpen = true; })" Label="здание" />
     </div>
-    <div class="col-2">
-        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSectionDialogIsOpen = true; })" Label="Добавить раздел сайта" />
-    </div>
-    <div class="col-2">
-        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSubSectionDialogIsOpen = true; })" Label="Добавить подраздел сайта" />
+    <div class="col-4">
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSectionDialogIsOpen = true; })" Label="раздел сайта" Class="mb-2" />
+        <MatButton Outlined="true" Icon="add" OnClick="@(e => { newSiteSubSectionDialogIsOpen = true; })" Label="подраздел сайта" />
     </div>
 </div>
 <div class="row">
     <div class="col-4">
-        <h2 class="text-center">Список подразделений</h2>
         @if (departments is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
@@ -43,36 +40,28 @@
         }
         else
         {
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Название</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var department in departments)
+            <ul class="list-group">
+                <li class="list-group-item"><MatIcon Icon="work" />Список подразделений</li>
+                @foreach (var department in departments)
+                {
+                    @if (!department.IsVisible)
                     {
-                        @if (!department.IsVisible)
-                        {
-                            TrCssClass = "table-danger";
-                        }
-                        else
-                        {
-                            TrCssClass = null;
-                        }
-
-                        <tr @key="department" class="@TrCssClass">
-                            <td>@department.Name</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department))" Label="Редактировать" /></td>
-                        </tr>
+                        ListCssClass = "list-group-item-danger";
                     }
-                </tbody>
-            </table>
+                    else
+                    {
+                        ListCssClass = null;
+                    }
+
+                    <li class="list-group-item @ListCssClass" @key="department">
+                        @department.Name
+                        <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditDepartmentDialog(department))" Class="float-right" />
+                    </li>
+                }
+            </ul>
         }
     </div>
     <div class="col-4">
-        <h2 class="text-center">Список зданий</h2>
         @if (buildings is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
@@ -89,27 +78,19 @@
         }
         else
         {
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Название</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var building in buildings)
-                    {
-                        <tr @key="building">
-                            <td>@building.Name</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building))" Label="Редактировать" /></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <ul class="list-group">
+                <li class="list-group-item"><MatIcon Icon="location_city" />Список зданий</li>
+                @foreach (var building in buildings)
+                {
+                    <li class="list-group-item" @key="building">
+                        @building.Name
+                        <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditBuildingDialog(building))" Class="float-right" />
+                    </li>
+                }
+            </ul>
         }
     </div>
     <div class="col-4">
-        <h2 class="text-center">Разделы официального сайта</h2>
         @if (siteSections is null)
         {
             <div class="spinner-border text-primary text-center" role="status">
@@ -127,14 +108,23 @@
         else
         {
             <ul class="list-group">
+                <li class="list-group-item"><MatIcon Icon="language" />Официальный сайт</li>
                 @foreach (var siteSection in siteSections)
                 {
-                    <li class="list-group-item">@siteSection.Name</li>
-                    @if (siteSection.SiteSubsections.Any())
+                    <li class="list-group-item">
+                        @siteSection.Name
+                        <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditSiteSectionDialog(siteSection))" Class="float-right" />
+                    </li>
+                    @if (siteSection.SiteSubsections is { })
                     {
                         @foreach (var siteSubSection in siteSection.SiteSubsections)
                         {
-                            <li class="list-group-item">@siteSubSection.Title</li>
+                            <li class="list-group-item" style="padding-left: 60px;">
+                                @siteSubSection.Title
+                                <span class="text-right">
+                                    <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditSiteSubSectionDialog(siteSubSection))" Class="float-right" />
+                                </span>
+                            </li>
                         }
                     }
                 }
@@ -211,7 +201,7 @@
     <MatDialog @bind-IsOpen="@newSiteSectionDialogIsOpen">
         <MatDialogTitle>Новый раздел сайта</MatDialogTitle>
         <MatDialogContent>
-            <MatTextField Label="Название" @bind-Value="@NewSiteSection.Name"></MatTextField>            
+            <MatTextField Label="Название" @bind-Value="@NewSiteSection.Name"></MatTextField>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { newSiteSectionDialogIsOpen = false; })" Label="Отмена" />
@@ -219,6 +209,23 @@
         </MatDialogActions>
     </MatDialog>
 </EditForm>
+
+@if (currentSiteSection is { })
+{
+    <EditForm Model="@currentSiteSection">
+        <MatDialog @bind-IsOpen="@editSiteSectionDialogIsOpen">
+            <MatDialogTitle>Редактировать раздел сайта</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Название" @bind-Value="@SiteSectionName"></MatTextField>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@CancelUpdateSiteSection" Label="Отмена" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateSiteSection())" Label="Обновить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteSiteSection())" Label="Удалить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
 
 <EditForm Model="@NewSiteSubSection">
     <MatDialog @bind-IsOpen="@newSiteSubSectionDialogIsOpen">
@@ -239,7 +246,7 @@
                     }
                 }
             </select>
-            <MatTextField Label="Название" @bind-Value="@NewSiteSection.Name"></MatTextField>
+            <MatTextField Label="Название" @bind-Value="@NewSiteSubSection.Title"></MatTextField>
         </MatDialogContent>
         <MatDialogActions>
             <MatButton Icon="undo" OnClick="@(e => { newSiteSubSectionDialogIsOpen = false; })" Label="Отмена" />
@@ -248,6 +255,23 @@
     </MatDialog>
 </EditForm>
 
+@if (currentSiteSubSection is { })
+{
+    <EditForm Model="@currentSiteSubSection">
+        <MatDialog @bind-IsOpen="@editSiteSubSectionDialogIsOpen">
+            <MatDialogTitle>Редактировать подраздел сайта</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Название" @bind-Value="@SiteSubSectionName"></MatTextField>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@CancelUpdateSiteSubSection" Label="Отмена" />
+                <MatButton Icon="" Type="submit" OnClick="@(() => UpdateSiteSubSection())" Label="Обновить" />
+                <MatButton Icon="delete_forever" OnClick="@(() => DeleteSiteSubSection())" Label="Удалить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
+
 @code {
 
     Department NewDepartment { get; set; } = new Department();
@@ -255,13 +279,13 @@
     SiteSection NewSiteSection { get; set; } = new SiteSection();
     SiteSubsection NewSiteSubSection { get; set; } = new SiteSubsection();
 
-    Department currentDepartment;
     List<Department> departments;
     List<Building> buildings;
     List<SiteSection> siteSections;
 
-    string TrCssClass;
+    string ListCssClass;
 
+    Department currentDepartment;
     private string _departmentName;
     public string DepatrmentName
     {
@@ -274,7 +298,6 @@
     }
 
     Building currentBuilding;
-
     private string _buildingName;
     public string BuildingName
     {
@@ -282,6 +305,30 @@
         set
         {
             _buildingName = value;
+            this.StateHasChanged();
+        }
+    }
+
+    SiteSection currentSiteSection;
+    private string _siteSectionName;
+    public string SiteSectionName
+    {
+        get => _siteSectionName;
+        set
+        {
+            _siteSectionName = value;
+            this.StateHasChanged();
+        }
+    }
+
+    SiteSubsection currentSiteSubSection;
+    private string _siteSubSectionName;
+    public string SiteSubSectionName
+    {
+        get => _siteSubSectionName;
+        set
+        {
+            _siteSubSectionName = value;
             this.StateHasChanged();
         }
     }
@@ -393,12 +440,77 @@
         NewSiteSection = new SiteSection();
     }
 
+    void CancelUpdateSiteSection()
+    {
+        editSiteSectionDialogIsOpen = false;
+        currentSiteSection = null;
+    }
+
+    void OpenEditSiteSectionDialog(SiteSection siteSection)
+    {
+        editSiteSectionDialogIsOpen = true;
+        currentSiteSection = siteSection;
+        SiteSectionName = currentSiteSection.Name;
+    }
+
+    async Task DeleteSiteSection()
+    {
+        editSiteSectionDialogIsOpen = false;
+        var response = await HttpClient.DeleteAsync($"api/sections/sitesection/delete/{currentSiteSection.SiteSectionId}");
+        siteSections.Remove(currentSiteSection);
+        Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
+        currentSiteSection = null;
+    }
+
+    async Task UpdateSiteSection()
+    {
+        editSiteSectionDialogIsOpen = false;
+        currentSiteSection.Name = SiteSectionName;
+        await HttpClient.PutJsonAsync<SiteSection>($"api/sections/sitesection/update/{currentSiteSection.SiteSectionId}", currentSiteSection);
+        Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+        currentSiteSection = null;
+    }
+
     async Task AddNewSiteSubSection()
     {
         newSiteSubSectionDialogIsOpen = false;
-        var response = await HttpClient.PostJsonAsync<SiteSection>("api/sections/sitesection/create", NewSiteSection);
+        var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == NewSiteSubSection.SiteSectionId);
+        NewSiteSubSection.SiteSection = siteSection;
+        var response = await HttpClient.PostJsonAsync<SiteSubsection>("api/sections/sitsubesection/create", NewSiteSubSection);
         Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
-        siteSections.Add(response);
+        siteSection.SiteSubsections.Add(response);
         NewSiteSubSection = new SiteSubsection();
+    }
+
+    void CancelUpdateSiteSubSection()
+    {
+        editSiteSubSectionDialogIsOpen = false;
+        currentSiteSubSection = null;
+    }
+
+    void OpenEditSiteSubSectionDialog(SiteSubsection siteSubSection)
+    {
+        editSiteSubSectionDialogIsOpen = true;
+        currentSiteSubSection = siteSubSection;
+        SiteSubSectionName = currentSiteSubSection.Title;
+    }
+
+    async Task DeleteSiteSubSection()
+    {
+        editSiteSubSectionDialogIsOpen = false;
+        var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == currentSiteSubSection.SiteSectionId);
+        var response = await HttpClient.DeleteAsync($"api/sections/sitesubsection/delete/{currentSiteSubSection.SiteSubsectionId}");
+        siteSection.SiteSubsections.Remove(currentSiteSubSection);
+        Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
+        currentSiteSubSection = null;
+    }
+
+    async Task UpdateSiteSubSection()
+    {
+        editSiteSubSectionDialogIsOpen = false;
+        currentSiteSubSection.Title = SiteSubSectionName;
+        await HttpClient.PutJsonAsync<SiteSubsection>($"api/sections/sitesubsection/update/{currentSiteSubSection.SiteSubsectionId}", currentSiteSubSection);
+        Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+        currentSiteSubSection = null;
     }
 }
