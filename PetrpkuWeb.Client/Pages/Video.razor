@@ -1,10 +1,16 @@
 @page "/video"
 
-
+@inject IJSRuntime JSRuntime
 
 <h3>video</h3>
 <video id="video"></video>
 
 @code {
 
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JSRuntime.InvokeVoidAsync("hlsPlayer");
+
+    }
 }

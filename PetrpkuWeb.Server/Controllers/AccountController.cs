@@ -51,6 +51,12 @@ namespace PetrpkuWeb.Server.Controllers
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
                 return Unauthorized(new { message = "Username or password can't be null" });
 
+            var idettityUser = await _db.Users.Include(u => u.AssosiatedUser).SingleOrDefaultAsync(u => u.UserName == model.Username);
+            if(idettityUser is null || !idettityUser.AssosiatedUser.IsActive)
+            {
+                return BadRequest(new LoginResult { Successful = false, Error = $"User locked {idettityUser.AssosiatedUser.DisplayName}" });
+            }
+
             var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
             if (ldapUser is null)
             {
@@ -66,11 +72,6 @@ namespace PetrpkuWeb.Server.Controllers
 #else
                 return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
 #endif
-            }
-
-            if (appUserIdentity.LockoutEnabled)
-            {
-                return BadRequest(new LoginResult { Successful = false, Error = $"User locked {appUserIdentity.UserName}" });
             }
 
             if (appUserIdentity.Email != ldapUser.Email)
