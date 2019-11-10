@@ -147,9 +147,9 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (siteSubSection is null)
                 return BadRequest();
-            
-            _db.SiteSubsections.Add(siteSubSection);
+
             _db.SiteSections.Update(siteSubSection.SiteSection);
+            _db.SiteSubsections.Add(siteSubSection);            
             await _db.SaveChangesAsync();
 
             return Ok(siteSubSection);

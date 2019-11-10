@@ -22,7 +22,7 @@ namespace PetrpkuWeb.Client.Pages
         public IMatToaster Toaster { get; set; }
 
         [CascadingParameter]
-        private Task<AuthenticationState> authenticationStateTask { get; set; }
+        private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
         private LdapUser LdapUser { get; set; } = new LdapUser();
 
@@ -41,7 +41,7 @@ namespace PetrpkuWeb.Client.Pages
 
         protected async override Task OnInitializedAsync()
         {
-            identityUser = (await authenticationStateTask).User;
+            identityUser = (await AuthenticationStateTask).User;
 
             appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
             departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");

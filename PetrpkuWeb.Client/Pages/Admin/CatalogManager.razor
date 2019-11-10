@@ -227,7 +227,7 @@
         <MatDialogTitle>Новый подраздел сайта</MatDialogTitle>
         <MatDialogContent>
             <label>Раздел сайта</label>
-            <select class="custom-select" @bind="@NewSiteSubSection.SiteSectionId">
+            <select class="custom-select" @bind="@dropDownSiteSectionId">
                 @if (siteSections is null)
                 {
                     <option selected>(loading...)</option>

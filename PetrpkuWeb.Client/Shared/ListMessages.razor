@@ -1,0 +1,47 @@
+@inject HttpClient HttpClient
+
+
+<table class="table">
+    <tbody>
+        <ListTemplate Loader="@LoadMessages">
+            <LoadingContent>
+                <tr>
+                    <td class="preloader-wrapper big active">
+                        <div class="spinner-layer spinner-blue-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div><div class="gap-patch">
+                                <div class="circle"></div>
+                            </div><div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </LoadingContent>
+            <EmptyContent>
+                <tr>
+                    <td>Нет заявок...</td>
+                </tr>
+            </EmptyContent>
+            <ItemContent Context="item">
+                <tr @key="item">
+                    <td>@item.Author.DisplayName</td>
+                    <td>@item.Section.Name</td>
+                    <td>@item.Subsection.Title</td>
+                    <td>@item.Title.Truncate(50)</td>
+                    <td>@item.CreateDate.ToShortDateString()</td>
+                </tr>
+            </ItemContent>
+        </ListTemplate>
+    </tbody>
+</table>
+
+
+@code {
+
+    async Task<List<Message>> LoadMessages()
+    {
+        return await HttpClient.GetJsonAsync<List<Message>>("api/messages/all");
+    }
+}

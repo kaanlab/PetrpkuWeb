@@ -77,6 +77,8 @@ namespace PetrpkuWeb.Client.Pages.Admin
             }
         }
 
+        string dropDownSiteSectionId;
+
         bool newDepartmentDialogIsOpen = false;
         bool newBuildingDialogIsOpen = false;
         bool newSiteSectionDialogIsOpen = false;
@@ -218,11 +220,12 @@ namespace PetrpkuWeb.Client.Pages.Admin
         async Task AddNewSiteSubSection()
         {
             newSiteSubSectionDialogIsOpen = false;
-            var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == NewSiteSubSection.SiteSectionId);
+            var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == int.Parse(dropDownSiteSectionId));
             NewSiteSubSection.SiteSection = siteSection;
             var response = await HttpClient.PostJsonAsync<SiteSubsection>("api/sections/sitsubesection/create", NewSiteSubSection);
             Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
-            siteSection.SiteSubsections.Add(response);
+            var index = siteSections.FindIndex(s => s.SiteSectionId == siteSection.SiteSectionId);
+            siteSections[index].SiteSubsections.Add(response);
             NewSiteSubSection = new SiteSubsection();
         }
 
@@ -244,7 +247,8 @@ namespace PetrpkuWeb.Client.Pages.Admin
             editSiteSubSectionDialogIsOpen = false;
             var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == currentSiteSubSection.SiteSectionId);
             var response = await HttpClient.DeleteAsync($"api/sections/sitesubsection/delete/{currentSiteSubSection.SiteSubsectionId}");
-            siteSection.SiteSubsections.Remove(currentSiteSubSection);
+            var index = siteSections.FindIndex(s => s.SiteSectionId == NewSiteSubSection.SiteSectionId);
+            siteSections[index].SiteSubsections.Remove(currentSiteSubSection);
             Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentSiteSubSection = null;
         }
