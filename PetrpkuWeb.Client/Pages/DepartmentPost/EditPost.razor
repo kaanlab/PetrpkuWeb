@@ -16,10 +16,8 @@
     {
         <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
 
-
         <EditForm Model="post" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
             <div class="row">
-
                 <div class="col-12 mb-2">
                     <DataAnnotationsValidator />
                 </div>
@@ -63,7 +61,7 @@
                             <textarea class="form-control" rows="30" @bind-value="post.Content" @bind-value:event="oninput"></textarea>
                             <ValidationMessage For="() => post.Content" />
                         </div>
-                        <div class="col-6 alert alert-info" role="alert">
+                        <div class="col-6 alert alert-info mb-0" role="alert">
                             <MarkdownView Content="@post.Content" />
                         </div>
                     </div>
@@ -72,14 +70,21 @@
                     @foreach (var attachment in post.Attachments)
                     {
                         var index = post.Attachments.IndexOf(attachment);
-                        <tr @key="attachment">
-                            <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
+                    <tr @key="attachment">
+                        <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
+                        @if (attachment.IsImage == true)
+                        {
+                            <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
+                        }
+                        else
+                        {
                             <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
-                            <td>@attachment.Description</td>
-                            <td>@attachment.Name</td>
-                            <td>@attachment.Length</td>
-                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
-                        </tr>
+                        }
+                        <td>@attachment.Description</td>
+                        <td>@attachment.Name</td>
+                        <td>@attachment.Length</td>
+                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                    </tr>
                     }
                 </table>
 

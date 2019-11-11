@@ -31,6 +31,7 @@
                     <td>@item.Subsection.Title</td>
                     <td>@item.Title.Truncate(50)</td>
                     <td>@item.CreateDate.ToShortDateString()</td>
+                    <td><MatButton Icon="edit" Link="@($"/message/edit/{item.MessageId}")" /></td>
                 </tr>
             </ItemContent>
         </ListTemplate>

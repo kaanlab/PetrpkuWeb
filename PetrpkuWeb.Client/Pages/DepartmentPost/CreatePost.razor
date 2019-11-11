@@ -62,7 +62,7 @@
                     <textarea class="form-control" rows="30" @bind-value="NewPost.Content" @bind-value:event="oninput"></textarea>
                     <ValidationMessage For="() => NewPost.Content" />
                 </div>
-                <div class="col-6 alert alert-info" role="alert">
+                <div class="col-6 alert alert-info mb-0" role="alert">
                     <MarkdownView Content="@NewPost.Content" />
                 </div>
             </div>

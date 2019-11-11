@@ -16,97 +16,104 @@
     {
         <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
 
-        <div class="row">
-            <div class="col-12">
-                <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
-                    <div class="col-12 mb-2">
-                        <DataAnnotationsValidator />
-                        <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle" />
-                        <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
-                    </div>
-                    <div class="col-12 mb-2">
-                        <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
-                        <ValidationMessage For="() => article.Title" />
-                    </div>
+        <EditForm Model="article" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <DataAnnotationsValidator />
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateArticle" />
+                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteArticle" />
+                </div>
+                <div class="col-12 mb-2">
+                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@article.Title"></MatTextField>
+                    <ValidationMessage For="() => article.Title" />
+                </div>
 
-                    <div class="form-group">
-                        <label>Аннотация</label>
-                        <input class="form-control" type="text" placeholder=@article.Content.Truncate(200) readonly>
-                    </div>
+                <div class="form-group col-12 mb-2">
+                    <label>Аннотация</label>
+                    <input class="form-control" type="text" placeholder=@article.Content.Truncate(200) readonly>
+                </div>
 
+                <div class="form-group col-12 mb-2">
                     <label>Текст</label>
                     <div class="row">
                         <div class="col-6">
                             <textarea class="form-control" rows="15" @bind-value="article.Content" @bind-value:event="oninput"></textarea>
                             <ValidationMessage For="() => article.Content" />
                         </div>
-                        <div class="col-6 alert alert-info" role="alert">
+                        <div class="col-6 alert alert-info mb-0" role="alert">
                             <MarkdownView Content="@article.Content" />
                         </div>
                     </div>
+                </div>
 
-                    <div class="col-12 mb-2">                        
-                        <select class="custom-select" @bind="article.Type">
-                            <option selected>Выберите важность сообщения...</option>
-                            @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
-                            {
-                                <option value="@styleType">@styleType.DisplayName()</option>
-                            }
-                        </select>
-                    </div>
-                    <table class="table">
-                        @foreach (var attachment in article.Attachments)
+                <div class="form-group col-12 mb-2">
+                    <select class="custom-select" @bind="article.Type">
+                        <option selected>--- Выберите важность сообщения ---</option>
+                        @foreach (Article.Style styleType in Enum.GetValues(typeof(Article.Style)))
                         {
-                            var index = article.Attachments.IndexOf(attachment);
-                            <tr @key="attachment">
-                                <td>@(article.Attachments.IndexOf(attachment) + 1)</td>
-                                <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
-                                <td>@attachment.Description</td>
-                                <td>@attachment.Name</td>
-                                <td>@attachment.Length</td>
-                                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
-                            </tr>
+                            <option value="@styleType">@styleType.DisplayName()</option>
                         }
-                    </table>
-                </EditForm>
-            </div>
-
-            <br />
-
-            <div class="col-12 mb-2">
-                <div class="alert alert-danger" role="alert">
-                    <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
-                    <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
-
-                    @if (ListFileInfoVM.Any())
+                    </select>
+                </div>
+                <table class="table">
+                    @foreach (var attachment in article.Attachments)
                     {
-                        <table class="table">
-                            @foreach (var fileInfo in ListFileInfoVM)
+                        var index = article.Attachments.IndexOf(attachment);
+                        <tr @key="attachment">
+                            <td>@(article.Attachments.IndexOf(attachment) + 1)</td>
+                            @if (attachment.IsImage == true)
                             {
-                                <tr @key="fileInfo">
-                                    <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
-                                    <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
-                                    <td>@fileInfo.Name</td>
-                                    <td>@fileInfo.Size</td>
-                                </tr>
+                                <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
                             }
-
-                        </table>
-                        <div class="col-12">
-                            <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
-                            <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
-                        </div>
+                            else
+                            {
+                                <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            }
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                        </tr>
                     }
+                </table>
 
-                    <hr>
-                    <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" />
-                    <hr>
+                <br />
 
-                    <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+                <div class="col-12 mb-2">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
+                        <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
 
+                        @if (ListFileInfoVM.Any())
+                        {
+                            <table class="table">
+                                @foreach (var fileInfo in ListFileInfoVM)
+                                {
+                                    <tr @key="fileInfo">
+                                        <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                        <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                        <td>@fileInfo.Name</td>
+                                        <td>@fileInfo.Size</td>
+                                    </tr>
+                                }
+
+                            </table>
+                            <div class="col-12">
+                                <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                            </div>
+                        }
+
+                        <hr>
+                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" />
+                        <hr>
+
+                        <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
+                    </div>
                 </div>
             </div>
-        </div>
+        </EditForm>
     }
     else
     {

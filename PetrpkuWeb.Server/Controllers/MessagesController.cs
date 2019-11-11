@@ -46,7 +46,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .AsNoTracking()
                 .ToListAsync();
         }
-
+               
         [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateMessage(MessageViewModel messageVM)
@@ -63,6 +63,31 @@ namespace PetrpkuWeb.Server.Controllers
 
             await _db.Messages.AddAsync(message);
             await _db.SaveChangesAsync();
+
+            return Ok(message);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("show/{messageId:int}")]
+        public async Task<ActionResult<List<Message>>> GetMessage(int messageId)
+        {
+            var message = await _db.Messages
+                .Include(s => s.Section)
+                .Include(s => s.Subsection)
+                .Include(a => a.Attachments)
+                .Include(a => a.Author)
+                .Include(ch => ch.Checked)
+                    .ThenInclude(u => u.AssosiatedUser)
+                .Include(s => s.Sent)
+                    .ThenInclude(u => u.AssosiatedUser)
+                .Include(p => p.Published)
+                    .ThenInclude(u => u.AssosiatedUser)
+                .OrderByDescending(d => d.CreateDate)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(m => m.MessageId == messageId);
+            
+            if (message is null)
+                return BadRequest();
 
             return Ok(message);
         }

@@ -1,5 +1,4 @@
 @page "/article/show/{ArticleId:int}"
-@using System.Threading
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
@@ -7,66 +6,67 @@
 
 @if (article is { })
 {
-<div class="card @CssExtension.Border(article)">
-    <div class="card-body @CssExtension.Text(article)">
-        <h5 class="card-title">@article.Title</h5>
-        <span class="card-text">
-            <MarkdownView Content="@article.Content" />
-        </span>
-    </div>
-    <ul class="list-group list-group-flush">
-        @if (article.Attachments.Any())
-        {
-        var rand = new Random(3);
-        @if(article.Attachments.Where(a => a.IsImage == true).Count() > 1)
-        {
-             <li class="list-group-item img-container">
-                    @foreach (var attachment in article.Attachments.Where(a => a.IsImage == true))
-                    {
-                       int index = rand.Next(imgCssClass.Length);
-                       <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
-                            <img src="@attachment.Path" />
-                       </a>
-                    }
-             </li>
-        }
-        else
-        {
-            var imgAttachment = article.Attachments.SingleOrDefault(a => a.IsImage == true);
-            <li class="list-group-item">
-                <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@imgAttachment.Path" />
-             </li>
-        }
-
-        <li class="list-group-item">
-            <table class="table">
-                @foreach (var attachment in article.Attachments.Where(a => a.IsImage == false))
-                {
-                <tr @key="attachment">
-                    <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
-                    <td>@attachment.Description</td>
-                    <td>@attachment.Name</td>
-                    <td>@attachment.Length</td>
-                    <td>
-                        <form method="get" action="@attachment.Path">
-                            <MatButton Type="submit" Icon="cloud_download" />
-                        </form>
-                    </td>
-                </tr>
-                }
-            </table>
-        </li>
-            }
-    </ul>
-    <div class="card-footer text-muted">
-        <p>@article.Author.FirstName @article.Author.LastName</p>
-        <p>Опубликовано: @article.PublishDate.ToShortDateString()</p>
-        @if (article.UpdateDate.HasValue)
+    <div class="card @CssExtension.Border(article)">
+        <div class="card-body @CssExtension.Text(article)">
+            <h5 class="card-title">@article.Title</h5>
+            <span class="card-text">
+                <MarkdownView Content="@article.Content" />
+            </span>
+        </div>
+        <ul class="list-group list-group-flush">
+            @if (article.Attachments.Any())
             {
-        <p>Обновлено: @article.UpdateDate.Value.ToShortDateString()</p>
+
+                @if (article.Attachments.Where(a => a.IsImage == true).Count() > 1)
+                {
+                    var rand = new Random(3);
+                    <li class="list-group-item img-container">
+                        @foreach (var attachment in article.Attachments.Where(a => a.IsImage == true))
+                        {
+                            int index = rand.Next(imgCssClass.Length);
+                            <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
+                                <img src="@attachment.Path" />
+                            </a>
+                        }
+                    </li>
+                }
+
+                @if (article.Attachments.Where(a => a.IsImage == true).Count() == 1)
+                {
+                    <li class="list-group-item">
+                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@article.Attachments.SingleOrDefault(a => a.IsImage == true).Path" />
+                    </li>
+                }
+
+                <li class="list-group-item">
+                    <table class="table">
+                        @foreach (var attachment in article.Attachments.Where(a => a.IsImage == false))
+                        {
+                            <tr @key="attachment">
+                                <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
+                                <td>@attachment.Description</td>
+                                <td>@attachment.Name</td>
+                                <td>@attachment.Length</td>
+                                <td>
+                                    <form method="get" action="@attachment.Path">
+                                        <MatButton Type="submit" Icon="cloud_download" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </li>
             }
+        </ul>
+        <div class="card-footer text-muted">
+            <p>@article.Author.FirstName @article.Author.LastName</p>
+            <p>Опубликовано: @article.PublishDate.ToShortDateString()</p>
+            @if (article.UpdateDate.HasValue)
+            {
+                <p>Обновлено: @article.UpdateDate.Value.ToShortDateString()</p>
+            }
+        </div>
     </div>
-</div>
 }
 
 @code {

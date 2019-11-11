@@ -1,5 +1,286 @@
-﻿<h3>EditMessage</h3>
+@page "/message/edit/{MessageId:int}"
+
+@attribute [Authorize(Roles = AuthRole.ANY)]
+
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IFileReaderService fileReaderService
+@inject IMatToaster Toaster
+
+
+@if (message is { })
+{
+    @if (identityUserId == message.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
+    {
+        <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
+
+        <EditForm Model="message" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <DataAnnotationsValidator />
+                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdateMessage" />
+                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeleteMessage" />
+                </div>
+
+                @if (siteSections is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <div class="col-12 mb-2">
+                        <select class="custom-select" @onchange="@SectionClicked">
+                            <option selected>--- Выберите раздел сайта ---</option>
+                            @foreach (var siteSection in siteSections)
+                            {
+                                <option value="@siteSection.SiteSectionId">@siteSection.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 mb-2">
+                        <select class="custom-select" @onchange="@SubsectionClicked">
+                            <option selected>--- Выберите подраздел сайта ---</option>
+                            @if (siteSubsections is { })
+                            {
+                                @foreach (var subsection in siteSubsections)
+                                {
+                                    <option value="@subsection.SiteSubsectionId">@subsection.Title</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+
+                <div class="form-group col-12 mb-2">
+                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="@message.Title"></MatTextField>
+                    <ValidationMessage For="() => message.Title" />
+                </div>
+
+                <div class="form-group col-12 mb-2">
+                    <label>Текст</label>
+                    <div class="col-12 mb-2">
+                        <textarea class="form-control" rows="15" @bind="message.Content"></textarea>
+                        <ValidationMessage For="() => message.Content" />
+                    </div>
+                </div>
+
+                <table class="table">
+                    @foreach (var attachment in message.Attachments)
+                    {
+                        var index = message.Attachments.IndexOf(attachment);
+                        <tr @key="attachment">
+                            <td>@(message.Attachments.IndexOf(attachment) + 1)</td>
+                            @if (attachment.IsImage == true)
+                            {
+                                <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
+                            }
+                            else
+                            {
+                                <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                            }
+                            <td>@attachment.Description</td>
+                            <td>@attachment.Name</td>
+                            <td>@attachment.Length</td>
+                            <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                        </tr>
+                    }
+                </table>
+
+                <br />
+
+                <div class="col-12 mb-2">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
+                        <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
+                        @if (ListFileInfoVM.Any())
+                        {
+                            <table class="table">
+                                @foreach (var fileInfo in ListFileInfoVM)
+                                {
+                                    <tr @key="fileInfo">
+                                        <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                                        <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                                        <td>@fileInfo.Name</td>
+                                        <td>@fileInfo.Size</td>
+                                    </tr>
+                                }
+
+                            </table>
+                            <div class="col-12">
+                                <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                            </div>
+                        }
+
+                        <hr>
+                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" />
+                        <hr>
+
+                        <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <div class="row">
+            <MatButton Outlined="true" Link="/" Label="На главную" Icon="home" />
+        </div>
+    }
+}
+
+<EditForm Model="@CurrentAttachment">
+    <MatDialog @bind-IsOpen="@dialogIsOpen">
+        <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
+        <MatDialogContent>
+            <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
+        </MatDialogContent>
+        <MatDialogActions>
+            <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+            <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+            <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
+        </MatDialogActions>
+    </MatDialog>
+</EditForm>
 
 @code {
 
+    [Parameter]
+    public int MessageId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private Attachment CurrentAttachment { get; set; } = new Attachment();
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+
+    List<SiteSection> siteSections;
+    List<SiteSubsection> siteSubsections;
+
+    string siteSectionId;
+    string siteSubSectionId;
+
+    Message message;
+
+    ClaimsPrincipal identityUser;
+    int identityUserId;
+
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
+
+    bool dialogIsOpen = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        identityUser = (await authenticationStateTask).User;
+        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+
+        siteSections = await HttpClient.GetJsonAsync<List<SiteSection>>("api/sections/sitesections/all");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        message = await HttpClient.GetJsonAsync<Message>($"api/messages/show/{MessageId}");
+    }
+
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+    }
+
+    async Task UpdateMessage()
+    {
+        message.AppUserId = identityUserId;
+        await HttpClient.PutJsonAsync<Message>($"api/messages/update/{message.MessageId}", message);
+        Toaster.Add($"Объявление успешно обновлено", MatToastType.Success, "Успех!");
+        NavigationManager.NavigateTo("/dashboard");
+    }
+
+    async Task DeleteMessage()
+    {
+        await HttpClient.DeleteAsync($"api/messages/delete/{message.MessageId}");
+        Toaster.Add($"Новость удалена", MatToastType.Warning, "Внимание!");
+        NavigationManager.NavigateTo("/dashboard");
+    }
+
+    void OpenDialog(int attachmentId)
+    {
+        CurrentAttachment = message.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+
+        dialogIsOpen = true;
+    }
+
+    async Task ShowFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
+        await fileReaderReference.ClearValue();
+    }
+
+    async Task UploadFiles()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var content = await response.Content.ReadAsStringAsync();
+        message.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+
+        await ClearFileInfo();
+    }
+
+    async Task UpdateAttachmentInfo()
+    {
+        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+
+    async Task DeleteAttachment()
+    {
+        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        message.Attachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
+
+        dialogIsOpen = false;
+    }
+
+    async Task SectionClicked(ChangeEventArgs sectionEvent)
+    {
+        //siteSubsections.Clear();
+        siteSectionId = sectionEvent.Value.ToString();
+        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubsection>>($"api/sections/sitesubsections/{siteSectionId}");
+        this.StateHasChanged();
+    }
+
+    void SubsectionClicked(ChangeEventArgs subSectionEvent)
+    {
+        siteSubSectionId = subSectionEvent.Value.ToString();
+        this.StateHasChanged();
+    }
 }

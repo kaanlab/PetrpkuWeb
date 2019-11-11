@@ -19,7 +19,6 @@
         <ul class="list-group list-group-flush">
             @if (post.Attachments.Any())
             {
-                
                 @if (post.Attachments.Where(a => a.IsImage == true).Count() > 1)
                 {
                     Random rand = new Random(3);
@@ -31,10 +30,9 @@
                                 <img src="@attachment.Path" />
                             </a>
                         }
-
                     </li>
                 }
-                
+
                 @if (post.Attachments.Where(a => a.IsImage == true).Count() == 1)
                 {
                     <li class="list-group-item">
