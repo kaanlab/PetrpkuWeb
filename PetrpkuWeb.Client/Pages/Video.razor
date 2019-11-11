@@ -2,8 +2,15 @@
 
 @inject IJSRuntime JSRuntime
 
-<h3>video</h3>
-<video id="video"></video>
+<h2 class="col-12 mb-4 text-center">Видеокамера на КПП</h2>
+
+<div class="alert alert-danger" role="alert">
+    Для получения записи с камеры обращаться в лабораторию ИОТ, кабинет 305
+</div>
+
+<div class="embed-responsive embed-responsive-4by3">
+    <video class="embed-responsive-item" id="video"></video>
+</div>
 
 @code {
 

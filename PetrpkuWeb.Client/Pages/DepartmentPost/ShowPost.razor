@@ -19,9 +19,10 @@
         <ul class="list-group list-group-flush">
             @if (post.Attachments.Any())
             {
-                var rand = new Random(3);
+                
                 @if (post.Attachments.Where(a => a.IsImage == true).Count() > 1)
                 {
+                    Random rand = new Random(3);
                     <li class="list-group-item img-container">
                         @foreach (var attachment in post.Attachments.Where(a => a.IsImage == true))
                         {
@@ -33,11 +34,11 @@
 
                     </li>
                 }
-                else
+                
+                @if (post.Attachments.Where(a => a.IsImage == true).Count() == 1)
                 {
-                    var imgAttachment = post.Attachments.SingleOrDefault(a => a.IsImage == true);
                     <li class="list-group-item">
-                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@imgAttachment.Path" />
+                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@post.Attachments.SingleOrDefault(a => a.IsImage == true).Path" />
                     </li>
                 }
 
@@ -82,12 +83,10 @@
     [Parameter]
     public int PostId { get; set; }
 
-
-
     ClaimsPrincipal identityUser;
     int identityUserId;
 
-    private Post post;
+    Post post;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
