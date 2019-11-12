@@ -116,11 +116,7 @@
                         }
 
                         <hr>
-                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" />
-                        <hr>
-
-                        <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
-
+                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" @onchange="ShowFileInfo"/>
                     </div>
                 </div>
                 <div class="col-12 text-right mb-2">

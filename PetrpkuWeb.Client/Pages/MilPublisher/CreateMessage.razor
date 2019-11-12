@@ -106,9 +106,7 @@
             }
 
             <hr>
-            <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" />
-            <hr>
-            <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
+            <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" @onchange="ShowFileInfo"/>
         </div>
     </div>
 </EditForm>
@@ -217,7 +215,7 @@
         NewMessage.Attachments.AddRange(listOfAttachments);
         var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/messages/create", NewMessage);
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/dashboard");
     }
 
     void OpenDialog(int attachmentId)

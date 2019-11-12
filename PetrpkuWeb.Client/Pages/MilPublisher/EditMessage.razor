@@ -30,7 +30,10 @@
                 }
                 else
                 {
-                    <div class="col-12 mb-2">
+                    <div class="col-6">
+                        @message.Section.Name
+                    </div>
+                    <div class="col-6 mb-2">
                         <select class="custom-select" @onchange="@SectionClicked">
                             <option selected>--- Выберите раздел сайта ---</option>
                             @foreach (var siteSection in siteSections)
@@ -39,8 +42,10 @@
                             }
                         </select>
                     </div>
-
-                    <div class="col-12 mb-2">
+                    <div class="col-6">
+                        @message.Subsection.Title
+                    </div>
+                    <div class="col-6 mb-2">
                         <select class="custom-select" @onchange="@SubsectionClicked">
                             <option selected>--- Выберите подраздел сайта ---</option>
                             @if (siteSubsections is { })
@@ -117,11 +122,7 @@
                         }
 
                         <hr>
-                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" />
-                        <hr>
-
-                        <MatButton Raised="true" OnClick="ShowFileInfo" Disabled="@(ListFileInfoVM.Any())" Label="Добавить файлы" />
-
+                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElement" @onchange="ShowFileInfo"/>
                     </div>
                 </div>
             </div>
@@ -274,6 +275,7 @@
     {
         //siteSubsections.Clear();
         siteSectionId = sectionEvent.Value.ToString();
+        message.Section = siteSections.Find(s => s.SiteSectionId == int.Parse(siteSectionId));
         siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubsection>>($"api/sections/sitesubsections/{siteSectionId}");
         this.StateHasChanged();
     }
@@ -281,6 +283,7 @@
     void SubsectionClicked(ChangeEventArgs subSectionEvent)
     {
         siteSubSectionId = subSectionEvent.Value.ToString();
+        message.Subsection = siteSubsections.Find(ss => ss.SiteSubsectionId == int.Parse(siteSubSectionId));
         this.StateHasChanged();
     }
 }
