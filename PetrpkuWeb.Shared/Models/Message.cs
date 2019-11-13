@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -14,6 +14,11 @@ namespace PetrpkuWeb.Shared.Models
         public string Content { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
+        public bool IsApproved { get; set; }
+        public bool IsChecked { get; set; }
+        public bool IsSent { get; set; }
+        public bool IsPublished { get; set; }
+        public bool IsReadonly { get; set; }
 
         //
         public int AppUserId { get; set; }

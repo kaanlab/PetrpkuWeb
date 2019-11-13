@@ -14,16 +14,17 @@
 {
     @if (identityUserId == post.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
     {
-        <h2 class="col-12 mb-4 text-center">Редактировать объявление</h2>
+        <h2 class="col-12 mb-4 text-center">Редактировать статью</h2>
 
         <EditForm Model="post" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
             <div class="row">
                 <div class="col-12 mb-2">
                     <DataAnnotationsValidator />
                 </div>
-                <div class="alert alert-danger" role="alert">
-                    <img src=@(string.IsNullOrEmpty(post.Poster) ? "/img/site/default_poster.jpg" : post.Poster) class="img-fluid img-thumbnail" alt="Responsive image">
-                    <p>Добавте изображение для статьи</p>
+
+                <div class="form-group col-4">
+                    <label>Изображение</label>
+                    <img src=@(string.IsNullOrEmpty(post.Poster) ? "/img/site/default_poster.jpg" : post.Poster) class="img-fluid img-thumbnail mb-2" alt="Responsive image">
                     @if (PosterFileInfoVM is { })
                     {
                         <table class="table">
@@ -40,12 +41,12 @@
                         </div>
                         <hr />
                     }
-                    <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" />
-                    <MatButton Raised="true" OnClick="ShowPosterFileInfo" Label="Добавить" Disabled=@(PosterFileInfoVM is { }) />
+                    <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" @onchange="ShowPosterFileInfo" />
                 </div>
 
                 <div class="form-group col-12 mb-2">
-                    <MatTextField Label="Заголовок" FullWidth="true" @bind-Value="post.Title"></MatTextField>
+                    <label>Заголовок</label>
+                    <input class="form-control" type="text" @bind-value="post.Title">
                     <ValidationMessage For="() => post.Title" />
                 </div>
 
@@ -66,65 +67,70 @@
                         </div>
                     </div>
                 </div>
-                <table class="table">
-                    @foreach (var attachment in post.Attachments)
-                    {
-                        var index = post.Attachments.IndexOf(attachment);
-                    <tr @key="attachment">
-                        <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
-                        @if (attachment.IsImage == true)
-                        {
-                            <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
-                        }
-                        else
-                        {
-                            <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
-                        }
-                        <td>@attachment.Description</td>
-                        <td>@attachment.Name</td>
-                        <td>@attachment.Length</td>
-                        <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
-                    </tr>
-                    }
-                </table>
 
-                <br />
-
-                <div class="col-12 mb-2">
-                    <div class="alert alert-danger" role="alert">
-                        <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
-                        <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
-
-                        @if (ListFileInfoVM.Any())
-                        {
-                            <table class="table">
-                                @foreach (var fileInfo in ListFileInfoVM)
-                                {
-                                    <tr @key="fileInfo">
-                                        <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
-                                        <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
-                                        <td>@fileInfo.Name</td>
-                                        <td>@fileInfo.Size</td>
-                                    </tr>
-                                }
-
-                            </table>
-                            <div class="col-12">
-                                <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
-                                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
-                            </div>
-                        }
-
-                        <hr>
-                        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" @onchange="ShowFileInfo"/>
+                @if (post.Attachments.Any())
+                {
+                    <div class="form-group col-12 mb-2">
+                        <label>Вложения</label>
+                        <table class="table">
+                            @foreach (var attachment in post.Attachments)
+                            {
+                                var index = post.Attachments.IndexOf(attachment);
+                                <tr @key="attachment">
+                                    <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
+                                    @if (attachment.IsImage == true)
+                                    {
+                                        <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
+                                    }
+                                    else
+                                    {
+                                        <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                                    }
+                                    <td>@attachment.Description</td>
+                                    <td>@attachment.Name</td>
+                                    <td>@attachment.Length</td>
+                                    <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                                </tr>
+                            }
+                        </table>
                     </div>
-                </div>
-                <div class="col-12 text-right mb-2">
-                    <MatButton Raised="true" Icon="edit" Type="submit" Label="Сохранить" OnClick="UpdatePost" />
-                    <MatButton Raised="true" Icon="delete" Label="Удалить" OnClick="DeletePost" />
-                </div>
+                }
+            <div class="col-12 mb-2">
+                <MatButton Raised="true" Icon="done" Type="submit" Label="Сохранить" OnClick="UpdatePost" Class="float-right" />
+                <MatButton Raised="true" Icon="delete_outline" Label="Удалить" OnClick="DeletePost" Class="float-right mr-2" />
+            </div>
             </div>
         </EditForm>
+
+        <br />
+        <div class="alert alert-secondary" role="alert">
+            <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
+            <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
+            @if (ListFileInfoVM.Any())
+            {
+                <table class="table">
+                    @foreach (var fileInfo in ListFileInfoVM)
+                    {
+                        <tr @key="fileInfo">
+                            <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                            <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                            <td>@fileInfo.Name</td>
+                            <td>@fileInfo.Size</td>
+                        </tr>
+                    }
+
+                </table>
+                <div class="col-12">
+                    <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                    <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+                </div>
+            }
+
+            <hr>
+            <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" @onchange="ShowFileInfo" />
+        </div>
+
     }
     else
     {
@@ -178,7 +184,7 @@
     {
         identityUser = (await authenticationStateTask).User;
         identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
-       
+
     }
 
     protected override async Task OnParametersSetAsync()
@@ -196,7 +202,7 @@
     {
         var departmentId = post.Department.DepartmentId;
         await HttpClient.PutJsonAsync<Post>($"api/posts/update/{post.PostId}", post);
-        Toaster.Add($"Объявление успешно обновлено", MatToastType.Success, "Успех!");
+        Toaster.Add($"Статья успешно обновлена", MatToastType.Success, "Успех!");
         NavigationManager.NavigateTo($"/department/{departmentId}");
     }
 
@@ -204,7 +210,7 @@
     {
         var departmentId = post.Department.DepartmentId;
         await HttpClient.DeleteAsync($"api/posts/delete/{post.PostId}");
-        Toaster.Add($"Новость {post.Title} удалена", MatToastType.Warning, "Внимание!");
+        Toaster.Add($"Статья {post.Title} удалена", MatToastType.Warning, "Внимание!");
         NavigationManager.NavigateTo($"/department/{departmentId}");
     }
 

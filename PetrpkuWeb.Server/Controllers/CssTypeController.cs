@@ -61,15 +61,15 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpPut("update/{siteSectionId:int}")]
-        public async Task<ActionResult> PutSiteSectionAsync(int siteSectionId, SiteSection siteSection)
+        [HttpPut("update/{cssTypeId:int}")]
+        public async Task<ActionResult> PutSiteSectionAsync(int cssTypeId, CssType cssType)
         {
-            if (siteSectionId == siteSection.SiteSectionId)
+            if (cssTypeId == cssType.CssTypeId)
             {
-                _db.Attach(siteSection).State = EntityState.Modified;
+                _db.Attach(cssType).State = EntityState.Modified;
                 await _db.SaveChangesAsync();
 
-                return Ok(siteSection);
+                return Ok(cssType);
             }
 
             return BadRequest();

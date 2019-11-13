@@ -4,9 +4,9 @@ using System.Text;
 
 namespace PetrpkuWeb.Shared.Models
 {
-    public class Checked
+    public class Approved
     {
-        public int CheckedId { get; set; }
+        public int ApprovedId { get; set; }
         public DateTime Date { get; set; }
 
         // relationship
