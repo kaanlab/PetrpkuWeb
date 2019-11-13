@@ -10,14 +10,14 @@ using PetrpkuWeb.Server.Data;
 namespace PetrpkuWeb.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191030073331_InitMigration")]
+    [Migration("20191113095840_InitMigration")]
     partial class InitMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.0-preview1.19506.2")
+                .HasAnnotation("ProductVersion", "3.1.0-preview2.19525.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -305,6 +305,9 @@ namespace PetrpkuWeb.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("CssTypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("PublishDate")
                         .HasColumnType("datetime2");
 
@@ -312,15 +315,14 @@ namespace PetrpkuWeb.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("ArticleId");
 
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("CssTypeId");
 
                     b.ToTable("Articles");
                 });
@@ -406,6 +408,24 @@ namespace PetrpkuWeb.Server.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("Checkeds");
+                });
+
+            modelBuilder.Entity("PetrpkuWeb.Shared.Models.CssType", b =>
+                {
+                    b.Property<int>("CssTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CssTypeId");
+
+                    b.ToTable("CssTypes");
                 });
 
             modelBuilder.Entity("PetrpkuWeb.Shared.Models.Department", b =>
@@ -698,6 +718,12 @@ namespace PetrpkuWeb.Server.Migrations
                     b.HasOne("PetrpkuWeb.Shared.Models.AppUser", "Author")
                         .WithMany("Articles")
                         .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetrpkuWeb.Shared.Models.CssType", "CssType")
+                        .WithMany("Articles")
+                        .HasForeignKey("CssTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

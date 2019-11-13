@@ -24,14 +24,14 @@ namespace PetrpkuWeb.Client.Pages
         public int AppUserId { get; set; }
 
         [CascadingParameter]
-        private Task<AuthenticationState> authenticationStateTask { get; set; }
+        private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
         //private Attachment Avatar { get; set; } = new Attachment();
         private FileInfoViewModel AvatarFileInfoVM { get; set; }
 
         AppUser user;
         int identityUserId;
-        bool dialogIsOpen = false;
+        bool dialogIsOpen;
 
         ElementReference inputElement;
         IFileReaderRef fileReaderReference;
@@ -44,7 +44,7 @@ namespace PetrpkuWeb.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var identityUser = (await authenticationStateTask).User;
+            var identityUser = (await AuthenticationStateTask).User;
             identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
         }
 

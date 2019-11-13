@@ -35,6 +35,20 @@ namespace PetrpkuWeb.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CssTypes",
+                columns: table => new
+                {
+                    CssTypeId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Value = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CssTypes", x => x.CssTypeId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Departments",
                 columns: table => new
                 {
@@ -151,8 +165,8 @@ namespace PetrpkuWeb.Server.Migrations
                     Content = table.Column<string>(nullable: false),
                     PublishDate = table.Column<DateTime>(nullable: false),
                     UpdateDate = table.Column<DateTime>(nullable: true),
-                    Type = table.Column<int>(nullable: false),
-                    AppUserId = table.Column<int>(nullable: false)
+                    AppUserId = table.Column<int>(nullable: false),
+                    CssTypeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,6 +176,12 @@ namespace PetrpkuWeb.Server.Migrations
                         column: x => x.AppUserId,
                         principalTable: "AppUsers",
                         principalColumn: "AppUserId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Articles_CssTypes_CssTypeId",
+                        column: x => x.CssTypeId,
+                        principalTable: "CssTypes",
+                        principalColumn: "CssTypeId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -510,6 +530,11 @@ namespace PetrpkuWeb.Server.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Articles_CssTypeId",
+                table: "Articles",
+                column: "CssTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -672,6 +697,9 @@ namespace PetrpkuWeb.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "CssTypes");
 
             migrationBuilder.DropTable(
                 name: "Checkeds");

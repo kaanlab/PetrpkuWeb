@@ -38,16 +38,16 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
-//#if DEBUG
-//            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
-//            services.AddDbContext<AppDbContext>(
-//               options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
-//#else
+#if DEBUG
+            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
+            services.AddDbContext<AppDbContext>(
+               options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
+#else
             services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
             services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
-//#endif
+#endif
 
             services.AddDefaultIdentity<AppUserIdentity>()
                 .AddEntityFrameworkStores<AppDbContext>();

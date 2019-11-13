@@ -39,8 +39,8 @@
 
                 @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
                 {
-                    <div @key="article" class="card @CssExtension.Border(article) mb-2">
-                        <div class="card-body @CssExtension.Text(article)">
+                    <div @key="article" class="card border-@article.CssType.Value mb-2">
+                        <div class="card-body text-@article.CssType.Value">
                             <h5 class="card-title">@article.Title</h5>
                             <span class="card-text">
                                 <MarkdownView Content="@article.Content.Truncate(140)" />

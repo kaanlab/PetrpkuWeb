@@ -51,12 +51,13 @@ namespace PetrpkuWeb.Server.Controllers
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
                 return Unauthorized(new { message = "Username or password can't be null" });
 
+#if RELEASE
             var idettityUser = await _db.Users.Include(u => u.AssosiatedUser).SingleOrDefaultAsync(u => u.UserName == model.Username);
             if(idettityUser is null || !idettityUser.AssosiatedUser.IsActive)
             {
                 return BadRequest(new LoginResult { Successful = false, Error = $"User locked {idettityUser.AssosiatedUser.DisplayName}" });
             }
-
+#endif
             var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
             if (ldapUser is null)
             {

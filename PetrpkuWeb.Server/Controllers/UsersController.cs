@@ -70,6 +70,8 @@ namespace PetrpkuWeb.Server.Controllers
                 .Include(d => d.Department)
                 .Include(a => a.Articles)
                     .ThenInclude(atach => atach.Attachments)
+                .Include(a => a.Articles)
+                    .ThenInclude(ct => ct.CssType)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.AppUserId == appUserId);
         }

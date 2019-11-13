@@ -8,29 +8,29 @@ namespace PetrpkuWeb.Client.Extensions
 {
     public static class CssExtension
     {
-        public static string Text(Article article)
-        {
-            return article.Type switch
-            {
-                Article.Style.Warning => "text-warning",
-                Article.Style.Danger => "text-danger",
-                Article.Style.Info => "text-info",
+        //public static string Text(Article article)
+        //{
+        //    return article.Type switch
+        //    {
+        //        Article.Style.Warning => "text-warning",
+        //        Article.Style.Danger => "text-danger",
+        //        Article.Style.Info => "text-info",
 
-                _ => String.Empty,
-            };
-        }
+        //        _ => String.Empty,
+        //    };
+        //}
 
-        public static string Border(Article article)
-        {
-            return article.Type switch
-            {
-                Article.Style.Warning => "border-warning",
-                Article.Style.Danger => "border-danger",
-                Article.Style.Info => "border-info",
+        //public static string Border(Article article)
+        //{
+        //    return article.Type switch
+        //    {
+        //        Article.Style.Warning => "border-warning",
+        //        Article.Style.Danger => "border-danger",
+        //        Article.Style.Info => "border-info",
 
-                _ => String.Empty,
-            };
-        }
+        //        _ => String.Empty,
+        //    };
+        //}
 
         public static string Img(string extension)
         {

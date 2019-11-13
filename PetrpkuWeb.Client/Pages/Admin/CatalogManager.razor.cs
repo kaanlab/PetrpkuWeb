@@ -22,10 +22,14 @@ namespace PetrpkuWeb.Client.Pages.Admin
         Building NewBuilding { get; set; } = new Building();
         SiteSection NewSiteSection { get; set; } = new SiteSection();
         SiteSubsection NewSiteSubSection { get; set; } = new SiteSubsection();
+        CssType NewCssType { get; set; } = new CssType();
+ 
+        private List<Department> departments;
+        private List<Building> buildings;
+        private List<SiteSection> siteSections;
+        private List<CssType> cssTypes;
 
-        List<Department> departments;
-        List<Building> buildings;
-        List<SiteSection> siteSections;
+        private CssType currentCssType;
 
         string ListCssClass;
 
@@ -79,15 +83,17 @@ namespace PetrpkuWeb.Client.Pages.Admin
 
         string dropDownSiteSectionId;
 
-        bool newDepartmentDialogIsOpen = false;
-        bool newBuildingDialogIsOpen = false;
-        bool newSiteSectionDialogIsOpen = false;
-        bool newSiteSubSectionDialogIsOpen = false;
+        private bool newDepartmentDialogIsOpen;
+        private bool newBuildingDialogIsOpen;
+        private bool newSiteSectionDialogIsOpen;
+        private bool newSiteSubSectionDialogIsOpen;
+        private bool newCssTypeDialogIsOpen;
 
-        bool editDepartmentDialogIsOpen = false;
-        bool editBuildingDialogIsOpen = false;
-        bool editSiteSectionDialogIsOpen = false;
-        bool editSiteSubSectionDialogIsOpen = false;
+        private bool editDepartmentDialogIsOpen;
+        private bool editBuildingDialogIsOpen;
+        private bool editSiteSectionDialogIsOpen;
+        private bool editSiteSubSectionDialogIsOpen;
+        private bool editCssTypeDialogIsOpen;
 
 
         protected async override Task OnInitializedAsync()
@@ -95,8 +101,10 @@ namespace PetrpkuWeb.Client.Pages.Admin
             departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
             buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
             siteSections = await HttpClient.GetJsonAsync<List<SiteSection>>("api/sections/all");
+            cssTypes = await HttpClient.GetJsonAsync<List<CssType>>("api/csstype/all");
         }
 
+        #region Department
         async Task AddNewDepartment()
         {
             newDepartmentDialogIsOpen = false;
@@ -136,7 +144,9 @@ namespace PetrpkuWeb.Client.Pages.Admin
             Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentDepartment = null;
         }
+        #endregion
 
+        #region Building
         async Task AddNewBuilding()
         {
             newBuildingDialogIsOpen = false;
@@ -176,7 +186,9 @@ namespace PetrpkuWeb.Client.Pages.Admin
             Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentBuilding = null;
         }
+#endregion
 
+        #region SiteSection
         async Task AddNewSiteSection()
         {
             newSiteSectionDialogIsOpen = false;
@@ -216,7 +228,9 @@ namespace PetrpkuWeb.Client.Pages.Admin
             Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
             currentSiteSection = null;
         }
+        #endregion
 
+        #region SiteSubSection
         async Task AddNewSiteSubSection()
         {
             newSiteSubSectionDialogIsOpen = false;
@@ -261,5 +275,45 @@ namespace PetrpkuWeb.Client.Pages.Admin
             Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
             currentSiteSubSection = null;
         }
+#endregion
+
+        #region CssType
+        async Task AddNewCssType()
+        {
+            newCssTypeDialogIsOpen = false;
+            var response = await HttpClient.PostJsonAsync<CssType>("api/csstype/create", NewCssType);
+            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+            cssTypes.Add(response);
+            NewCssType = new CssType();
+        }
+
+        void OpenEditCssTypeDialog(CssType cssType)
+        {
+            editCssTypeDialogIsOpen = true;
+            currentCssType = cssType;
+        }
+
+        void CancelUpdateCssType()
+        {
+            editCssTypeDialogIsOpen = false;
+        }
+
+        async Task UpdateCssType()
+        {
+            editCssTypeDialogIsOpen = false;
+            await HttpClient.PutJsonAsync<CssType>($"api/csstype/update/{currentCssType.CssTypeId}", currentCssType);
+            Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
+            currentDepartment = null;
+        }
+
+        async Task DeleteCssType()
+        {
+            editCssTypeDialogIsOpen = false;
+            var response = await HttpClient.DeleteAsync($"api/csstype/delete/{currentCssType.CssTypeId}");
+            departments.Remove(currentDepartment);
+            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
+            currentDepartment = null;
+        }
+        #endregion
     }
 }

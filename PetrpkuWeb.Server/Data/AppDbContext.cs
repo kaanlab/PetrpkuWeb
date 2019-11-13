@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using PetrpkuWeb.Shared.Models;
@@ -28,6 +29,7 @@ namespace PetrpkuWeb.Server.Data
         public DbSet<Sent> Sents { get; set; }
         public DbSet<Checked> Checkeds { get; set; }
         public DbSet<Published> Publisheds { get; set; }
+        public DbSet<CssType> CssTypes { get; set; }
     }
     
 }

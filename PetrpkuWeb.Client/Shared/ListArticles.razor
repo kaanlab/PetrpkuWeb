@@ -15,8 +15,8 @@
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div @key="item" class="card @CssExtension.Border(item) mb-2">
-            <div class="card-body @CssExtension.Text(item)">
+        <div @key="item" class="card border-@item.CssType.Value mb-2">
+            <div class="card-body text-@item.CssType.Value">
                 <h5 class="card-title">@item.Title</h5>
                 <span class="card-text">
                     <MarkdownView Content="@item.Content.Truncate(200)" />
@@ -27,7 +27,7 @@
                     <div class="media col-8">
                         <img src="@item.Author.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
                         <div class="media-body">
-                            <p class="mt-0">@item.Author.FirstName @item.Author.LastName</p>
+                            <p class="mb-0">@item.Author.FirstName @item.Author.LastName</p>
                             <p class="card-text">
                                 <small class="text-muted">Опубликовано: @item.PublishDate</small>
                                 @if (item.UpdateDate.HasValue)

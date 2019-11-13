@@ -6,8 +6,8 @@
 
 @if (article is { })
 {
-    <div class="card @CssExtension.Border(article)">
-        <div class="card-body @CssExtension.Text(article)">
+    <div class="card border-@article.CssType.Value">
+        <div class="card-body text-@article.CssType.Value">
             <h5 class="card-title">@article.Title</h5>
             <span class="card-text">
                 <MarkdownView Content="@article.Content" />

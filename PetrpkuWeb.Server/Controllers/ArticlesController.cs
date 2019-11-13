@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +34,7 @@ namespace PetrpkuWeb.Server.Controllers
             return await _db.Articles
                 .Include(a => a.Attachments)
                 .Include(a => a.Author)
+                .Include(ct =>ct.CssType)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
                 .ToListAsync();
@@ -47,7 +48,9 @@ namespace PetrpkuWeb.Server.Controllers
                 return BadRequest();
 
             var article = _mapper.Map<Article>(articleVM);
-
+            var cssType = await _db.CssTypes.SingleOrDefaultAsync(ct => ct.CssTypeId == articleVM.CssTypeId);
+            
+            article.CssType = cssType;
             article.PublishDate = DateTime.Now;
 
             _db.Attachments.UpdateRange(article.Attachments);
@@ -66,6 +69,7 @@ namespace PetrpkuWeb.Server.Controllers
             var article = await _db.Articles
                  .Include(a => a.Attachments)
                  .Include(a => a.Author)
+                 .Include(ct => ct.CssType)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(u => u.ArticleId == articleId);
 
@@ -81,6 +85,8 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (articleId == article.ArticleId)
             {
+                var cssType = await _db.CssTypes.SingleOrDefaultAsync(ct => ct.CssTypeId == article.CssTypeId);
+                article.CssType = cssType;
                 article.UpdateDate = DateTime.Now;
                 //_db.Attach(article).State = EntityState.Modified;
                 _db.Articles.Update(article);
