@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Novell.Directory.Ldap;
 using PetrpkuWeb.Shared.Models;
 using System;
@@ -201,7 +201,8 @@ namespace PetrpkuWeb.NovellDirectoryLdap
 
         private string GetGroup(string value)
         {
-            Match match = Regex.Match(value, "^CN=([^,]*)");
+            // Find all groups with "webportal_" word 
+            Match match = Regex.Match(value, "^CN=(webportal_\\w*[^,]*)");
             if (!match.Success)
             {
                 return null;
