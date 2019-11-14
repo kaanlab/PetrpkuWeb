@@ -74,6 +74,7 @@ namespace PetrpkuWeb.Server.Controllers
                 return BadRequest(new LoginResult { Successful = false, Error = "User is locked" });
             }
 
+            // update email if changed
             if (appUserIdentity.Email != ldapUser.Email)
             {
                 appUserIdentity.Email = ldapUser.Email;
@@ -81,6 +82,9 @@ namespace PetrpkuWeb.Server.Controllers
 
                 await _userManager.UpdateAsync(appUserIdentity);
             }
+
+            // update groups if changed
+            //await RegisterRoles(appUserIdentity, ldapUser);
 
             await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
 
@@ -112,10 +116,10 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpGet("search/{ldapUserName}")]
-        public ActionResult<IAuthUser> SearchUser(string ldapUserName)
+        [HttpGet("search/{authUserName}")]
+        public ActionResult<IAuthUser> SearchUser(string authUserName)
         {
-            var ldapUser = _appAuthenticationService.Search(ldapUserName);
+            var ldapUser = _appAuthenticationService.Search(authUserName);
             if (ldapUser is null)
             {
                 return BadRequest(new LoginResult { Successful = false, Error = "Bad username" });
@@ -140,7 +144,7 @@ namespace PetrpkuWeb.Server.Controllers
 
         [Authorize(Roles = AuthRole.ADMIN)]
         [HttpPost("identity/add")]
-        public async Task<ActionResult> AddAccount(LdapUser authUser)
+        public async Task<ActionResult> AddAccount(IAuthUser authUser)
         {
             if (authUser is { })
             {
@@ -200,7 +204,7 @@ namespace PetrpkuWeb.Server.Controllers
 
 
         private AppUserIdentity AddIdentityUser(IAuthUser authUser)
-        {            
+        {
             var appUserIdentity = new AppUserIdentity()
             {
                 UserName = authUser.UserName,
@@ -210,7 +214,7 @@ namespace PetrpkuWeb.Server.Controllers
                 DisplayName = authUser.DisplayName,
                 AssosiatedUser = new AppUser()
                 {
-                    DisplayName = authUser.DisplayName,                    
+                    DisplayName = authUser.DisplayName,
                     IsActive = true,
                     IsDuty = false
                 }
@@ -218,5 +222,15 @@ namespace PetrpkuWeb.Server.Controllers
 
             return appUserIdentity;
         }
+
+        //private async Task RegisterRoles(AppUserIdentity appUserIdentity, IAuthUser authUser)
+        //{
+        //    var roles = await _userManager.GetRolesAsync(appUserIdentity);
+        //    if (roles is { })
+        //    {
+        //        await _userManager.RemoveFromRolesAsync(appUserIdentity, roles);
+        //    }
+        //    await _userManager.AddToRolesAsync(appUserIdentity, authUser.Roles);
+        //}
     }
 }
