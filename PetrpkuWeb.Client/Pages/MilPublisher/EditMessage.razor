@@ -24,7 +24,7 @@
         {
             <h2 class="col-12 mb-4 text-center">Редактировать заявку на официальный сайт</h2>
 
-            <EditForm Model="message" OnInvalidSubmit="@(() => Toaster.Add(" Для публикации необходимо заполнить поля заголовок и текст", MatToastType.Danger, "Ошибка!"))">
+            <EditForm Model="message" OnInvalidSubmit="@(() => Toaster.Add("Для формирования заявки необходимо заполнить разделы сайта и поле с описанием действий", MatToastType.Danger, "Ошибка!"))">
                 <div class="row">
                     <div class="col-12 mb-2">
                         <DataAnnotationsValidator />
@@ -70,13 +70,21 @@
                     }
 
                     <div class="form-group col-12 mb-2">
-                        <label>Заголовок</label>
-                        <input class="form-control" type="text" @bind-value="@message.Title">
+                        <label>Опишите, что необходимо сделать (заменить, добавить, удалить...)</label>
+                        <div class="col-12 mb-2">
+                            <textarea class="form-control" rows="5" @bind="message.ToDo"></textarea>
+                            <ValidationMessage For="() => message.ToDo" />
+                        </div>
+                    </div>
+
+                    <div class="form-group col-12 mb-2">
+                        <label>Заголовок новости/материала (при необходимости)</label>
+                        <input class="form-control" type="text" @bind="@message.Title">
                         <ValidationMessage For="() => message.Title" />
                     </div>
 
                     <div class="form-group col-12 mb-2">
-                        <label>Текст</label>
+                        <label>Текст новости/материала (при необходимости)</label>
                         <div class="col-12 mb-2">
                             <textarea class="form-control" rows="15" @bind="message.Content"></textarea>
                             <ValidationMessage For="() => message.Content" />

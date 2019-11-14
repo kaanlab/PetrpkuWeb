@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,10 +9,11 @@ namespace PetrpkuWeb.Shared.Models
     public class Message
     {
         public int MessageId { get; set; }
-        [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
-        public string Title { get; set; }
-        [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
-        public string Content { get; set; }
+
+        [Required(ErrorMessage = "Это поле обязательно для заполнения!")]
+        public string ToDo { get; set; }
+        public string? Title { get; set; }
+        public string? Content { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public bool IsApproved { get; set; }
