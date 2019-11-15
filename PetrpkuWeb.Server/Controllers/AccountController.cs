@@ -61,7 +61,7 @@ namespace PetrpkuWeb.Server.Controllers
             if (appUserIdentity is null)
             {
 #if DEBUG
-                appUserIdentity = AddIdentityUser(ldapUser);
+                appUserIdentity = await AddIdentityUser(ldapUser);
                 await _userManager.CreateAsync(appUserIdentity);
 #else
                 return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
@@ -148,7 +148,7 @@ namespace PetrpkuWeb.Server.Controllers
         {
             if (authUser is { })
             {
-                var appUserIdentity = AddIdentityUser(authUser);
+                var appUserIdentity = await AddIdentityUser(authUser);
                 var result = await _userManager.CreateAsync(appUserIdentity);
 
                 if (result.Succeeded)
@@ -203,24 +203,27 @@ namespace PetrpkuWeb.Server.Controllers
         //}
 
 
-        private AppUserIdentity AddIdentityUser(IAuthUser authUser)
+        private Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
         {
-            var appUserIdentity = new AppUserIdentity()
+            return Task.Run(() =>
             {
-                UserName = authUser.UserName,
-                NormalizedUserName = authUser.UserName.ToUpperInvariant(),
-                Email = authUser.Email,
-                NormalizedEmail = authUser.Email.ToUpperInvariant(),
-                DisplayName = authUser.DisplayName,
-                AssosiatedUser = new AppUser()
+                var appUserIdentity = new AppUserIdentity()
                 {
+                    UserName = authUser.UserName,
+                    NormalizedUserName = authUser.UserName.ToUpperInvariant(),
+                    Email = authUser.Email,
+                    NormalizedEmail = authUser.Email.ToUpperInvariant(),
                     DisplayName = authUser.DisplayName,
-                    IsActive = true,
-                    IsDuty = false
-                }
-            };
+                    AssosiatedUser = new AppUser()
+                    {
+                        DisplayName = authUser.DisplayName,
+                        IsActive = true,
+                        IsDuty = false
+                    }
+                };
 
-            return appUserIdentity;
+                return appUserIdentity;
+            });
         }
 
         //private async Task RegisterRoles(AppUserIdentity appUserIdentity, IAuthUser authUser)
