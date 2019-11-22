@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PetrpkuWeb.Shared.Extensions
 {
-    public static class AuthRole
+    public static class AuthRoles
     {
         public const string ADMIN = "webportal_admin";
         public const string USER = "webportal_user";

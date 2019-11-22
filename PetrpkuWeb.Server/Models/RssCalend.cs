@@ -1,0 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace PetrpkuWeb.Server.Models
+{
+    public class RssCalend
+    {
+        public string Title { get; set; }
+        public string Link { get; set; }
+        public string Guid { get; set; }
+        public string Description { get; set; }
+
+    }
+}

@@ -79,3 +79,7 @@
         column-count: 4;
     }
 }
+
+.editor-container {
+    margin-bottom: 70px;
+}

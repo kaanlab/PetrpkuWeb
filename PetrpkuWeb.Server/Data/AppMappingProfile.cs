@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PetrpkuWeb.Shared.Models;
+using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Data
@@ -15,6 +15,13 @@ namespace PetrpkuWeb.Server.Data
             CreateMap<ArticleViewModel, Article>();
             CreateMap<PostViewModel, Post>();
             CreateMap<MessageViewModel, Message>();
+
+
+            //Model to ViewModel
+            CreateMap<AppUser, AppUserViewModel>()
+                .ForMember(dest => dest.AuthIdentity, opt => opt.MapFrom(src => src.AuthIdentity))
+                .ForMember(dest => dest.Building, opt => opt.MapFrom(src => src.Building))
+                .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Department));
         }
     }
 }

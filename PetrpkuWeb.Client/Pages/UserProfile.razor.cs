@@ -1,6 +1,7 @@
 using Blazor.FileReader;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
 using System;
@@ -50,7 +51,7 @@ namespace PetrpkuWeb.Client.Pages
 
         protected override async Task OnParametersSetAsync()
         {
-            user = await HttpClient.GetJsonAsync<AppUser>($"api/users/user/{AppUserId}");
+            user = await HttpClient.GetJsonAsync<AppUser>($"{ApiRoutes.Users.GETUSER}/{AppUserId}");
         }
 
         async Task ShowFileInfo()
@@ -80,7 +81,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task OkClick()
         {
             dialogIsOpen = false;
-            await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{user.AppUserId}", user);
+            await HttpClient.PutJsonAsync<AppUser>($"{ApiRoutes.Users.UPDATE}/{user.AppUserId}", user);
         }
 
         async Task UploadFile()

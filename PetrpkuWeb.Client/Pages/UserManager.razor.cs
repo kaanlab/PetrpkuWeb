@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Newtonsoft.Json;
+using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -43,10 +44,10 @@ namespace PetrpkuWeb.Client.Pages
         {
             identityUser = (await AuthenticationStateTask).User;
 
-            appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
+            appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>(ApiRoutes.Users.GETALL);
             departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
             buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
-            ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>("api/account/ldap/all");
+            ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.GETALL_LDAPUSERS);
         }
 
         async Task AddAccount()
@@ -63,7 +64,7 @@ namespace PetrpkuWeb.Client.Pages
             var byteContent = new ByteArrayContent(buffer);
             byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var response = await HttpClient.PostAsync("api/account/identity/add", byteContent);
+            var response = await HttpClient.PostAsync(ApiRoutes.Account.ADD_AUTHUSER, byteContent);
             var content = await response.Content.ReadAsStringAsync();
 
             //Add to UsersIdentity collection
@@ -85,7 +86,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task UpdateAppUser(int appUserId)
         {
             editAppUserDialogIsOpen = false;
-            var response = await HttpClient.PutJsonAsync<AppUser>($"api/users/update/{appUserId}", editAppUser);
+            var response = await HttpClient.PutJsonAsync<AppUser>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
             var index = appUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
             appUsersList[index] = response;
             Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");

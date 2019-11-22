@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Client.Extensions
@@ -29,7 +30,7 @@ namespace PetrpkuWeb.Client.Extensions
 
         public async Task<LoginResult> Login(LoginViewModel loginModel)
         {
-            var result = await _httpClient.PostJsonAsync<LoginResult>("api/account/login", loginModel);
+            var result = await _httpClient.PostJsonAsync<LoginResult>(ApiRoutes.Account.LOGIN, loginModel);
 
             if (result.Successful)
             {

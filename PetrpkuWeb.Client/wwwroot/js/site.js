@@ -38,3 +38,22 @@ function hlsPlayer() {
         });
     }
 }
+
+(function () {
+    window.QuillFunctions = {
+        createQuill: function (quillElement) {
+            var options = {
+                debug: 'info',
+                modules: {
+                    toolbar: '#toolbar'
+                },
+                placeholder: 'Compose an epic...',
+                readOnly: false,
+                theme: 'snow'
+            };
+            // set quill as the object we can call
+            // methods on later
+            quill = new Quill(quillElement, options);
+        }
+    };
+})();

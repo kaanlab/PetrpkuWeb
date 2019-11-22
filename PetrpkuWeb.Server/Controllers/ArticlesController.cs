@@ -40,7 +40,7 @@ namespace PetrpkuWeb.Server.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ANY)]
+        [Authorize(Roles = AuthRoles.ANY)]
         [HttpPost("create")]
         public async Task<ActionResult<Article>> CreateArticle(ArticleViewModel articleVM)
         {

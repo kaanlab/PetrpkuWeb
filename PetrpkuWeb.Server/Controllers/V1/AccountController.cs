@@ -13,13 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
-namespace PetrpkuWeb.Server.Controllers
+namespace PetrpkuWeb.Server.Controllers.V1
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -44,7 +45,7 @@ namespace PetrpkuWeb.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost(ApiRoutes.Account.LOGIN)]
         public async Task<ActionResult<LoginResult>> Login(LoginViewModel model)
         {
 
@@ -115,9 +116,9 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpGet("search/{authUserName}")]
-        public ActionResult<IAuthUser> SearchUser(string authUserName)
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpGet(ApiRoutes.Account.SEARCH + "/{authUserName}")]
+        public ActionResult<IAuthUser> SearchAuthUser(string authUserName)
         {
             var ldapUser = _appAuthenticationService.Search(authUserName);
             if (ldapUser is null)
@@ -127,9 +128,9 @@ namespace PetrpkuWeb.Server.Controllers
             return Ok(ldapUser);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpGet("ldap/all")]
-        public async Task<ActionResult<List<LdapUser>>> GetAll()
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpGet(ApiRoutes.Account.GETALL_LDAPUSERS)]
+        public async Task<ActionResult<List<LdapUser>>> GetAllLdapUsers()
         {
             var ldapUsers = _appAuthenticationService.SearchAll();
             if (ldapUsers.Count > 0)
@@ -142,9 +143,9 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest(new { Message = "Пользователи отсутствуют" });
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpPost("identity/add")]
-        public async Task<ActionResult> AddAccount(IAuthUser authUser)
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpPost(ApiRoutes.Account.ADD_AUTHUSER)]
+        public async Task<ActionResult> AddAuthUser(IAuthUser authUser)
         {
             if (authUser is { })
             {
@@ -160,8 +161,8 @@ namespace PetrpkuWeb.Server.Controllers
             return BadRequest();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN)]
-        [HttpGet("identity/all")]
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpGet(ApiRoutes.Account.GETALL_AUTHUSERS)]
         public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
         {
             return await _db.Users
