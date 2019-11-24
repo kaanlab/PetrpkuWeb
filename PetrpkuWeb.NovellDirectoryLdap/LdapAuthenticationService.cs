@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using Novell.Directory.Ldap;
-using PetrpkuWeb.Shared.Models;
+using PetrpkuWeb.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace PetrpkuWeb.NovellDirectoryLdap
 {
-    public class LdapAuthenticationService : IAppAuthenticationService
+    public class LdapAuthenticationService : ILdapAuthenticationService
     {
         private const string MemberOfAttribute = "memberOf";
         private const string DisplayNameAttribute = "displayName";

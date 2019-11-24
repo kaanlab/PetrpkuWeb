@@ -14,9 +14,9 @@ namespace PetrpkuWeb.Shared.Contracts.V1
 
             public const string GETALL_LDAPUSERS = "api/v1/account/ldap/all";
 
-            public const string ADD_AUTHUSER = "api/v1/account/identity/add";
+            public const string ADD_IDENTITY = "api/v1/account/identity/add";
 
-            public const string GETALL_AUTHUSERS = "api/v1/account/identity/all";
+            public const string GETALL_IDENTITIES = "api/v1/account/identity/all";
         }
 
         public static class Users

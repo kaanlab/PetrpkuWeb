@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -13,6 +13,8 @@ namespace PetrpkuWeb.Shared.ViewModels
         [Required(ErrorMessage = "Поле \"Пароль\" не может быть пустым")]
         public string Password { get; set; }
         public bool RememberMe { get; set; }
+
+        public bool IsLdapUser { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

@@ -1,10 +1,10 @@
-﻿
-using PetrpkuWeb.Shared.Models;
+
+using PetrpkuWeb.Shared.ViewModels;
 using System.Collections.Generic;
 
 namespace PetrpkuWeb.NovellDirectoryLdap
 {
-    public interface IAppAuthenticationService
+    public interface ILdapAuthenticationService
     {
         IAuthUser Login(string username, string password);
         IAuthUser Search(string username);

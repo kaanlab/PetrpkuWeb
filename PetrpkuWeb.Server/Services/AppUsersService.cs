@@ -21,7 +21,8 @@ namespace PetrpkuWeb.Server.Services
             return await _db.AppUsers
                 .Include(b => b.Building)
                 .Include(d => d.Department)
-                .Where(u => u.IsActive)
+                .Include(ai => ai.AuthIdentity)
+                .Where(ai => ai.AuthIdentity.IsActive)
                 .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();
@@ -32,7 +33,9 @@ namespace PetrpkuWeb.Server.Services
             return await _db.AppUsers
                 .Include(b => b.Building)
                 .Include(d => d.Department)
-                .Where(u => u.IsActive && u.IsDuty)
+                .Include(ai => ai.AuthIdentity)
+                .Where(ai => ai.AuthIdentity.IsActive)
+                .Where(u => u.IsDuty)
                 .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();

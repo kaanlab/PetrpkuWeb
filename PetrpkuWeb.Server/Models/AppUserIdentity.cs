@@ -8,6 +8,8 @@ namespace PetrpkuWeb.Server.Models
     public class AppUserIdentity : IdentityUser
     {
         public string DisplayName { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsLdapUser { get; set; }
 
         // relationship
         public int AppUserId { get; set; }

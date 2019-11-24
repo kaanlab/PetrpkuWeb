@@ -1,5 +1,5 @@
 
-namespace PetrpkuWeb.Server.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
     public class LdapUser : IAuthUser
     {

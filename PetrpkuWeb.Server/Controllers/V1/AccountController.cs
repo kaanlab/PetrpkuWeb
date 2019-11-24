@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Server.Models;
+using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Controllers.V1
@@ -25,102 +27,71 @@ namespace PetrpkuWeb.Server.Controllers.V1
     public class AccountController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IAppAuthenticationService _appAuthenticationService;
+        private readonly ILdapAuthenticationService _ldapAuthenticationService;
         private readonly SignInManager<AppUserIdentity> _signInManager;
-        private readonly UserManager<AppUserIdentity> _userManager;
-        private readonly AppDbContext _db;
+        private readonly IAppIdentityService _appIdentityService;
+        private readonly IMapper _mapper;
 
         public AccountController(
             IConfiguration configuration,
             SignInManager<AppUserIdentity> signInManager,
-            IAppAuthenticationService appAuthenticationService,
-            UserManager<AppUserIdentity> userManager,
-            AppDbContext db)
+            ILdapAuthenticationService ldapAuthenticationService,
+            IAppIdentityService appIdentityService,
+            IMapper mapper)
         {
             _configuration = configuration;
             _signInManager = signInManager;
-            _appAuthenticationService = appAuthenticationService;
-            _userManager = userManager;
-            _db = db;
+            _ldapAuthenticationService = ldapAuthenticationService;
+            _appIdentityService = appIdentityService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
         [HttpPost(ApiRoutes.Account.LOGIN)]
-        public async Task<ActionResult<LoginResult>> Login(LoginViewModel model)
+        public async Task<ActionResult> Login(LoginViewModel model)
         {
 
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
                 return Unauthorized(new { message = "Username or password can't be null" });
 
-            var ldapUser = _appAuthenticationService.Login(model.Username, model.Password);
-            if (ldapUser is null)
+            var appUserIdentity = await _signInManager.UserManager.FindByNameAsync(model.Username);
+            if (appUserIdentity is null || !appUserIdentity.IsActive)
             {
-                return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
+                //appUserIdentity = await _appIdentityService.AddIdentityUser(ldapUser);
+                //await _userManager.CreateAsync(appUserIdentity);
+                return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
             }
 
-            var appUserIdentity = await _userManager.FindByNameAsync(ldapUser.UserName);
-            if (appUserIdentity is null)
+            if (appUserIdentity.IsLdapUser)
             {
-#if DEBUG
-                appUserIdentity = await AddIdentityUser(ldapUser);
-                await _userManager.CreateAsync(appUserIdentity);
-#else
-                return BadRequest(new LoginResult { Successful = false, Error = $"Can't find user {ldapUser.UserName} in AD" });
-#endif
+                var ldapUser = _ldapAuthenticationService.Login(model.Username, model.Password);
+                if (ldapUser is null)
+                {
+                    return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
+                }
+
+                await _appIdentityService.UpdateEmail(appUserIdentity, ldapUser);
+
+                await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
+            }
+            else 
+            {
+                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
+                if (!result.Succeeded) return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
             }
 
-            var idettityUser = await _db.Users.Include(u => u.AssosiatedUser).SingleOrDefaultAsync(u => u.UserName == model.Username);
-            if (idettityUser is null || !idettityUser.AssosiatedUser.IsActive)
-            {
-                return BadRequest(new LoginResult { Successful = false, Error = "User is locked" });
-            }
+            var appUserIdentityRoles = await _signInManager.UserManager.GetRolesAsync(appUserIdentity);
 
-            // update email if changed
-            if (appUserIdentity.Email != ldapUser.Email)
-            {
-                appUserIdentity.Email = ldapUser.Email;
-                appUserIdentity.NormalizedEmail = ldapUser.Email.ToUpperInvariant();
-
-                await _userManager.UpdateAsync(appUserIdentity);
-            }
-
-            // update groups if changed
-            //await RegisterRoles(appUserIdentity, ldapUser);
-
-            await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
-                new Claim(ClaimTypes.Name, appUserIdentity.UserName),
-                new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
-            };
-
-            foreach (var role in ldapUser.Roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecurityKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration["JwtExpireInDays"]));
-
-            var token = new JwtSecurityToken(
-                _configuration["JwtIssuer"],
-                _configuration["JwtAudience"],
-                claims,
-                expires: expiry,
-                signingCredentials: creds
-            );
+            var token = CreateJwtToken(appUserIdentity, appUserIdentityRoles);
 
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpGet(ApiRoutes.Account.SEARCH + "/{authUserName}")]
-        public ActionResult<IAuthUser> SearchAuthUser(string authUserName)
+        public ActionResult SearchAuthUser(string authUserName)
         {
-            var ldapUser = _appAuthenticationService.Search(authUserName);
+            var ldapUser = _ldapAuthenticationService.Search(authUserName);
             if (ldapUser is null)
             {
                 return BadRequest(new LoginResult { Successful = false, Error = "Bad username" });
@@ -130,12 +101,12 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpGet(ApiRoutes.Account.GETALL_LDAPUSERS)]
-        public async Task<ActionResult<List<LdapUser>>> GetAllLdapUsers()
+        public async Task<ActionResult> GetAllLdapUsers()
         {
-            var ldapUsers = _appAuthenticationService.SearchAll();
+            var ldapUsers = _ldapAuthenticationService.SearchAll();
             if (ldapUsers.Count > 0)
             {
-                var authUsers = await _db.Users.ToListAsync();
+                var authUsers = await _appIdentityService.GetAllIdentityUsers();
                 ldapUsers.RemoveAll(r => authUsers.Exists(u => u.UserName == r.UserName));
 
                 return Ok(ldapUsers);
@@ -144,31 +115,53 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpPost(ApiRoutes.Account.ADD_AUTHUSER)]
+        [HttpPost(ApiRoutes.Account.ADD_IDENTITY)]
         public async Task<ActionResult> AddAuthUser(IAuthUser authUser)
         {
             if (authUser is { })
             {
-                var appUserIdentity = await AddIdentityUser(authUser);
-                var result = await _userManager.CreateAsync(appUserIdentity);
+                var appUserIdentity = await _appIdentityService.AddIdentityUser(authUser);
 
-                if (result.Succeeded)
-                {
-                    return Ok(appUserIdentity);
-                }
-                return BadRequest();
+                return Ok(_mapper.Map<AppUserIdentityViewModel>(appUserIdentity));
             }
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpGet(ApiRoutes.Account.GETALL_AUTHUSERS)]
-        public async Task<ActionResult<List<AppUserIdentity>>> GetAllAuthUsers()
+        [HttpGet(ApiRoutes.Account.GETALL_IDENTITIES)]
+        public async Task<ActionResult> GetAllAuthUsers()
         {
-            return await _db.Users
-                .Include(u => u.AssosiatedUser)
-                .OrderBy(u => u.AppUserId)
-                .ToListAsync();
+            var identityUsers = await _appIdentityService.GetAllIdentityUsersOrderById();
+
+            return Ok(_mapper.Map<AppUserIdentityViewModel>(identityUsers));
+        }
+
+
+        private JwtSecurityToken CreateJwtToken(AppUserIdentity appUserIdentity, IList<string> appUserIdentityRoles)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
+                new Claim(ClaimTypes.Name, appUserIdentity.UserName),
+                new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
+            };
+
+            foreach (var role in appUserIdentityRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecurityKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration["JwtExpireInDays"]));
+
+            return new JwtSecurityToken(
+                _configuration["JwtIssuer"],
+                _configuration["JwtAudience"],
+                claims,
+                expires: expiry,
+                signingCredentials: creds
+            );
         }
 
         //[Authorize(Roles = AuthRole.ADMIN)]
@@ -204,28 +197,28 @@ namespace PetrpkuWeb.Server.Controllers.V1
         //}
 
 
-        private Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
-        {
-            return Task.Run(() =>
-            {
-                var appUserIdentity = new AppUserIdentity()
-                {
-                    UserName = authUser.UserName,
-                    NormalizedUserName = authUser.UserName.ToUpperInvariant(),
-                    Email = authUser.Email,
-                    NormalizedEmail = authUser.Email.ToUpperInvariant(),
-                    DisplayName = authUser.DisplayName,
-                    AssosiatedUser = new AppUser()
-                    {
-                        DisplayName = authUser.DisplayName,
-                        IsActive = true,
-                        IsDuty = false
-                    }
-                };
+        //private Task<AppUserIdentity> AddIdentityUser(IAuthUser authUser)
+        //{
+        //    return Task.Run(() =>
+        //    {
+        //        var appUserIdentity = new AppUserIdentity()
+        //        {
+        //            UserName = authUser.UserName,
+        //            NormalizedUserName = authUser.UserName.ToUpperInvariant(),
+        //            Email = authUser.Email,
+        //            NormalizedEmail = authUser.Email.ToUpperInvariant(),
+        //            DisplayName = authUser.DisplayName,
+        //            AssosiatedUser = new AppUser()
+        //            {
+        //                DisplayName = authUser.DisplayName,
+        //                IsActive = true,
+        //                IsDuty = false
+        //            }
+        //        };
 
-                return appUserIdentity;
-            });
-        }
+        //        return appUserIdentity;
+        //    });
+        //}
 
         //private async Task RegisterRoles(AppUserIdentity appUserIdentity, IAuthUser authUser)
         //{

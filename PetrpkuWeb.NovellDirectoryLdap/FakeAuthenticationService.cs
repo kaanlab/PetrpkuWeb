@@ -1,10 +1,10 @@
-﻿using PetrpkuWeb.Shared.Models;
+using PetrpkuWeb.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 
 namespace PetrpkuWeb.NovellDirectoryLdap
 {
-    public class FakeAuthenticationService : IAppAuthenticationService
+    public class FakeAuthenticationService : ILdapAuthenticationService
     {
         public IAuthUser Login(string username, string password)
         {

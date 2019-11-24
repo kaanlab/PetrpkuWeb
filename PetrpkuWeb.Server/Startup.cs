@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
-using PetrpkuWeb.Shared.Models;
-
+using PetrpkuWeb.Server.Models;
 
 namespace PetrpkuWeb.Server
 {
@@ -38,18 +38,19 @@ namespace PetrpkuWeb.Server
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+
+            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
+            services.AddScoped<ILdapAuthenticationService, LdapAuthenticationService>();
+
 #if DEBUG
-            services.AddScoped<IAppAuthenticationService, FakeAuthenticationService>();
             services.AddDbContext<AppDbContext>(
                options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
 #else
-            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
-            services.AddScoped<IAppAuthenticationService, LdapAuthenticationService>();
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
 #endif
-
             services.AddDefaultIdentity<AppUserIdentity>()
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

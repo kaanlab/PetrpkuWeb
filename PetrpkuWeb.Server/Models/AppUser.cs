@@ -17,7 +17,6 @@ namespace PetrpkuWeb.Server.Models
         public string ExtPhone { get; set; }
         public string Room { get; set; }
         public DateTime Birthday { get; set; }
-        public bool IsActive { get; set; }
         public bool IsDuty { get; set; }
   
 

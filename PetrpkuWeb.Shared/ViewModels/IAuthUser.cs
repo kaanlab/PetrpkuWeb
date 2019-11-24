@@ -1,5 +1,5 @@
-﻿
-namespace PetrpkuWeb.Shared.Models
+
+namespace PetrpkuWeb.Shared.ViewModels
 {
     public interface IAuthUser
     {

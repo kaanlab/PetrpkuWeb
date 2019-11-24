@@ -22,6 +22,10 @@ namespace PetrpkuWeb.Server.Data
                 .ForMember(dest => dest.AuthIdentity, opt => opt.MapFrom(src => src.AuthIdentity))
                 .ForMember(dest => dest.Building, opt => opt.MapFrom(src => src.Building))
                 .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Department));
+
+            //Viewmodel to Model
+            CreateMap<AppUserIdentityViewModel, AppUserIdentity>()
+                .ForMember(dest => dest.AssosiatedUser, opt => opt.MapFrom(src => src.AssosiatedUser));
         }
     }
 }
