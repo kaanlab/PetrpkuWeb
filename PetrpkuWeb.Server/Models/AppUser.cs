@@ -1,13 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
 namespace PetrpkuWeb.Server.Models
 {
-    public class AppUser
+    public class AppUser : IdentityUser
     {
-        public int AppUserId { get; set; }
-        public string Avatar { get; set; } = @"/img/user/default_avatar.png";
         public string DisplayName { get; set; }
+        public string Avatar { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MidleName { get; set; }
@@ -18,10 +18,10 @@ namespace PetrpkuWeb.Server.Models
         public string Room { get; set; }
         public DateTime Birthday { get; set; }
         public bool IsDuty { get; set; }
-  
+        public bool IsActive { get; set; }
+        public bool LdapAuth { get; set; }
 
         // relationship
-        public AppUserIdentity AuthIdentity { get; set; }
         public IEnumerable<Duty> DaysOfDuty { get; set; }
         public IEnumerable<Article> Articles { get; set; }
         public IEnumerable<Post> Posts { get; set; }

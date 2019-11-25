@@ -9,7 +9,7 @@ using PetrpkuWeb.Server.Models;
 
 namespace PetrpkuWeb.Server.Data
 {
-    public class AppDbContext : IdentityDbContext<AppUserIdentity>
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions options)
             : base(options)
@@ -19,7 +19,6 @@ namespace PetrpkuWeb.Server.Data
         public DbSet<Article> Articles { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Duty> Duties { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Building> Buildings { get; set; }

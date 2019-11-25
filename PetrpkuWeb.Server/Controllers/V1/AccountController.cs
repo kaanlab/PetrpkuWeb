@@ -28,21 +28,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
     {
         private readonly IConfiguration _configuration;
         private readonly ILdapAuthenticationService _ldapAuthenticationService;
-        private readonly SignInManager<AppUserIdentity> _signInManager;
-        private readonly IAppIdentityService _appIdentityService;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IAppUsersService _appUsersService;
         private readonly IMapper _mapper;
 
         public AccountController(
             IConfiguration configuration,
-            SignInManager<AppUserIdentity> signInManager,
+            SignInManager<AppUser> signInManager,
             ILdapAuthenticationService ldapAuthenticationService,
-            IAppIdentityService appIdentityService,
+            IAppUsersService appUsersService,
             IMapper mapper)
         {
             _configuration = configuration;
             _signInManager = signInManager;
             _ldapAuthenticationService = ldapAuthenticationService;
-            _appIdentityService = appIdentityService;
+            _appUsersService = appUsersService;
             _mapper = mapper;
         }
 
@@ -54,15 +54,15 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
                 return Unauthorized(new { message = "Username or password can't be null" });
 
-            var appUserIdentity = await _signInManager.UserManager.FindByNameAsync(model.Username);
-            if (appUserIdentity is null || !appUserIdentity.IsActive)
+            var appUser = await _signInManager.UserManager.FindByNameAsync(model.Username);
+            if (appUser is null || !appUser.IsActive)
             {
                 //appUserIdentity = await _appIdentityService.AddIdentityUser(ldapUser);
                 //await _userManager.CreateAsync(appUserIdentity);
                 return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
             }
 
-            if (appUserIdentity.IsLdapUser)
+            if (appUser.LdapAuth)
             {
                 var ldapUser = _ldapAuthenticationService.Login(model.Username, model.Password);
                 if (ldapUser is null)
@@ -70,9 +70,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
                     return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
                 }
 
-                await _appIdentityService.UpdateEmail(appUserIdentity, ldapUser);
+                await _appUsersService.UpdateEmail(appUser, ldapUser);
 
-                await _signInManager.SignInAsync(appUserIdentity, model.RememberMe);
+                await _signInManager.SignInAsync(appUser, model.RememberMe);
             }
             else 
             {
@@ -80,9 +80,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
                 if (!result.Succeeded) return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
             }
 
-            var appUserIdentityRoles = await _signInManager.UserManager.GetRolesAsync(appUserIdentity);
+            var appUserRoles = await _signInManager.UserManager.GetRolesAsync(appUser);
 
-            var token = CreateJwtToken(appUserIdentity, appUserIdentityRoles);
+            var token = CreateJwtToken(appUser, appUserRoles);
 
             return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
@@ -106,7 +106,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             var ldapUsers = _ldapAuthenticationService.SearchAll();
             if (ldapUsers.Count > 0)
             {
-                var authUsers = await _appIdentityService.GetAllIdentityUsers();
+                var authUsers = await _appUsersService.GetAllIdentityUsers();
                 ldapUsers.RemoveAll(r => authUsers.Exists(u => u.UserName == r.UserName));
 
                 return Ok(ldapUsers);
@@ -120,7 +120,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             if (authUser is { })
             {
-                var appUserIdentity = await _appIdentityService.AddIdentityUser(authUser);
+                var appUserIdentity = await _appUsersService.AddIdentityUser(authUser);
 
                 return Ok(_mapper.Map<AppUserIdentityViewModel>(appUserIdentity));
             }
@@ -131,22 +131,22 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.Account.GETALL_IDENTITIES)]
         public async Task<ActionResult> GetAllAuthUsers()
         {
-            var identityUsers = await _appIdentityService.GetAllIdentityUsersOrderById();
+            var identityUsers = await _appUsersService.GetAllIdentityUsersOrderById();
 
             return Ok(_mapper.Map<AppUserIdentityViewModel>(identityUsers));
         }
 
 
-        private JwtSecurityToken CreateJwtToken(AppUserIdentity appUserIdentity, IList<string> appUserIdentityRoles)
+        private JwtSecurityToken CreateJwtToken(AppUser appUser, IList<string> appUserRoles)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.WindowsAccountName, appUserIdentity.DisplayName),
-                new Claim(ClaimTypes.Name, appUserIdentity.UserName),
-                new Claim(ClaimTypes.UserData, appUserIdentity.AppUserId.ToString())
+                new Claim(ClaimTypes.WindowsAccountName, appUser.DisplayName),
+                new Claim(ClaimTypes.Name, appUser.UserName),
+                new Claim(ClaimTypes.UserData, appUser.Id.ToString())
             };
 
-            foreach (var role in appUserIdentityRoles)
+            foreach (var role in appUserRoles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }

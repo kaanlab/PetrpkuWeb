@@ -50,8 +50,8 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ANY)]
-        [HttpGet(ApiRoutes.Users.GETUSER + "/{appUserId:int}")]
-        public async Task<ActionResult<AppUser>> GetUser(int appUserId)
+        [HttpGet(ApiRoutes.Users.GETUSER + "/{appUserId}")]
+        public async Task<ActionResult<AppUser>> GetUser(string appUserId)
         {
             return await _appUsersService.GetUserById(appUserId);
         }
