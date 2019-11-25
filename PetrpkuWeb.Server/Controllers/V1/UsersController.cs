@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
@@ -22,7 +21,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
         private readonly IAppUsersService _appUsersService;
         private readonly IMapper _mapper;
 
-        public UsersController(IAppUsersService appUsersService, IMapper mapper)
+        public UsersController(
+            IAppUsersService appUsersService, 
+            IMapper mapper)
         {
             _appUsersService = appUsersService;
             _mapper = mapper;
@@ -53,7 +54,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.Users.GETUSER + "/{appUserId}")]
         public async Task<ActionResult<AppUser>> GetUser(string appUserId)
         {
-            return await _appUsersService.GetUserById(appUserId);
+            return await _appUsersService.GetById(appUserId);
         }
 
         [AllowAnonymous]
@@ -75,7 +76,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (appUserId == appUser.AppUserId)
             {
                 var userToUpdate = _mapper.Map<AppUser>(appUser);
-                var updated = await _appUsersService.UpdateUser(userToUpdate);
+                var updated = await _appUsersService.Update(userToUpdate);
                 if(updated)
                 {
                     return Ok();

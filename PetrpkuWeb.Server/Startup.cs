@@ -49,7 +49,7 @@ namespace PetrpkuWeb.Server
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
 #endif
-            services.AddDefaultIdentity<AppUserIdentity>()
+            services.AddDefaultIdentity<AppUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
 

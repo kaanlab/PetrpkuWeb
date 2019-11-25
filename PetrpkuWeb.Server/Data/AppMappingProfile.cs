@@ -18,14 +18,12 @@ namespace PetrpkuWeb.Server.Data
 
 
             //Model to ViewModel
-            CreateMap<AppUser, AppUserViewModel>()
-                .ForMember(dest => dest.AuthIdentity, opt => opt.MapFrom(src => src.AuthIdentity))
+            CreateMap<AppUser, AppUserViewModel>()                
                 .ForMember(dest => dest.Building, opt => opt.MapFrom(src => src.Building))
                 .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Department));
 
             //Viewmodel to Model
-            CreateMap<AppUserIdentityViewModel, AppUserIdentity>()
-                .ForMember(dest => dest.AssosiatedUser, opt => opt.MapFrom(src => src.AssosiatedUser));
+
         }
     }
 }

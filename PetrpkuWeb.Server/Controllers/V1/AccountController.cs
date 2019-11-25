@@ -70,7 +70,8 @@ namespace PetrpkuWeb.Server.Controllers.V1
                     return BadRequest(new LoginResult { Successful = false, Error = "Bad username or password" });
                 }
 
-                await _appUsersService.UpdateEmail(appUser, ldapUser);
+                if (appUser.Email != ldapUser.Email)
+                    await _appUsersService.UpdateEmail(appUser, ldapUser);
 
                 await _signInManager.SignInAsync(appUser, model.RememberMe);
             }
@@ -106,7 +107,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             var ldapUsers = _ldapAuthenticationService.SearchAll();
             if (ldapUsers.Count > 0)
             {
-                var authUsers = await _appUsersService.GetAllIdentityUsers();
+                var authUsers = await _appUsersService.GetAll();
                 ldapUsers.RemoveAll(r => authUsers.Exists(u => u.UserName == r.UserName));
 
                 return Ok(ldapUsers);
@@ -120,9 +121,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             if (authUser is { })
             {
-                var appUserIdentity = await _appUsersService.AddIdentityUser(authUser);
+                var appUserIdentity = await _appUsersService.Add(authUser);
 
-                return Ok(_mapper.Map<AppUserIdentityViewModel>(appUserIdentity));
+                return Ok(_mapper.Map<AppUserViewModel>(appUserIdentity));
             }
             return BadRequest();
         }
@@ -131,9 +132,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.Account.GETALL_IDENTITIES)]
         public async Task<ActionResult> GetAllAuthUsers()
         {
-            var identityUsers = await _appUsersService.GetAllIdentityUsersOrderById();
+            var identityUsers = await _appUsersService.GetAllOrderById();
 
-            return Ok(_mapper.Map<AppUserIdentityViewModel>(identityUsers));
+            return Ok(_mapper.Map<AppUserViewModel>(identityUsers));
         }
 
 

@@ -23,19 +23,19 @@ namespace PetrpkuWeb.Server.Services
             _userManager = userManager;
         }
 
-        public async Task<List<AppUser>> GetAllIdentityUsersOrderById()
+        public async Task<List<AppUser>> GetAllOrderById()
         {
             return await _db.Users
                 .OrderBy(u => u.Id)
                 .ToListAsync();
         }
 
-        public async Task<List<AppUser>> GetAllIdentityUsers()
+        public async Task<List<AppUser>> GetAll()
         {
             return await _db.Users.ToListAsync();
         }
 
-        public async Task<AppUser> AddIdentityUser(IAuthUser authUser)
+        public async Task<AppUser> Add(IAuthUser authUser)
         {
 
             var appUser = new AppUser()
@@ -56,21 +56,16 @@ namespace PetrpkuWeb.Server.Services
             return appUser;
         }
 
-        public async Task<AppUser> FindByName(IAuthUser authUser)
-        {
-            return await _userManager.FindByNameAsync(authUser.UserName);
-        }
 
         public async Task UpdateEmail(AppUser appUser, IAuthUser authUser)
         {
             // update email if changed
-            if (appUser.Email != authUser.Email)
-            {
+            
                 appUser.Email = authUser.Email;
                 appUser.NormalizedEmail = authUser.Email.ToUpperInvariant();
 
                 await _userManager.UpdateAsync(appUser);
-            }
+ 
         }
 
 
@@ -106,7 +101,7 @@ namespace PetrpkuWeb.Server.Services
                 .ToListAsync();
         }
 
-        public async Task<AppUser> GetUserById(string appUserId)
+        public async Task<AppUser> GetById(string appUserId)
         {
             return await _db.Users
                 .Include(d => d.DaysOfDuty)
@@ -130,7 +125,7 @@ namespace PetrpkuWeb.Server.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> UpdateUser(AppUser appUser)
+        public async Task<bool> Update(AppUser appUser)
         {
             //_db.AppUsers.Update(appUser);
             var updated = await _userManager.UpdateAsync(appUser);
