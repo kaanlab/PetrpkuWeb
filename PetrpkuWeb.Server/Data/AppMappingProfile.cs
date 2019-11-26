@@ -23,6 +23,7 @@ namespace PetrpkuWeb.Server.Data
                 .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Department));
 
             //Viewmodel to Model
+            CreateMap<CssTypeViewModel, CssType>();
 
         }
     }

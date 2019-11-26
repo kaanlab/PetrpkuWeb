@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Server.Models;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

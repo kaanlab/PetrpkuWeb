@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 
-namespace PetrpkuWeb.Server.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class CssType
+    public class CssTypeViewModel
     {
         public int CssTypeId { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
-
-        //
-        public IEnumerable<Announcement> Announcements { get; set; }
+        public IEnumerable<AnnouncementViewModel> Announcements { get; set; }
     }
 }

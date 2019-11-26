@@ -1,5 +1,5 @@
 
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Models;
 using System.Collections.Generic;
 
 namespace PetrpkuWeb.NovellDirectoryLdap

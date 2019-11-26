@@ -34,5 +34,25 @@ namespace PetrpkuWeb.Shared.Contracts.V1
             public const string UPDATE = "api/v1/users/update";
         }
 
+        public static class Rss
+        {
+            public const string MILNEWS = "api/v1/rssfeed/petrpku-mil-ru";
+
+            public const string CALEND = "api/v1/rssfeed/calend-ru";
+        }
+
+        public static class CssType
+        {
+            public const string GETALL = "api/v1/csstype/all";
+
+            public const string SHOW = "api/v1/csstype/show";
+
+            public const string CREATE = "api/v1/csstype/create";
+
+            public const string UPDATE = "api/v1/csstype/update";
+
+            public const string DELETE = "api/v1/csstype/delete";
+        }
+
     }
 }

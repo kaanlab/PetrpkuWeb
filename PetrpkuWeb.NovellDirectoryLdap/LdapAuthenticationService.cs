@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using Novell.Directory.Ldap;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

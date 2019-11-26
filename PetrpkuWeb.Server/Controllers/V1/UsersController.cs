@@ -81,25 +81,6 @@ namespace PetrpkuWeb.Server.Controllers.V1
                 {
                     return Ok();
                 }
-                
-                //var building = await _db.Buildings.SingleOrDefaultAsync(b => b.BuildingId == appUser.BuildingId);
-                //var department = await _db.Departments.SingleOrDefaultAsync(d => d.DepartmentId == appUser.DepartmentId);
-
-                //appUser.Building = building;
-                //appUser.Department = department;
-
-                //if (appUser.IsActive == false)
-                //{
-                //   var appUserIdentity = await _db.Users.SingleOrDefaultAsync(u => u.DisplayName == appUser.DisplayName);
-                //   //appUserIdentity.LockoutEnabled = true;
-                //   _db.Users.Update(appUserIdentity);
-                //   await _db.SaveChangesAsync();
-                //}
-
-                //_db.AppUsers.Update(appUser);
-                //await _db.SaveChangesAsync();
-
-                //return Ok(appUser);
             }
             return BadRequest();
         }

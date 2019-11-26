@@ -1,48 +1,32 @@
+using Microsoft.Extensions.Caching.Memory;
+using PetrpkuWeb.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using PetrpkuWeb.Shared.Models;
 
-namespace PetrpkuWeb.Server.Controllers
+namespace PetrpkuWeb.Server.Services
 {
-    [Route("api/rssfeed")]
-    [ApiController]
-    public class RssFeedController : ControllerBase
+    public class RssService : IRssService
     {
         private readonly string _urlMil = "http://petrpku.mil.ru/more/Novosti/rss";
         private readonly string _urlCalend = "https://www.calend.ru/img/export/today-events.rss";
         private readonly IMemoryCache _cache;
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public RssFeedController(IMemoryCache memoryCache, IHttpClientFactory clientFactory)
+        public RssService(IMemoryCache memoryCache, IHttpClientFactory httpClientFactory)
         {
             _cache = memoryCache;
-            _clientFactory = clientFactory;
+            _httpClientFactory = httpClientFactory;
         }
-
-        [HttpGet("mil")]
-        public async Task<ActionResult<List<RssMil>>> GetCachedMil()
-        {
-            return await GetRssMilAndCache();
-        }
-
-        [HttpGet("calend")]
-        public async Task<ActionResult<List<RssCalend>>> GetCachedCalend()
-        {
-            return await GetRssCalendAndCache();
-        }
-
-        private async Task<List<RssMil>> GetRssMilAndCache()
+        public async Task<List<RssMil>> GetRssMilAndCache()
         {
             if (!_cache.TryGetValue("ListOfRssMil", out List<RssMil> rssNews))
             {
                 string response;
-                var client = _clientFactory.CreateClient();
+                var client = _httpClientFactory.CreateClient();
                 response = await client.GetStringAsync(_urlMil);
 
                 if (response is { })
@@ -65,12 +49,12 @@ namespace PetrpkuWeb.Server.Controllers
             return rssNews;
         }
 
-        private async Task<List<RssCalend>> GetRssCalendAndCache()
+        public async Task<List<RssCalend>> GetRssCalendAndCache()
         {
             if (!_cache.TryGetValue("ListOfRssCalend", out List<RssCalend> rssNews))
             {
                 string response;
-                var client = _clientFactory.CreateClient();
+                var client = _httpClientFactory.CreateClient();
                 response = await client.GetStringAsync(_urlCalend);
 
                 if (response is { })
