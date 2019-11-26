@@ -36,7 +36,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             return await _appUsersService.GetAllActiveOrderByDispalyName();
         }
 
-        [Authorize(Roles = AuthRoles.ANY)]
+        [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpGet(ApiRoutes.Users.GETALL_ACTIVE_DUTIES)]
         public async Task<ActionResult<List<AppUser>>> GetAllActiveDuties()
         {
@@ -50,7 +50,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             return await _appUsersService.GetAllOrderByDispalyName();
         }
 
-        [Authorize(Roles = AuthRoles.ANY)]
+        [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpGet(ApiRoutes.Users.GETUSER + "/{appUserId}")]
         public async Task<ActionResult<AppUser>> GetUser(string appUserId)
         {
@@ -69,7 +69,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             return await _appUsersService.GetBirthdaysForOneWeek(firstDayOfWeek, lastDayOfWeek);
         }
 
-        [Authorize(Roles = AuthRoles.ANY)]
+        [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpPut(ApiRoutes.Users.UPDATE + "/{appUserId:int}")]
         public async Task<ActionResult<AppUser>> PutUserAsync(int appUserId, AppUserViewModel appUser)
         {

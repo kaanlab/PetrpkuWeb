@@ -6,6 +6,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using PetrpkuWeb.Server.Models;
+using Microsoft.AspNetCore.Identity;
+using PetrpkuWeb.Shared.Extensions;
 
 namespace PetrpkuWeb.Server.Data
 {
@@ -29,6 +31,20 @@ namespace PetrpkuWeb.Server.Data
         public DbSet<Checked> Checkeds { get; set; }
         public DbSet<Published> Publisheds { get; set; }
         public DbSet<CssType> CssTypes { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<IdentityRole>()
+                   .HasData(new IdentityRole { Name = AuthRoles.USER, NormalizedName = AuthRoles.USER.ToUpperInvariant(), Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+            builder.Entity<IdentityRole>()
+                   .HasData(new IdentityRole { Name = AuthRoles.ADMIN, NormalizedName = AuthRoles.ADMIN.ToUpperInvariant(), Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+            builder.Entity<IdentityRole>()
+                   .HasData(new IdentityRole { Name = AuthRoles.KADRY, NormalizedName = AuthRoles.KADRY.ToUpperInvariant(), Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+            builder.Entity<IdentityRole>()
+                   .HasData(new IdentityRole { Name = AuthRoles.PUBLISHER, NormalizedName = AuthRoles.PUBLISHER.ToUpperInvariant(), Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+        }
     }
     
 }

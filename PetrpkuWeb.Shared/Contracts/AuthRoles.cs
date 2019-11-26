@@ -6,12 +6,12 @@ namespace PetrpkuWeb.Shared.Extensions
 {
     public static class AuthRoles
     {
-        public const string ADMIN = "webportal_admin";
-        public const string USER = "webportal_user";
-        public const string KADRY = "webportal_kadry";
-        public const string PUBLISHER = "webportal_publisher";
-        public const string ADMIN_PUBLISHER = "webportal_admin, webportal_publisher";
-        public const string ADMIN_KADRY = "webportal_admin, webportal_kadry";
-        public const string ANY = "webportal_admin, webportal_kadry, webportal_user";
+        public const string ADMIN = "Admin";
+        public const string USER = "User";
+        public const string KADRY = "Kadry";
+        public const string PUBLISHER = "Publisher";
+        public const string ADMIN_PUBLISHER = "Admin, Publisher";
+        public const string ADMIN_KADRY = "Admin, Kadry";
+        public const string ADMIN_KADRY_USER = "Admin, Kadry, User";
     }
 }

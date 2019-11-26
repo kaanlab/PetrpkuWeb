@@ -1,4 +1,6 @@
-﻿using PetrpkuWeb.Shared.Models;
+using Microsoft.AspNetCore.Identity;
+using PetrpkuWeb.Server.Models;
+using PetrpkuWeb.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,37 +10,24 @@ namespace PetrpkuWeb.Server.Data
 {
     public class SeedData
     {
-        public static void Initialize(AppDbContext _db)
+        public static async Task Initialize(UserManager<AppUser> userManager)
         {
-            //var building = new Building()
-            //{
-            //    Name = "отсутствует",
-            //    //IsHidden = true
-            //};
-
-            //var department = new Department()
-            //{
-            //    Name = "отсутствует",
-            //    //IsHidden = true
-            //};
-
-            var appUserIdentity = new AppUserIdentity()
+            var appUser = new AppUser()
             {
-                UserName = "icer",
-                NormalizedUserName = "ICER",
-                DisplayName = "Кантышев А.В.",
-                AssosiatedUser = new AppUser()
-                {
-                    DisplayName = "Кантышев А.В.",
-                    //Building = building,
-                    //Department = department,
-                    IsActive = true,
-                    IsDuty = false
-                }
+                UserName = "admin",
+                NormalizedUserName = "ADMIN",
+                DisplayName = "Администратор",
+                Email = "admin@petrpku.ru",
+                NormalizedEmail = "ADMIN@PETRPKU.RU",
+                IsActive = true,
+                IsDuty = false,
+                LdapAuth = false
             };
 
-            _db.Users.Add(appUserIdentity);
-            _db.SaveChanges();
+            var result = await userManager.CreateAsync(appUser, "passw0rd!");
+            
+            if(result.Succeeded)
+                await userManager.AddToRoleAsync(appUser, AuthRoles.ADMIN);
         }
     }
 }
