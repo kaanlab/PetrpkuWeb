@@ -12,9 +12,6 @@ namespace PetrpkuWeb.Server.Data
     {
         public AppMappingProfile()
         {
-
-
-
             //Model to ViewModel
             CreateMap<AppUser, AppUserViewModel>()                
                 .ForMember(dest => dest.Building, opt => opt.MapFrom(src => src.Building))
@@ -22,11 +19,20 @@ namespace PetrpkuWeb.Server.Data
 
             CreateMap<Attachment, AttachmentViewModel>();
 
+            CreateMap<SiteSubsection, SiteSubSectionViewModel>()
+                .ForMember(dest => dest.SiteSection, opt => opt.MapFrom(src => src.SiteSection));
+
             //Viewmodel to Model
             CreateMap<CssTypeViewModel, CssType>();
+
             CreateMap<ArticleViewModel, Article>();
+
             CreateMap<PostViewModel, Post>();
+
             CreateMap<MessageViewModel, Message>();
+
+            CreateMap<SiteSubSectionViewModel, SiteSubsection>()
+                .ForMember(dest => dest.SiteSection, opt => opt.MapFrom(src => src.SiteSection));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.CssType.GETALL)]
+        [HttpGet(ApiRoutes.CssType.ALL)]
         public async Task<ActionResult> GetAll()
         {
             var cssType = await _cssTypeService.GetAll();
@@ -68,7 +68,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpPut(ApiRoutes.CssType.UPDATE + "/{cssTypeId:int}")]
+        [HttpPut(ApiRoutes.CssType.UPDATE + "/{cssTypeViewModelId:int}")]
         public async Task<ActionResult> UpdateCssType(int cssTypeViewModelId, CssTypeViewModel cssTypeViewModel)
         {
             if (cssTypeViewModelId == cssTypeViewModel.CssTypeId)

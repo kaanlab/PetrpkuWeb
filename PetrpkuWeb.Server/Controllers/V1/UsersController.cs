@@ -30,35 +30,35 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Users.GETALL_ACTIVE)]
+        [HttpGet(ApiRoutes.Users.ALL_ACTIVE)]
         public async Task<ActionResult<List<AppUser>>> GetAllActive()
         {
             return await _appUsersService.GetAllActiveOrderByDispalyName();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpGet(ApiRoutes.Users.GETALL_ACTIVE_DUTIES)]
+        [HttpGet(ApiRoutes.Users.ALL_ACTIVE_DUTIES)]
         public async Task<ActionResult<List<AppUser>>> GetAllActiveDuties()
         {
             return await _appUsersService.GetAllActiveDutiesOrderByDispalyName();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
-        [HttpGet(ApiRoutes.Users.GETALL)]
+        [HttpGet(ApiRoutes.Users.ALL)]
         public async Task<ActionResult<List<AppUser>>> GetAll()
         {
             return await _appUsersService.GetAllOrderByDispalyName();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpGet(ApiRoutes.Users.GETUSER + "/{appUserId}")]
+        [HttpGet(ApiRoutes.Users.USER + "/{appUserId}")]
         public async Task<ActionResult<AppUser>> GetUser(string appUserId)
         {
             return await _appUsersService.GetById(appUserId);
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Users.GETBIRTHDAYS)]
+        [HttpGet(ApiRoutes.Users.BIRTHDAYS)]
         public async Task<ActionResult<List<AppUser>>> GetBirthdays()
         {
             var firstDayOfWeek = DateTime.Now.FirstDayOfWeek();

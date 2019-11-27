@@ -81,6 +81,8 @@ namespace PetrpkuWeb.Shared.Contracts.V1
 
             public const string DELETE = "api/v1/sections/sitesection/delete";
 
+            public const string SUBSECTIONS = "api/v1/sections/sitesubsections";
+
             public const string SUBSECTION_ALL = "api/v1/sections/sitesubsections/all";
 
             public const string SUBSECTION_SHOW = "api/v1/sections/sitesubsection/show";
