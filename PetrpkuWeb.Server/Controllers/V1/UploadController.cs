@@ -14,23 +14,28 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using ImageMagick;
 using PetrpkuWeb.Shared.Extensions;
+using PetrpkuWeb.Shared.Contracts.V1;
+using PetrpkuWeb.Server.Models;
+using AutoMapper;
 
-namespace PetrpkuWeb.Server.Controllers
+namespace PetrpkuWeb.Server.Controllers.V1
 {
-    [Authorize(Roles = AuthRole.ANY)]
-    [Route("api/[controller]")]
+    [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
+    //[Route("api/[controller]")]
     [ApiController]
     public class UploadController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly IMapper _mapper;
 
-        public UploadController(AppDbContext db)
+        public UploadController(AppDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
-        [HttpPost("poster"), DisableRequestSizeLimit]
-        public async Task<ActionResult<string>> UploadPoster(IFormFile file)
+        [HttpPost(ApiRoutes.Upload.POSTER), DisableRequestSizeLimit]
+        public async Task<ActionResult> UploadPoster(IFormFile file)
         {
             try
             {
@@ -43,8 +48,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                     if (System.IO.File.Exists(path))
                     {
-                        dirPath = CreateRandomNameDirectory();
-                        path = Path.Combine(dirPath, file.FileName);
+                        path = Path.Combine(dirPath, Path.GetRandomFileName().Substring(0, 6), file.FileName);
                     }
 
                     await using (var stream = new FileStream(path, FileMode.Create))
@@ -86,8 +90,8 @@ namespace PetrpkuWeb.Server.Controllers
             }
         }
 
-        [HttpPost("avatar"), DisableRequestSizeLimit]
-        public async Task<ActionResult<Attachment>> UploadAvatar(IFormFile file)
+        [HttpPost(ApiRoutes.Upload.AVATAR), DisableRequestSizeLimit]
+        public async Task<ActionResult> UploadAvatar(IFormFile file)
         {
             try
             {
@@ -100,8 +104,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                     if (System.IO.File.Exists(path))
                     {
-                        dirPath = CreateRandomNameDirectory();
-                        path = Path.Combine(dirPath, file.FileName);
+                        path = Path.Combine(dirPath, Path.GetRandomFileName().Substring(0, 6), file.FileName);
                     }
 
                     await using (var stream = new FileStream(path, FileMode.Create))
@@ -146,12 +149,12 @@ namespace PetrpkuWeb.Server.Controllers
             }
         }
 
-        [HttpPost("files"), DisableRequestSizeLimit]
-        public async Task<ActionResult<List<Attachment>>> UploadFiles(List<IFormFile> files)
+        [HttpPost(ApiRoutes.Upload.FILES), DisableRequestSizeLimit]
+        public async Task<ActionResult> UploadFiles(List<IFormFile> files)
         {
             try
             {
-                var result = new List<Attachment>();
+                var attachments = new List<Attachment>();
                 var dirPath = UploadPath();
 
                 foreach (var file in files)
@@ -162,8 +165,7 @@ namespace PetrpkuWeb.Server.Controllers
 
                     if (System.IO.File.Exists(path))
                     {
-                        dirPath = CreateRandomNameDirectory();
-                        path = Path.Combine(dirPath, file.FileName);
+                        path = Path.Combine(dirPath, Path.GetRandomFileName().Substring(0, 6), file.FileName);
                     }
 
                     await using (var stream = new FileStream(path, FileMode.Create))
@@ -199,10 +201,10 @@ namespace PetrpkuWeb.Server.Controllers
                     _db.Attachments.Add(attachment);
                     await _db.SaveChangesAsync();
 
-                    result.Add(attachment);
+                    attachments.Add(attachment);
                 }
 
-                return Ok(result);
+                return Ok(_mapper.Map<List<AttachmentViewModel>>(attachments));
             }
             catch (NotSupportedException ex)
             {
@@ -210,40 +212,35 @@ namespace PetrpkuWeb.Server.Controllers
             }
         }
 
-        [HttpPut("updateinfo/{attachmentId:int}")]
-        public async Task<ActionResult<Attachment>> PutAttachmentInfoAsync(int attachmentId, Attachment attachment)
+        [HttpPut(ApiRoutes.Upload.UPDATE + "/{attachmentId:int}")]
+        public async Task<ActionResult<Attachment>> UpdateAttachment(int attachmentViewModelId, AttachmentViewModel attachmentViewModel)
         {
-            if (attachmentId != attachment.AttachmentId)
+            if (attachmentViewModelId != attachmentViewModel.AttachmentId)
             {
                 return BadRequest();
             }
 
+            var attachment = _mapper.Map<Attachment>(attachmentViewModel);
+
             _db.Entry(attachment).State = EntityState.Modified;
             await _db.SaveChangesAsync();
 
-            return Ok(attachment);
+            return Ok(_mapper.Map<AttachmentViewModel>(attachment));
         }
 
-        [HttpDelete("deleteinfo/{attachmentId:int}")]
-        public async Task<ActionResult> DeleteAttachmentInfoAsync([FromRoute] int attachmentId)
+        [HttpDelete(ApiRoutes.Upload.DELETE + "/{attachmentId:int}")]
+        public async Task<ActionResult> DeleteAttachment([FromRoute] int attachmentId)
         {
-            var attachmentInfo = await _db.Attachments.FindAsync(attachmentId);
+            var attachment = await _db.Attachments.FindAsync(attachmentId);
 
-            if (attachmentInfo is null)
+            if (attachment is null)
             {
                 return NotFound();
             }
 
-            _db.Attachments.Remove(attachmentInfo);
+            _db.Attachments.Remove(attachment);
             await _db.SaveChangesAsync();
             return NoContent();
-        }
-
-        private string CreateRandomNameDirectory()
-        {
-            var uniqueDir = Path.Combine("uploadfolder", Path.GetRandomFileName().Substring(0, 6));
-            Directory.CreateDirectory(uniqueDir);
-            return uniqueDir;
         }
 
         private string UploadPath()
