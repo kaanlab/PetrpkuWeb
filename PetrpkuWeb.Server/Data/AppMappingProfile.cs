@@ -1,8 +1,4 @@
 using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
@@ -22,6 +18,9 @@ namespace PetrpkuWeb.Server.Data
             CreateMap<SiteSubsection, SiteSubSectionViewModel>()
                 .ForMember(dest => dest.SiteSection, opt => opt.MapFrom(src => src.SiteSection));
 
+            //CreateMap<MilRequest, MilRequestViewModel>()
+            //    .ForMember(dest => dest.se)
+
             //Viewmodel to Model
             CreateMap<CssTypeViewModel, CssType>();
 
@@ -29,10 +28,13 @@ namespace PetrpkuWeb.Server.Data
 
             CreateMap<PostViewModel, Post>();
 
-            CreateMap<MessageViewModel, Message>();
+            //CreateMap<MessageViewModel, Message>();
 
             CreateMap<SiteSubSectionViewModel, SiteSubsection>()
                 .ForMember(dest => dest.SiteSection, opt => opt.MapFrom(src => src.SiteSection));
+
+            CreateMap<PostViewModel, Post>()
+                .ForMember(dest => dest.Attachments, opt => opt.MapFrom(src => src.Attachments));
         }
     }
 }

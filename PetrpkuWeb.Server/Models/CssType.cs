@@ -12,6 +12,6 @@ namespace PetrpkuWeb.Server.Models
         public string Value { get; set; }
 
         //
-        public IEnumerable<Announcement> Announcements { get; set; }
+        public IEnumerable<Note> Announcements { get; set; }
     }
 }

@@ -213,7 +213,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [HttpPut(ApiRoutes.Upload.UPDATE + "/{attachmentId:int}")]
-        public async Task<ActionResult<Attachment>> UpdateAttachment(int attachmentViewModelId, AttachmentViewModel attachmentViewModel)
+        public async Task<ActionResult> UpdateAttachment(int attachmentViewModelId, AttachmentViewModel attachmentViewModel)
         {
             if (attachmentViewModelId != attachmentViewModel.AttachmentId)
             {

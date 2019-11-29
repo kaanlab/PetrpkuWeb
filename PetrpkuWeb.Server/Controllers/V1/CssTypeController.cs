@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Controllers.V1
@@ -21,10 +14,10 @@ namespace PetrpkuWeb.Server.Controllers.V1
     [ApiController]
     public class CssTypeController : ControllerBase
     {
-        private readonly ICssTypeService _cssTypeService;
+        private readonly ITypeService<CssType> _cssTypeService;
         private readonly IMapper _mapper;
 
-        public CssTypeController(ICssTypeService cssTypeService, IMapper mapper)
+        public CssTypeController(ITypeService<CssType> cssTypeService, IMapper mapper)
         {
             _cssTypeService = cssTypeService;
             _mapper = mapper;
@@ -43,7 +36,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.CssType.SHOW + "/{cssTypeId:int}")]
         public async Task<ActionResult> GetCssType(int cssTypeId)
         {
-            var cssType = await _cssTypeService.GetCssType(cssTypeId);
+            var cssType = await _cssTypeService.GetOne(cssTypeId);
 
             if (cssType is null)
                 return NotFound();
@@ -56,7 +49,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         public async Task<ActionResult> CreateCssType(CssTypeViewModel cssTypeViewModel)
         {
             if (cssTypeViewModel is null)
-                return BadRequest();
+                return NotFound();
 
             var cssType = _mapper.Map<CssType>(cssTypeViewModel);
             var created = await _cssTypeService.Create(cssType);
@@ -85,11 +78,12 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpDelete(ApiRoutes.CssType.DELETE + "/{cssTypeId:int}")]
-        public async Task<IActionResult> DeleteCssType(int cssTypeId)
+        public async Task<ActionResult> DeleteCssType(int cssTypeId)
         {
             if (ModelState.IsValid)
             {
                 var deleted = await _cssTypeService.Delete(cssTypeId);
+                
                 if (deleted)
                     return NoContent();
             }

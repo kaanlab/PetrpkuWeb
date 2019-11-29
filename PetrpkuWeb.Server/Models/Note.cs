@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace PetrpkuWeb.Server.Models
 {
-    public class Announcement
+    public class Note
     {
-        public int AnnouncementId { get; set; }
+        public int NoteId { get; set; }
 
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
@@ -20,9 +20,7 @@ namespace PetrpkuWeb.Server.Models
 
 
         // relationship
-        public int AppUserId { get; set; }
         public AppUser Author { get; set; }
-        public int CssTypeId { get; set; }
         public CssType CssType { get; set; }
     }
 }

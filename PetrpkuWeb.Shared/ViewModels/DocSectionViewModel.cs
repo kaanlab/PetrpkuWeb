@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace PetrpkuWeb.Server.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class Document
+    public class DocSectionViewModel
     {
         public int DocumentId { get; set; }
 
@@ -15,9 +14,9 @@ namespace PetrpkuWeb.Server.Models
 
         // relationship
         public string Id { get; set; }
-        public AppUser Author { get; set; }
+        public AppUserViewModel Author { get; set; }
         public int DepartmentId { get; set; }
-        public Department Department { get; set; }
-        public List<Attachment> Attachments { get; set; }
+        public DepartmentViewModel Department { get; set; }
+        public List<AttachmentViewModel> Attachments { get; set; }
     }
 }

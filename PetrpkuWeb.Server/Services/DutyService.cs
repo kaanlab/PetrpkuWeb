@@ -1,127 +1,91 @@
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
+using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PetrpkuWeb.Server.Data;
-using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.Models;
+using Document = DocumentFormat.OpenXml.Wordprocessing.Document;
 
-namespace PetrpkuWeb.Server.Controllers
+namespace PetrpkuWeb.Server.Services
 {
-
-    [Route("api/duty")]
-    [ApiController]
-    public class DutyController : ControllerBase
+    public class DutyService : IDutyService
     {
         private readonly AppDbContext _db;
 
-        public DutyController(AppDbContext db)
+        public DutyService(AppDbContext db)
         {
             _db = db;
         }
 
-        [AllowAnonymous]
-        [HttpGet("today")]
-        public async Task<ActionResult<Duty>> GetWhoIsDutyTodayAsync()
+        public async Task<Duty> DutyToday()
         {
             return await _db.Duties
                 .Include(u => u.AssignedTo)
-                    .ThenInclude(b => b.Department)
+                .ThenInclude(b => b.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear);
         }
 
-        [AllowAnonymous]
-        [HttpGet("month/{selectedMonth:int}/{selectedYear:int}")]
-        public async Task<ActionResult<List<Duty>>> GetDutyMonthAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
+        public async Task<List<Duty>> DutyMonth(int selectedMonth, int selectedYear)
         {
             return await _db.Duties
-                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
-                .Include(u => u.AssignedTo)
-                    .ThenInclude(b => b.Department)
-                .Include(u => u.AssignedTo)
-                .OrderBy(d => d.DayOfDuty)
-                .AsNoTracking()
-                .ToListAsync();
+               .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
+               .Include(u => u.AssignedTo)
+                   .ThenInclude(b => b.Department)
+               .Include(u => u.AssignedTo)
+               .OrderBy(d => d.DayOfDuty)
+               .AsNoTracking()
+               .ToListAsync();
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpGet("getfile/{selectedMonth:int}/{selectedYear:int}")]
-        public async Task<ActionResult> GetFileAsync([FromRoute] int selectedMonth, [FromRoute] int selectedYear)
+        public async Task<byte[]> GetFileAsync(int selectedMonth, int selectedYear)
         {
             var tempFileName = Path.GetTempFileName();
-
-            var listOfDuty = await _db.Duties
-                .Include(u => u.AssignedTo)
-                    .ThenInclude(d => d.Department)
-                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
-                .OrderBy(d => d.DayOfDuty)
-                .AsNoTracking()
-                .ToListAsync();
-
+            var listOfDuty = await DutyMonth(selectedMonth, selectedYear);
             var days = Enumerable.Range(1, DateTime.DaysInMonth(selectedYear, selectedMonth)).Select(day => new DateTime(selectedYear, selectedMonth, day))
                 .ToList();
 
-            var file = GenerateDocFile(tempFileName, listOfDuty, days);
-
-            return File(file, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"API_{DateTime.Now.ToString("dd-MM-yyyy")}.docx");
+           return GenerateDocFile(tempFileName, listOfDuty, days);
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPost("createdutylist")]
-        public async Task<ActionResult> PostDutyListAsync(List<Duty> dutyList)
+        public async Task<List<Duty>> CreateDutys(List<Duty> dutys)
         {
-            await _db.Duties.AddRangeAsync(dutyList);
+            await _db.Duties.AddRangeAsync(dutys);
             await _db.SaveChangesAsync();
-            return Ok(dutyList);
+
+            return dutys;
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPost("create")]
-        public async Task<ActionResult<Duty>> PostDutyAsync(Duty duty)
+        public async Task<bool> Create(Duty duty)
         {
             _db.Duties.Add(duty);
-            await _db.SaveChangesAsync();
-            var response = _db.Duties.Where(d => d.DutyId == duty.DutyId).Include(u => u.AssignedTo).FirstOrDefault();
-            return Ok(response);
+            var created = await _db.SaveChangesAsync();
+            return created > 0;
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpPut("update/{dutyId:int}")]
-        public async Task<IActionResult> PutDutyAsync(int dutyId, Duty duty)
+        public async Task<bool> Update(Duty duty)
         {
-            if (dutyId != duty.DutyId)
-            {
-                return BadRequest();
-            }
-
-            _db.Entry(duty).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
-
-            return NoContent();
+            _db.Attach(duty).State = EntityState.Modified;
+            var updated = await _db.SaveChangesAsync();
+            return updated > 0;
         }
 
-        [Authorize(Roles = AuthRole.ADMIN_KADRY)]
-        [HttpDelete("delete/{dutyId:int}")]
-        public async Task<ActionResult> DeleteDutyAsync([FromRoute] int dutyId)
+        public async Task<bool> Delete(int dutyId)
         {
-            var dutyUser = await _db.Duties.FindAsync(dutyId);
+            var duty = await _db.Duties.SingleOrDefaultAsync(d => d.DutyId == dutyId);
 
-            if (dutyUser is null)
-            {
-                return NotFound();
-            }
+            if (duty is null)
+                return false;
 
-            _db.Duties.Remove(dutyUser);
-            await _db.SaveChangesAsync();
-            return NoContent();
+            _db.Duties.Remove(duty);
+            var deleted = await _db.SaveChangesAsync();
+
+            return deleted > 0;
         }
 
         private byte[] GenerateDocFile(string filePath, List<Duty> listOfDuty, List<DateTime> days)

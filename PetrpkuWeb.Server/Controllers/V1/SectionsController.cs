@@ -17,7 +17,7 @@ using PetrpkuWeb.Shared.ViewModels;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class SectionsController : ControllerBase
     {
@@ -55,7 +55,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             var siteSection = await _sectionsService.GetSiteSection(siteSectionId);
 
             if (siteSection is null)
-                return BadRequest();
+                return NotFound();
 
             return Ok(_mapper.Map<SiteSectionViewModel>(siteSection));
         }
@@ -65,7 +65,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         public async Task<ActionResult> AddSiteSectionAsync(SiteSectionViewModel siteSectionViewModel)
         {
             if (siteSectionViewModel is null)
-                return BadRequest();
+                return NotFound();
 
             var siteSection = _mapper.Map<SiteSection>(siteSectionViewModel);
 
@@ -132,7 +132,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             var siteSubSection = await _sectionsService.GetSiteSubSection(siteSubSectionId);
 
             if (siteSubSection is null)
-                return BadRequest();
+                return NotFound();
 
             return Ok(_mapper.Map<SiteSubSectionViewModel>(siteSubSection));
         }
@@ -142,7 +142,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         public async Task<ActionResult> CreateSiteSubSectionAsync(SiteSubSectionViewModel siteSubSectionViewModel)
         {
             if (siteSubSectionViewModel is null)
-                return BadRequest();
+                return NotFound();
 
             var siteSubSection = _mapper.Map<SiteSubsection>(siteSubSectionViewModel);
             var created = await _sectionsService.CreateSubSections(siteSubSection);

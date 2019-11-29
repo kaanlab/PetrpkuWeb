@@ -18,13 +18,13 @@ namespace PetrpkuWeb.Server.Data
         {
         }
 
-        public DbSet<Article> Articles { get; set; }
+        public DbSet<Note> Notes { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<Duty> Duties { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Building> Buildings { get; set; }
-        public DbSet<Message> Messages { get; set; }
+        public DbSet<MilRequest> MilRequests { get; set; }
         public DbSet<SiteSection> SiteSections { get; set; }
         public DbSet<SiteSubsection> SiteSubsections { get; set; }
         public DbSet<Sent> Sents { get; set; }

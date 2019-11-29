@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -7,6 +7,8 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class DutyViewModel : IValidatableObject
     {
+        public int DutyId { get; set; }
+
         [Required(ErrorMessage = "Поле \"Дата\" не может быть пустым")]
         public string Day { get; set; }
         [Required(ErrorMessage = "Поле \"Дежурный\" не может быть пустым")] 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PetrpkuWeb.Server.Services
 {
-    public class CssTypeService : ICssTypeService
+    public class CssTypeService : ITypeService<CssType>
     {
         private readonly AppDbContext _db;
         public CssTypeService(AppDbContext db)
@@ -28,7 +28,7 @@ namespace PetrpkuWeb.Server.Services
             return await _db.CssTypes.AsNoTracking().ToListAsync();
         }
 
-        public async Task<CssType> GetCssType(int cssTypeId)
+        public async Task<CssType> GetOne(int cssTypeId)
         {
            return await _db.CssTypes.AsNoTracking().SingleOrDefaultAsync(ct => ct.CssTypeId == cssTypeId);
         }

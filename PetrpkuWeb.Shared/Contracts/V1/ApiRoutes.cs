@@ -94,5 +94,95 @@ namespace PetrpkuWeb.Shared.Contracts.V1
             public const string SUBSECTION_DELETE = "api/v1/sections/sitesubsection/delete";
         }
 
+        public static class Buildings
+        {
+            public const string ALL = "api/v1/buildings/all";
+
+            public const string CREATE = "api/v1/buildings/create";
+
+            public const string UPDATE = "api/v1/buildings/update";
+
+            public const string DELETE = "api/v1/buildings/delete";
+        }
+
+        public static class Departments
+        {
+            public const string ALL = "api/v1/departments/all";
+
+            public const string SHOW = "api/v1/departments/show";
+
+            public const string CREATE = "api/v1/departments/create";
+
+            public const string UPDATE = "api/v1/departments/update";
+
+            public const string DELETE = "api/v1/departments/delete";
+        }
+
+        public static class Duty
+        {
+            public const string TODAY = "api/v1/duty/today";
+
+            public const string MONTH = "api/v1/duty/month";
+
+            public const string GETFILE = "api/v1/duty/getfile";
+
+            public const string CREATE_MANY = "api/v1/duty/createmany";
+
+            public const string CREATE = "api/v1/duty/create";
+
+            public const string UPDATE = "api/v1/duty/update";
+
+            public const string DELETE = "api/v1/duty/delete";
+        }
+
+        public static class Post
+        {
+            public const string ALL = "api/v1/posts/all";
+
+            public const string DEPARTMENT = "api/v1/posts/bydepartment";
+
+            public const string CREATE = "api/v1/posts/create";
+
+            public const string SHOW = "api/v1/posts/show";
+
+            public const string UPDATE = "api/v1/posts/update";
+
+            public const string DELETE = "api/v1/posts/delete";
+        }
+
+        public static class MilRequest
+        {
+            public const string ALL = "api/v1/milrequest/all";
+
+            public const string CREATE = "api/v1/milrequest/create";
+
+            public const string SHOW = "api/v1/milrequest/show";
+        }
+
+        public static class Note
+        {
+            public const string ALL = "api/v1/notes/all";
+
+            public const string SHOW = "api/v1/notes/show";
+
+            public const string CREATE = "api/v1/notes/create";
+
+            public const string UPDATE = "api/v1/notes/update";
+
+            public const string DELETE = "api/v1/notes/delete";
+        }
+
+        public static class DocSection
+        {
+            public const string ALL = "api/v1/docsections/all";
+
+            public const string SHOW = "api/v1/docsections/show";
+
+            public const string CREATE = "api/v1/docsections/create";
+
+            public const string UPDATE = "api/v1/docsections/update";
+
+            public const string DELETE = "api/v1/docsections/delete";
+        }
     }
 }
