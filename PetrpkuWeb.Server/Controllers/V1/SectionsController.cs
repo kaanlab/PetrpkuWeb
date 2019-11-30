@@ -157,7 +157,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpPut(ApiRoutes.Sections.UPDATE + "/{siteSubSectionId:int}")]
         public async Task<ActionResult> UpdateSiteSubSectionAsync(int siteSubSectionViewModelId, SiteSubsection siteSubSectionViewModel)
         {
-            if (siteSubSectionViewModelId == siteSubSectionViewModel.SiteSubsectionId)
+            if (siteSubSectionViewModelId == siteSubSectionViewModel.SiteSubSectionId)
             {
                 var siteSubSection = _mapper.Map<SiteSubsection>(siteSubSectionViewModel);
                 var updated = await _sectionsService.UpdateSubSection(siteSubSection);

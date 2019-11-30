@@ -1,0 +1,290 @@
+@page "/post/create"
+
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
+
+@using Newtonsoft.Json
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IFileReaderService fileReaderService
+@inject IMatToaster Toaster
+
+
+@if (appUser is { })
+{
+    <h2 class="col-12 mb-4 text-center">Новая статья в @appUser.DepartmentViewModel.Name </h2>
+
+    <EditForm Model="NewPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
+        <div class="row">
+            <div class="col-12 mb-2">
+                <DataAnnotationsValidator />
+            </div>
+
+            <div class="form-group col-4">
+                <label>Изображение</label>
+                <img src=@(string.IsNullOrEmpty(NewPost.Poster) ? "/img/site/default_poster.jpg" : NewPost.Poster) class="img-fluid img-thumbnail mb-2" alt="Responsive image">
+                @if (PosterFileInfoVM is { })
+                {
+                    <table class="table">
+                        <tr>
+                            <td><img src="@CssExtension.Img(PosterFileInfoVM.Type)" /></td>
+                            <td>@PosterFileInfoVM.Name</td>
+                            <td>@PosterFileInfoVM.Size</td>
+                        </tr>
+                    </table>
+                    <hr />
+                    <div class="col-12">
+                        <button @onclick="ClearPosterFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                        <button @onclick="UploadFile" class="btn btn-primary">Загрузить</button>
+                    </div>
+                    <hr />
+                }
+                <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" @onchange="ShowPosterFileInfo" />
+            </div>
+
+            <div class="form-group col-12 mb-2">
+                <label>Заголовок</label>
+                <input class="form-control" type="text" @bind-value="NewPost.Title">
+                <ValidationMessage For="() => NewPost.Title" />
+            </div>
+
+            <div class="form-group col-12 mb-2">
+                <label>Аннотация</label>
+                <textarea class="form-control" rows="2" readonly>@NewPost.Content.Truncate(240)</textarea>
+            </div>
+
+            <div class="form-group col-12 mb-2">
+                <label>Текст</label>
+                <div class="row">
+                    <div class="col-6">
+                        <textarea class="form-control" rows="30" @bind-value="NewPost.Content" @bind-value:event="oninput"></textarea>
+                        <ValidationMessage For="() => NewPost.Content" />
+                    </div>
+                    <div class="col-6 alert alert-info mb-0" role="alert">
+                        <MarkdownView Content="@NewPost.Content" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-12 mb-2">
+                <label>Разместить на Главной</label>
+                <MatSlideToggle @bind-Checked="@NewPost.OnMain"></MatSlideToggle>
+            </div>
+
+            @if (listOfAttachments.Any())
+            {
+                <div class="form-group col-12 mb-2">
+                    <label>Вложения</label>
+                    <table class="table">
+                        @foreach (var attachment in listOfAttachments)
+                        {
+                            var index = listOfAttachments.IndexOf(attachment);
+                            <tr @key="attachment">
+                                <td>@(listOfAttachments.IndexOf(attachment) + 1)</td>
+                                <td><img src="@CssExtension.Img(attachment.Extension)" /></td>
+                                <td>@attachment.Description</td>
+                                <td>@attachment.Name</td>
+                                <td>@attachment.Length</td>
+                                <td><MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenDialog(attachment.AttachmentId))" Label="Редактировать" /></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+            <div class="col-12 mb-2">
+                <MatButton Raised="true" Icon="done" Type="submit" Label="Опубликовать" OnClick="AddPost" Class="float-right" />
+            </div>
+        </div>
+    </EditForm>
+
+    <br />
+
+    <div class="alert alert-secondary" role="alert">
+        <h4 class="alert-heading">Добавьте файлы для загрузки</h4>
+        <p>Если необходимо добавить несколько файлов удерживайте нажатой клавишу Ctrl.</p>
+
+        @if (ListFileInfoVM.Any())
+        {
+            <table class="table">
+                @foreach (var fileInfo in ListFileInfoVM)
+                {
+                    <tr @key="fileInfo">
+                        <td>@(ListFileInfoVM.IndexOf(fileInfo) + 1)</td>
+                        <td><img src="@CssExtension.Img(fileInfo.Type)" /></td>
+                        <td>@fileInfo.Name</td>
+                        <td>@fileInfo.Size</td>
+                    </tr>
+                }
+
+            </table>
+            <div class="col-12">
+                <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                <button @onclick="UploadFiles" class="btn btn-primary">Загрузить файлы</button>
+            </div>
+        }
+
+        <hr>
+        <input type="file" accept="@StringExtension.ACCEPT_ALL_FILES" multiple @ref="inputElements" @onchange="ShowFileInfo" />
+    </div>
+
+    <EditForm Model="@CurrentAttachment">
+        <MatDialog @bind-IsOpen="@dialogIsOpen">
+            <MatDialogTitle>"@CurrentAttachment.Name</MatDialogTitle>
+            <MatDialogContent>
+                <MatTextField Label="Описание" @bind-Value="@CurrentAttachment.Description"></MatTextField>
+            </MatDialogContent>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="save" OnClick="DeleteAttachment" Label="Удалить" />
+                <MatButton Icon="save" Type="submit" OnClick="UpdateAttachmentInfo" Label="Сохранить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string authUserId;
+
+    private PostViewModel NewPost { get; set; } = new PostViewModel();
+    private List<AttachmentViewModel> listOfAttachments { get; set; } = new List<AttachmentViewModel>();
+    private AttachmentViewModel CurrentAttachment { get; set; } = new AttachmentViewModel();
+
+    private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
+    private FileInfoViewModel PosterFileInfoVM { get; set; }
+
+    private AppUserViewModel appUser;
+
+    bool dialogIsOpen = false;
+
+    ElementReference inputElement;
+    IFileReaderRef fileReaderReference;
+
+    ElementReference inputElements;
+    IFileReaderRef filesReaderReference;
+
+    //string[] imgCssClass = { "big", "vertical", String.Empty };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authUser = (await authenticationStateTask).User;
+        authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
+        appUser = await HttpClient.GetJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.USER}/{authUserId}");
+    }
+
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        fileReaderReference = fileReaderService.CreateReference(inputElement);
+        filesReaderReference = fileReaderService.CreateReference(inputElements);
+    }
+
+    async Task ShowFileInfo()
+    {
+        foreach (var file in await filesReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            var fileData = new FileInfoViewModel();
+            fileData.Name = fileInfo.Name;
+            fileData.Size = fileInfo.Size;
+            fileData.Type = fileInfo.Type;
+            ListFileInfoVM.Add(fileData);
+        }
+    }
+
+    async Task ClearFileInfo()
+    {
+        ListFileInfoVM.Clear();
+        await filesReaderReference.ClearValue();
+    }
+
+    async Task UploadFiles()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await filesReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.FILES, content: multipartFormDataContent);
+        var content = await response.Content.ReadAsStringAsync();
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<AttachmentViewModel>>(content));
+
+        await ClearFileInfo();
+    }
+
+    async Task ClearPosterFileInfo()
+    {
+        PosterFileInfoVM = null;
+        await fileReaderReference.ClearValue();
+    }
+
+    async Task ShowPosterFileInfo()
+    {
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+
+            PosterFileInfoVM = new FileInfoViewModel();
+            PosterFileInfoVM.Name = fileInfo.Name;
+            PosterFileInfoVM.Size = fileInfo.Size;
+            PosterFileInfoVM.Type = fileInfo.Type;
+        }
+    }
+
+    async Task UploadFile()
+    {
+        var multipartFormDataContent = new MultipartFormDataContent();
+        foreach (var file in await fileReaderReference.EnumerateFilesAsync())
+        {
+            multipartFormDataContent.Add(
+                new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
+        }
+
+        var response = await HttpClient.PostAsync(requestUri: "api/upload/poster", content: multipartFormDataContent);
+        NewPost.Poster = await response.Content.ReadAsStringAsync();
+        await ClearPosterFileInfo();
+    }
+
+    async Task AddPost()
+    {
+        NewPost.AppUserViewModel = appUser;
+        NewPost.DepartmentViewModel = appUser.DepartmentViewModel;
+        NewPost.AttachmentsViewModel = new List<AttachmentViewModel>();
+        NewPost.AttachmentsViewModel.AddRange(listOfAttachments);
+        var response = await HttpClient.PostJsonAsync<PostViewModel>(ApiRoutes.Post.CREATE, NewPost);
+        NavigationManager.NavigateTo($"/department/{appUser.DepartmentViewModel.DepartmentId}");
+
+        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
+    }
+
+    void OpenDialog(int attachmentId)
+    {
+        CurrentAttachment = listOfAttachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+
+        dialogIsOpen = true;
+    }
+
+    async Task UpdateAttachmentInfo()
+    {
+        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentViewModel>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+
+    async Task DeleteAttachment()
+    {
+        await HttpClient.DeleteAsync($"{ApiRoutes.Upload.DELETE}/{CurrentAttachment.AttachmentId}");
+        listOfAttachments.Remove(CurrentAttachment);
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
+
+        dialogIsOpen = false;
+    }
+
+}

@@ -37,8 +37,8 @@
 
 @code {
 
-    async Task<List<AppUser>> LoadUsers()
+    async Task<List<AppUserViewModel>> LoadUsers()
     {
-        return await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all");
+        return await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL);
     }
 }

@@ -11,6 +11,6 @@ namespace PetrpkuWeb.Server.Models
         //public bool IsHidden { get; set; }
 
         // relationship
-        public List<AppUser> ListOfUsers { get; set; }
+        public IEnumerable<AppUser> AppUsers { get; set; }
     }
 }

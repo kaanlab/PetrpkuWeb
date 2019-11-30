@@ -2,8 +2,6 @@
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
-
-@inject HttpClient HttpClient
 @inject IMatToaster Toaster
 
 
@@ -51,8 +49,8 @@
                             <td>@user.FirstName</td>
                             <td>@user.MidleName</td>
                             <td>@user.WorkingPosition</td>
-                            <td>@user.Department?.Name</td>
-                            <td>@user.Building?.Name</td>
+                            <td>@user.DepartmentViewModel?.Name</td>
+                            <td>@user.BuildingViewModel?.Name</td>
                             <td>@user.Room</td>
                             <td>@user.IntPhone</td>
                             <td>@user.ExtPhone</td>
@@ -66,13 +64,13 @@
 
 <div class="row">
     <h2 class="col-12 mb-4 text-center">Телефонный справочник</h2>
-    @if (appUsersList is null)
+    @if (appUsers is null)
     {
         <div class="spinner-border text-primary text-center" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     }
-    else if (appUsersList.Count == 0)
+    else if (appUsers.Count == 0)
     {
         <div class="card border-danger mb-3">
             <div class="card-body">
@@ -98,16 +96,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var user in appUsersList)
+                @foreach (var user in appUsers)
                 {
                     <tr @key="user">
-                        <th scope="row">@(appUsersList.IndexOf(user) + 1)</th>
+                        <th scope="row">@(appUsers.IndexOf(user) + 1)</th>
                         <td>@user.LastName</td>
                         <td>@user.FirstName</td>
                         <td>@user.MidleName</td>
                         <td>@user.WorkingPosition</td>
-                        <td>@user.Department?.Name</td>
-                        <td>@user.Building?.Name</td>
+                        <td>@user.DepartmentViewModel?.Name</td>
+                        <td>@user.BuildingViewModel?.Name</td>
                         <td>@user.Room</td>
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
@@ -122,12 +120,12 @@
 
     string SearchTerm { get; set; } = String.Empty;
 
-    List<AppUser> appUsersList;
-    List<AppUser> filtredAppUsers;
+    List<AppUserViewModel> appUsers;
+    List<AppUserViewModel> filtredAppUsers;
 
     protected async override Task OnInitializedAsync()
     {
-        appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/all/active");
+        appUsers = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL_ACTIVE);
     }
 
     void SearchKeyDown(KeyboardEventArgs e)
@@ -154,8 +152,8 @@
         if (!string.IsNullOrEmpty(SearchTerm))
         {
             string filter = SearchTerm.ToLower();
-            filtredAppUsers = appUsersList
-                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.Department.Name ?? "").ToLower().Contains(filter)).ToList();
+            filtredAppUsers = appUsers
+                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentViewModel.Name ?? "").ToLower().Contains(filter)).ToList();
             if (filtredAppUsers.Count < 1)
                 Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
         }

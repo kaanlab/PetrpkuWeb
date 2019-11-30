@@ -23,14 +23,17 @@ namespace PetrpkuWeb.Server.Models
 
         // relationship
         public IEnumerable<Duty> DaysOfDuty { get; set; }
-        public IEnumerable<Article> Articles { get; set; }
+        public IEnumerable<Note> Notes { get; set; }
         public IEnumerable<Post> Posts { get; set; }
-        public IEnumerable<Message> Messages { get; set; }
+        public IEnumerable<DocSection> DocSections { get; set; }
 
-        public int? DepartmentId { get; set; }
         public Department Department { get; set; }
-
-        public int? BuildingId { get; set; }
         public Building Building { get; set; }
+
+        public IEnumerable<MilRequest> MilRequests { get; set; }
+        public IEnumerable<Approved> Approveds { get; set; }
+        public IEnumerable<Checked> Checkeds { get; set; }
+        public IEnumerable<Sent> Sents { get; set; }
+        public IEnumerable<Published> Publisheds { get; set; }
     }
 }

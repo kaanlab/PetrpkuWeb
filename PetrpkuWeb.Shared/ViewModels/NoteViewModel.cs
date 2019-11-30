@@ -19,7 +19,7 @@ namespace PetrpkuWeb.Shared.ViewModels
 
 
         // relationship
-        public AppUserViewModel Author { get; set; }
-        public CssTypeViewModel CssType { get; set; }
+        public AppUserViewModel AppUserViewModel { get; set; }
+        public CssTypeViewModel CssTypeViewModel { get; set; }
     }
 }

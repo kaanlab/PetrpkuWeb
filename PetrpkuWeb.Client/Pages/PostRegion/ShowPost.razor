@@ -1,4 +1,4 @@
-@page "/posts/show/{PostId:int}"
+@page "/post/show/{PostId:int}"
 
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -12,18 +12,16 @@
         <div class="card-body">
             <img src=@post.Poster class="rounded img-fluid float-left mr-4">
             <h5 class="card-title">@post.Title</h5>
-            <span class="card-text">
-                <MarkdownView Content="@post.Content" />
-            </span>
+            <span class="card-text">@post.Content</span>
         </div>
         <ul class="list-group list-group-flush">
-            @if (post.Attachments.Any())
+            @if (post.AttachmentsViewModel.Any())
             {
-                @if (post.Attachments.Where(a => a.IsImage == true).Count() > 1)
+                @if (post.AttachmentsViewModel.Where(a => a.IsImage == true).Count() > 1)
                 {
                     Random rand = new Random(3);
                     <li class="list-group-item img-container">
-                        @foreach (var attachment in post.Attachments.Where(a => a.IsImage == true))
+                        @foreach (var attachment in post.AttachmentsViewModel.Where(a => a.IsImage == true))
                         {
                             int index = rand.Next(imgCssClass.Length);
                             <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
@@ -33,16 +31,16 @@
                     </li>
                 }
 
-                @if (post.Attachments.Where(a => a.IsImage == true).Count() == 1)
+                @if (post.AttachmentsViewModel.Where(a => a.IsImage == true).Count() == 1)
                 {
                     <li class="list-group-item">
-                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@post.Attachments.SingleOrDefault(a => a.IsImage == true).Path" />
+                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@post.AttachmentsViewModel.SingleOrDefault(a => a.IsImage == true).Path" />
                     </li>
                 }
 
                 <li class="list-group-item">
                     <table class="table">
-                        @foreach (var attachment in post.Attachments.Where(a => a.IsImage == false))
+                        @foreach (var attachment in post.AttachmentsViewModel.Where(a => a.IsImage == false))
                         {
                             <tr @key="attachment">
                                 <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
@@ -62,11 +60,11 @@
             }
         </ul>
         <div class="card-footer text-muted">
-            @if (identityUserId == post.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
+            @if (authUserId == post.AppUserViewModel.Id || authUser.IsInRole(AuthRoles.ADMIN))
             {
                 <MatButton Icon="edit" Link="@($"/post/edit/{post.PostId}")" />
             }
-            <p>@post.Author.FirstName @post.Author.LastName</p>
+            <p>@post.AppUserViewModel.FirstName @post.AppUserViewModel.LastName</p>
             @if (post.UpdateDate.HasValue)
             {
                 <p>Обновлено: @post.UpdateDate.Value.ToShortDateString()</p>
@@ -81,31 +79,27 @@
     [Parameter]
     public int PostId { get; set; }
 
-    ClaimsPrincipal identityUser;
-    int identityUserId;
+    ClaimsPrincipal authUser;
+    string authUserId;
 
-    Post post;
+    PostViewModel post;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        identityUser = authState.User;
+        authUser = authState.User;
 
-        if (identityUser.Identity.IsAuthenticated)
+        if (authUser.Identity.IsAuthenticated)
         {
-            Int32.TryParse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value, out identityUserId);
-        }
-        else
-        {
-            identityUserId = 0;
+            authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        post = await HttpClient.GetJsonAsync<Post>($"api/posts/show/{PostId}");
+        post = await HttpClient.GetJsonAsync<PostViewModel>($"{ApiRoutes.Post.SHOW}/{PostId}");
 
     }
 

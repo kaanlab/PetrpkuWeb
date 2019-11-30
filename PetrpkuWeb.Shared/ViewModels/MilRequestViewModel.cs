@@ -8,7 +8,7 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class MilRequestViewModel
     {
-        public int MilRequestViewModelId { get; set; }
+        public int MilRequestId { get; set; }
 
         [Required(ErrorMessage = "Это поле обязательно для заполнения!")]
         public string ToDo { get; set; }
@@ -16,11 +16,14 @@ namespace PetrpkuWeb.Shared.ViewModels
         public string Content { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
-
-        //
-        public AppUserViewModel  AppUser { get; set; }
-        public SiteSectionViewModel SiteSection { get; set; }
-        public SiteSubSectionViewModel SiteSubSection { get; set; }
-        public List<AttachmentViewModel> Attachments { get; set; }
+        public bool IsReadonly { get; set; }
+        public AppUserViewModel  AppUserViewModel { get; set; }
+        public SiteSectionViewModel SiteSectionViewModel { get; set; }
+        public SiteSubSectionViewModel SiteSubSectionViewModel { get; set; }
+        public List<AttachmentViewModel> AttachmentsViewModel { get; set; }
+        public ApprovedViewModel ApprovedViewModel { get; set; }
+        public CheckedViewModel CheckedViewModel { get; set; }
+        public SentViewModel SentViewModel { get; set; }
+        public PublishedViewModel PublishedViewModel { get; set; }
     }
 }

@@ -6,7 +6,7 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class AppUserViewModel
     {
-        public int AppUserId { get; set; }
+        public string Id { get; set; }
         public string Avatar { get; set; } 
         public string DisplayName { get; set; }
         public string FirstName { get; set; }
@@ -20,12 +20,12 @@ namespace PetrpkuWeb.Shared.ViewModels
         public DateTime Birthday { get; set; }
         public bool IsActive { get; set; }
         public bool IsDuty { get; set; }
-        public AppUserIdentityViewModel AuthIdentity { get; set; }
-        public IEnumerable<Duty> DaysOfDuty { get; set; }
-        public IEnumerable<Article> Articles { get; set; }
-        public IEnumerable<Post> Posts { get; set; }
-        public IEnumerable<Message> Messages { get; set; }
-        public DepartmentViewModel Department { get; set; }  
-        public BuildingViewModel Building { get; set; }
+        //public AppUserIdentityViewModel AuthIdentity { get; set; }
+        public List<DutyViewModel> DaysOfDutyViewModel { get; set; }
+        public List<NoteViewModel> NotesViewModel { get; set; }
+        public List<PostViewModel> PostsViewModel { get; set; }
+        public List<MilRequestViewModel> MilRequestsViewModel { get; set; }
+        public DepartmentViewModel DepartmentViewModel { get; set; }  
+        public BuildingViewModel BuildingViewModel { get; set; }
     }
 }

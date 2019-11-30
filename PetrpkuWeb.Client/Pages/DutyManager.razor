@@ -1,6 +1,6 @@
 @page "/dutymanager"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
 
 @using PetrpkuWeb.Client.Extensions
 
@@ -37,10 +37,10 @@
                     {
                         <tr @key="dutyUser">
                             <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                            <td>@dutyUser.AssignedTo.LastName @dutyUser.AssignedTo.FirstName @dutyUser.AssignedTo.MidleName</td>
-                            <td>@dutyUser.AssignedTo.Department.Name</td>
-                            <td>@dutyUser.AssignedTo.WorkingPosition</td>
-                            <td>@dutyUser.AssignedTo.MobPhone</td>
+                            <td>@dutyUser.AppUserViewModel.LastName @dutyUser.AppUserViewModel.FirstName @dutyUser.AppUserViewModel.MidleName</td>
+                            <td>@dutyUser.AppUserViewModel.DepartmentViewModel.Name</td>
+                            <td>@dutyUser.AppUserViewModel.WorkingPosition</td>
+                            <td>@dutyUser.AppUserViewModel.MobPhone</td>
                             <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" /></td>
                         </tr>
                     }
@@ -63,12 +63,12 @@
             </div>
         </div>
         <div class="row">
-            <EditForm Model="@DutyVM" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберите дату и назначте дежурного",MatToastType.Danger,"Ошибка!"))">
+            <EditForm Model="@AppointDuty" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберите дату и назначте дежурного",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12">
                     <DataAnnotationsValidator />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дата" @bind-Value="DutyVM.Day" Outlined="true">
+                    <MatSelect Label="Дата" @bind-Value="AppointDuty.Day" Outlined="true">
                         @if (listOfDays is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
@@ -82,10 +82,10 @@
                             }
                         }
                     </MatSelect>
-                    <ValidationMessage For="() => DutyVM.Day" />
+                    <ValidationMessage For="() => AppointDuty.Day" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дежурный" @bind-Value="DutyVM.User" Outlined="true">
+                    <MatSelect Label="Дежурный" @bind-Value="AppointDuty.User" Outlined="true">
                         @if (users is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
@@ -95,11 +95,11 @@
                             <MatOption Value="-1" Disabled="true" />
                             @foreach (var user in users)
                             {
-                                <MatOption Value="@user.AppUserId.ToString()">@user.DisplayName - @user.WorkingPosition</MatOption>
+                                <MatOption Value="@user.Id">@user.DisplayName - @user.WorkingPosition</MatOption>
                             }
                         }
                     </MatSelect>
-                    <ValidationMessage For="() => DutyVM.User" />
+                    <ValidationMessage For="() => AppointDuty.User" />
                 </div>
                 <div class="col-12 mb-2">
                     <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
@@ -114,11 +114,11 @@
 
     public DateTime? PikDate { get; set; } = DateTime.Now;
 
-    private List<Duty> ListOfDuty { get; set; } = new List<Duty>();
-    private DutyViewModel DutyVM { get; set; } = new DutyViewModel();
-    
+    private List<DutyViewModel> ListOfDuty { get; set; } = new List<DutyViewModel>();
+    private AppointDutyViewModel AppointDuty { get; set; } = new AppointDutyViewModel();
+
     List<DateTime> listOfDays;
-    List<AppUser> users;
+    List<AppUserViewModel> users;
     DateTime title = DateTime.Now;
 
     bool isSortedAscending;
@@ -132,13 +132,13 @@
 
         await GetCalendarAsync(month, year);
 
-        users = await HttpClient.GetJsonAsync<List<AppUser>>("api/users/duty/active");
+        users = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL_ACTIVE_DUTIES);
     }
 
     async Task GetCalendarAsync(int month, int year)
     {
         ListOfDuty = null;
-        ListOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
+        ListOfDuty = await HttpClient.GetJsonAsync<List<DutyViewModel>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
 
         listOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day)).ToList();
 
@@ -146,18 +146,18 @@
         title = PikDate.Value;
     }
 
-    async Task RemoveDutyUser(Duty dutyUser)
+    async Task RemoveDutyUser(DutyViewModel dutyUser)
     {
         if (dutyUser.DutyId > 0)
         {
             var deleteDutyUser = ListOfDuty.Where(u => u.DutyId == dutyUser.DutyId).FirstOrDefault();
-            await HttpClient.DeleteAsync($"api/duty/delete/{deleteDutyUser.DutyId}");
+            await HttpClient.DeleteAsync($"{ApiRoutes.Duty.DELETE}/{deleteDutyUser.DutyId}");
             ListOfDuty.Remove(dutyUser);
-            
+
             listOfDays.Add(dutyUser.DayOfDuty);
             listOfDays = listOfDays.OrderBy(d => d.Day).ToList();
-            
-            Toaster.Add($"{deleteDutyUser.AssignedTo.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
+
+            Toaster.Add($"{deleteDutyUser.AppUserViewModel.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
         }
     }
 
@@ -165,34 +165,29 @@
     {
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
-        var day = Int32.Parse(DutyVM.Day);
-        var user = Int32.Parse(DutyVM.User);
+        var day = Int32.Parse(AppointDuty.Day);
+        var id = AppointDuty.User;
         var date = new DateTime(year, month, day);
-        var findUser = users.Where(u => u.AppUserId == user).FirstOrDefault();
+        var findUser = users.Where(u => u.Id == id).FirstOrDefault();
 
-        var duty = new Duty()
+        var duty = new DutyViewModel()
         {
             DayOfDuty = date,
-            AppUserId = findUser.AppUserId
+            AppUserViewModel = findUser
         };
 
-        ListOfDuty.Add(
-            new Duty
-            {
-                DayOfDuty = date,
-                AssignedTo = findUser
-            });
-
+        ListOfDuty.Add(duty);
         listOfDays.Remove(duty.DayOfDuty);
 
-        var response = await HttpClient.PostJsonAsync<Duty>("api/duty/create", duty);
-        Toaster.Add($"{response.AssignedTo.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
-        DutyVM = new DutyViewModel();
+        var response = await HttpClient.PostJsonAsync<DutyViewModel>(ApiRoutes.Duty.CREATE, duty);
+        AppointDuty = new AppointDutyViewModel();
+
+        Toaster.Add($"{response.AppUserViewModel.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
     }
 
     async Task DownloadFile(int month, int year)
     {
-        var file = await HttpClient.GetByteArrayAsync($"api/duty/getfile/{month}/{year}");
+        var file = await HttpClient.GetByteArrayAsync($"{ApiRoutes.Duty.GETFILE}/{month}/{year}");
 
         await JSRuntime.SaveAs($"Дежурные_на_{month}-{year}_{DateTime.Now.ToString("HH-mm-ss")}.docx", file);
     }

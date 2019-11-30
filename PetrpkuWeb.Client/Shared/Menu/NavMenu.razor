@@ -52,12 +52,12 @@
     string dropDownCssClass => collapseDropdownMenu ? null : "show";
     string navMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : null;
 
-    List<Department> departments;
+    List<DepartmentViewModel> departments;
 
 
     protected async override Task OnInitializedAsync()
     {
-        departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
+        departments = await HttpClient.GetJsonAsync<List<DepartmentViewModel>>(ApiRoutes.Departments.ALL);
     }
 
     void ToggleNavMenu()

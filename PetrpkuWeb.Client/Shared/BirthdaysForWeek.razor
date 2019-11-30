@@ -21,7 +21,7 @@
             <div class="card-body">
                 <h5 class="card-title">@item.DisplayName</h5>
                 <span class="badge badge-info">@item.Birthday.Day-ого числа</span>
-                <p class="card-text"><small class="text-muted">@item.Department.Name</small></p>
+                <p class="card-text"><small class="text-muted">@item.DepartmentViewModel.Name</small></p>
                 <p class="card-text"><small class="text-muted">@item.WorkingPosition</small></p>
             </div>
         </div>
@@ -34,8 +34,8 @@
     public string FirstDayOfWeek { get; set; } = DateTime.Now.FirstDayOfWeek().ToShortDateString();
     public string LastDayOfWeek { get; set; } = DateTime.Now.LastDayOfWeek().ToShortDateString();
 
-    public async Task<List<AppUser>> LoadBirthdaysForWeek()
+    public async Task<List<AppUserViewModel>> LoadBirthdaysForWeek()
     {
-        return await HttpClient.GetJsonAsync<List<AppUser>>("api/users/birthdaysweek");
+        return await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.BIRTHDAYS_WEEK);
     }
 }

@@ -11,7 +11,7 @@ namespace PetrpkuWeb.Server.Models
         public bool IsVisible { get; set; }
 
         // relationship
-        public List<AppUser> ListOfUsers { get; set; }
-        public List<Post> Posts { get; set; }
+        public IEnumerable<AppUser> AppUsers { get; set; }
+        public IEnumerable<Post> Posts { get; set; }
     }
 }

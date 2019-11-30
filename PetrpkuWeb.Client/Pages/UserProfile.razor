@@ -1,138 +1,173 @@
-@page "/user/{AppUserId:int}"
+@page "/user/{Id}"
 
-@attribute [Authorize(Roles = AuthRole.ANY)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
 
 
-<div class="row">
-    @if (user is { })
-    {
-        <div class="col-4">
-            <div class="card">
-                <img src="@user.Avatar" class="card-img-top">
-                <div class="card-body">
-                    <h5 class="card-title">@user.DisplayName</h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@user.Birthday.ToShortDateString()</span></li>
-                    <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@user.LastName @user.FirstName @user.MidleName</span></li>
-                    <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@user.Department?.Name</span></li>
-                    <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@user.WorkingPosition</span></li>
-                    <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@user.Building?.Name</span></li>
-                    <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@user.Room</span></li>
-                    <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@user.IntPhone</span></li>
-                    <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@user.ExtPhone</span></li>
-                    <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@user.MobPhone</span></li>
-                </ul>
-                @if (identityUserId == user.AppUserId)
-                {
+    <div class="row">
+        @if (appUser is { })
+        {
+            <div class="col-4">
+                <div class="card">
+                    <img src="@appUser.Avatar" class="card-img-top">
                     <div class="card-body">
-                        <span class="ml-3"><MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" /></span>
+                        <h5 class="card-title">@appUser.DisplayName</h5>
                     </div>
-                }
-            </div>
-        </div>
-        <div class="col-4 border-right">
-
-            @if (user.Articles.Any())
-            {
-                <h3 class="text-center">Мои объявления</h3>
-
-                @foreach (var article in user.Articles.OrderByDescending(d => d.PublishDate))
-                {
-                    <div @key="article" class="card border-@article.CssType.Value mb-2">
-                        <div class="card-body text-@article.CssType.Value">
-                            <h5 class="card-title">@article.Title</h5>
-                            <span class="card-text">
-                                <MarkdownView Content="@article.Content.Truncate(140)" />
-                            </span>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@appUser.Birthday.ToShortDateString()</span></li>
+                        <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@appUser.LastName @appUser.FirstName @appUser.MidleName</span></li>
+                        <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@appUser.DepartmentViewModel?.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@appUser.WorkingPosition</span></li>
+                        <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@appUser.BuildingViewModel?.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@appUser.Room</span></li>
+                        <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@appUser.IntPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@appUser.ExtPhone</span></li>
+                        <li class="list-group-item"><MatIcon Icon="phone_iphone" /><span class="ml-2">@appUser.MobPhone</span></li>
+                    </ul>
+                    @if (authUserId == appUser.Id)
+                    {
+                        <div class="card-body">
+                            <span class="ml-3"><MatButton Outlined="true" Icon="edit" OnClick="@OpenDialog" Label="Редактировать" /></span>
                         </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col-6">
-                                    <p class="card-text"><small class="text-muted">Опубликовано: @article.PublishDate</small></p>
-                                    @if (article.UpdateDate.HasValue)
+                    }
+                </div>
+            </div>
+            <div class="col-4 border-right">
+
+                @if (appUser.NotesViewModel.Any())
+                {
+                    <h3 class="text-center">Мои объявления</h3>
+
+                    @foreach (var note in appUser.NotesViewModel.OrderByDescending(p => p.PublishDate))
+                    {
+                        <div @key="note" class="card border-@note.CssTypeViewModel.Value mb-2">
+                            <div class="card-body text-@note.CssTypeViewModel.Value">
+                                <h5 class="card-title">@note.Title</h5>
+                                <span class="card-text">@note.Content</span>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="card-text"><small class="text-muted">Опубликовано: @note.PublishDate</small></p>
+                                        @if (note.UpdateDate.HasValue)
+                                        {
+                                            <small class="text-muted">Обновлено: @note.UpdateDate.Value</small>
+                                        }
+                                    </div>
+                                    <MatButton Icon="remove_red_eye" Link="@($"/note/show/{note.NoteId}")" />
+                                    @if (authUserId == appUser.Id)
                                     {
-                                        <small class="text-muted">Обновлено: @article.UpdateDate.Value</small>
+                                        <MatButton Icon="edit" Link="@($"/note/edit/{note.NoteId}")" />
                                     }
                                 </div>
-                                @if (article.Attachments.Any())
-                                {
-                                    <div class="col-4">
-                                        <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@article.Attachments.Count()</span></small>
-                                    </div>
-                                }
-
-                                <MatButton Icon="remove_red_eye" Link="@($"/article/show/{article.ArticleId}")" />
-                                @if (identityUserId == user.AppUserId)
-                                {
-                                    <MatButton Icon="edit" Link="@($"/article/edit/{article.ArticleId}")" />
-                                }
                             </div>
                         </div>
-                    </div>
+                    }
                 }
-            }
-        </div>
-        <div class="col-4">
-            @if (user.DaysOfDuty.Any())
-            {
+            </div>
+            <div class="col-4">
+                <div class="col-4 border-right">
 
-                <h3 class="text-center">Мои дежурства</h3>
-                <table class="table table-striped">
-                    @foreach (var duty in user.DaysOfDuty.OrderByDescending(d => d.DayOfDuty))
+                    @if (appUser.PostsViewModel.Any())
                     {
-                        <tr @key="duty">
-                            <td>@duty.DayOfDuty.ToShortDateString()</td>
-                        </tr>
-                    }
-                </table>
-            }
-        </div>
+                        <h3 class="text-center">Мои объявления</h3>
 
-    }
-</div>
-<div class="row" style="height: 10px;"></div>
+                        @foreach (var post in appUser.PostsViewModel.OrderByDescending(p => p.PublishDate))
+                        {
+                            <div @key="post" class="card">
+                                <div class="card-body">
+                                    <img src=@post.Poster class="rounded img-fluid float-left mr-4">
+                                    <h5 class="card-title">@post.Title</h5>
+                                    <span class="card-text">@post.Content</span>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="card-text"><small class="text-muted">Опубликовано: @post.PublishDate</small></p>
+                                            @if (post.UpdateDate.HasValue)
+                                            {
+                                                <small class="text-muted">Обновлено: @post.UpdateDate.Value</small>
+                                            }
+                                        </div>
+                                        @if (post.AttachmentsViewModel.Any())
+                                        {
+                                            <div class="col-4">
+                                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsViewModel.Count()</span></small>
+                                            </div>
+                                        }
 
-@if (user is { })
-{
-    <EditForm Model="@user">
-        <MatDialog @bind-IsOpen="@dialogIsOpen">
-            <MatDialogTitle>Профиль @user.DisplayName</MatDialogTitle>
-            <MatDialogContent>
-                <div class="alert alert-danger mb-2" role="alert">
-                    <img class="img-thumbnail img-fluid" src="@user.Avatar" />
-                    <p>Для профиля желательно изображение размером 400х400px!</p>
-                    @if (AvatarFileInfoVM is { })
-                    {
-                        <table class="table">
-                            <tr>
-                                <td><img src="@CssExtension.Img(AvatarFileInfoVM.Type)" /></td>
-                                <td>@AvatarFileInfoVM.Name</td>
-                                <td>@AvatarFileInfoVM.Size</td>
-                            </tr>
-                        </table>
-                        <hr />
-                        <div class="col-12">
-                            <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
-                            <button @onclick="UploadFile" class="btn btn-primary">Загрузить</button>
-                        </div>
-                        <hr />
+                                        <MatButton Icon="remove_red_eye" Link="@($"/post/show/{post.PostId}")" />
+                                        @if (authUserId == appUser.Id)
+                                        {
+                                            <MatButton Icon="edit" Link="@($"/post/edit/{post.PostId}")" />
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
-                    <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" />
-                    <MatButton Raised="true" OnClick="ShowFileInfo" Label="Добавить" />
                 </div>
 
-                <MatTextField Label="Фамилия" @bind-Value="@user.LastName"></MatTextField>
-                <MatTextField Label="Имя" @bind-Value="@user.FirstName"></MatTextField>
-                <MatTextField Label="Отчество" @bind-Value="@user.MidleName"></MatTextField>
-                <MatTextField Label="Мобильный телефон" @bind-Value="@user.MobPhone"></MatTextField>
-                <label>День рождения</label>
-                <InputDate @bind-Value="@user.Birthday"></InputDate>
-            </MatDialogContent>
-            <MatDialogActions>
-                <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
-            </MatDialogActions>
-        </MatDialog>
-    </EditForm>
-}
+                <div class="col-4">
+                    @if (appUser.DaysOfDutyViewModel.Any())
+                    {
+
+                        <h3 class="text-center">Мои дежурства</h3>
+                        <table class="table table-striped">
+                            @foreach (var duty in appUser.DaysOfDutyViewModel.OrderByDescending(d => d.DayOfDuty))
+                            {
+                                <tr @key="duty">
+                                    <td>@duty.DayOfDuty.ToShortDateString()</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>               
+            </div>
+        }
+</div>
+
+        <div class="row" style="height: 10px;"></div>
+
+        @if (appUser is { })
+        {
+            <EditForm Model="@appUser">
+                <MatDialog @bind-IsOpen="@dialogIsOpen">
+                    <MatDialogTitle>Профиль @appUser.DisplayName</MatDialogTitle>
+                    <MatDialogContent>
+                        <div class="alert alert-danger mb-2" role="alert">
+                            <img class="img-thumbnail img-fluid" src="@appUser.Avatar" />
+                            <p>Для профиля желательно изображение размером 400х400px!</p>
+                            @if (AvatarFileInfoVM is { })
+                            {
+                                <table class="table">
+                                    <tr>
+                                        <td><img src="@CssExtension.Img(AvatarFileInfoVM.Type)" /></td>
+                                        <td>@AvatarFileInfoVM.Name</td>
+                                        <td>@AvatarFileInfoVM.Size</td>
+                                    </tr>
+                                </table>
+                                <hr />
+                                <div class="col-12">
+                                    <button @onclick="ClearFileInfo" class="btn btn-primary mr-2">Очистить</button>
+                                    <button @onclick="UploadFile" class="btn btn-primary">Загрузить</button>
+                                </div>
+                                <hr />
+                            }
+                            <input type="file" accept="@StringExtension.ACCEPT_IMAGES" @ref="inputElement" />
+                            <MatButton Raised="true" OnClick="ShowFileInfo" Label="Добавить" />
+                        </div>
+
+                        <MatTextField Label="Фамилия" @bind-Value="@appUser.LastName"></MatTextField>
+                        <MatTextField Label="Имя" @bind-Value="@appUser.FirstName"></MatTextField>
+                        <MatTextField Label="Отчество" @bind-Value="@appUser.MidleName"></MatTextField>
+                        <MatTextField Label="Мобильный телефон" @bind-Value="@appUser.MobPhone"></MatTextField>
+                        <label>День рождения</label>
+                        <InputDate @bind-Value="@appUser.Birthday"></InputDate>
+                    </MatDialogContent>
+                    <MatDialogActions>
+                        <MatButton Icon="undo" OnClick="@(e => { dialogIsOpen = false; })" Label="Отмена" />
+                        <MatButton Icon="save" Type="submit" OnClick="@OkClick" Label="Сохранить" />
+                    </MatDialogActions>
+                </MatDialog>
+            </EditForm>
+        }

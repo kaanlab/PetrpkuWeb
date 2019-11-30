@@ -1,0 +1,56 @@
+@inject HttpClient HttpClient
+
+
+<ListTemplate Loader="@LoadPosts">
+    <LoadingContent>
+        <div class="spinner-border text-primary text-center" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </LoadingContent>
+    <EmptyContent>
+        <div class="card border-danger mb-3">
+            <div class="card-body">
+                <p class="card-text">новостей нет</p>
+            </div>
+        </div>
+    </EmptyContent>
+    <ItemContent Context="item">
+        <div @key="item" class="card">
+            <img class="card-img-top" src="@item.Poster">
+            <div class="card-body">
+                <h5 class="card-title">@item.Title</h5>
+                <span class="card-text">@item.Content.Truncate(240)</span>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="media col-8">
+                        <div class="media-body">
+                            <p class="mt-0">@item.AppUserViewModel.FirstName @item.AppUserViewModel.LastName</p>
+                            <p class="card-text"><small class="text-muted"> @item.PublishDate</small></p>
+                        </div>
+                    </div>
+                    @if (item.AttachmentsViewModel.Any())
+                    {
+                        <div class="col-4">
+                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.AttachmentsViewModel.Count()</span></small>
+                        </div>
+                    }
+                </div>
+            </div>
+            <a class="stretched-link" href="/posts/show/@item.PostId"></a>
+      
+        </div>
+    </ItemContent>
+</ListTemplate>
+
+
+@code {
+
+    async Task<List<PostViewModel>> LoadPosts()
+    {
+        var posts = await HttpClient.GetJsonAsync<List<PostViewModel>>(ApiRoutes.Post.ALL);
+
+        return posts.Where(p => p.OnMain).ToList();
+    }
+
+}

@@ -10,6 +10,6 @@ namespace PetrpkuWeb.Server.Models
         public string Name { get; set; }
 
         //
-        public ICollection<SiteSubsection> SiteSubsections { get; set; }
+        public IEnumerable<SiteSubsection> SiteSubSections { get; set; }
     }
 }

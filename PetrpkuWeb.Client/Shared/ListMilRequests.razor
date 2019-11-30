@@ -3,7 +3,7 @@
 
 <table class="table">
     <tbody>
-        <ListTemplate Loader="@LoadMessages">
+        <ListTemplate Loader="@LoadMilRequests">
             <LoadingContent>
                 <tr>
                     <td class="preloader-wrapper big active">
@@ -26,13 +26,13 @@
             </EmptyContent>
             <ItemContent Context="item">
                 <tr @key="item">
-                    <td>@item.Author.DisplayName</td>
-                    <td>@item.Section.Name</td>
-                    <td>@item.Subsection.Title</td>
+                    <td>@item.AppUserViewModel.DisplayName</td>
+                    <td>@item.SiteSectionViewModel.Name</td>
+                    <td>@item.SiteSubSectionViewModel.Title</td>
                     <td>@item.Title.Truncate(50)</td>
                     <td>@item.CreateDate.ToShortDateString()</td>
                     <td>
-                        @if (item.IsApproved)
+                        @if (item.ApprovedViewModel.IsApproved)
                         {
                             <span class="badge badge-success">Согласован</span>
                         }
@@ -40,7 +40,7 @@
                         {
                             <span class="badge badge-danger">Согласовать</span>
                         }
-                        @if (item.IsChecked)
+                        @if (item.CheckedViewModel.IsChecked)
                         {
                             <span class="badge badge-success">Проверен</span>
                         }
@@ -48,7 +48,7 @@
                         {
                             <span class="badge badge-danger">Проверить</span>
                         }
-                        @if (item.IsSent)
+                        @if (item.SentViewModel.IsSent)
                         {
                             <span class="badge badge-success">Отправлен</span>
                         }
@@ -56,7 +56,7 @@
                         {
                             <span class="badge badge-danger">Отпраить</span>
                         }
-                        @if (item.IsPublished)
+                        @if (item.PublishedViewModel.IsPublished)
                         {
                             <span class="badge badge-success">Опубликован</span>
                         }
@@ -67,7 +67,7 @@
 
                     </td>
                     <td>
-                        <MatButton Icon="edit" Link="@($"/message/edit/{item.MessageId}")" />
+                        <MatButton Icon="edit" Link="@($"/milrequest/edit/{item.MilRequestId}")" />
                     </td>
                 </tr>
             </ItemContent>
@@ -78,8 +78,8 @@
 
 @code {
 
-    async Task<List<Message>> LoadMessages()
+    async Task<List<MilRequestViewModel>> LoadMilRequests()
     {
-        return await HttpClient.GetJsonAsync<List<Message>>("api/messages/all");
+        return await HttpClient.GetJsonAsync<List<MilRequestViewModel>>(ApiRoutes.MilRequest.ALL);
     }
 }

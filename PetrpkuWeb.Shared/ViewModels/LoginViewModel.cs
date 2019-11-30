@@ -14,8 +14,6 @@ namespace PetrpkuWeb.Shared.ViewModels
         public string Password { get; set; }
         public bool RememberMe { get; set; }
 
-        public bool IsLdapUser { get; set; }
-
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
 

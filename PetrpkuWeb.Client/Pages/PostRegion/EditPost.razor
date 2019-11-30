@@ -1,6 +1,6 @@
 @page "/post/edit/{PostId:int}"
 
-@attribute [Authorize(Roles = AuthRole.ANY)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
 
 @using Newtonsoft.Json
 

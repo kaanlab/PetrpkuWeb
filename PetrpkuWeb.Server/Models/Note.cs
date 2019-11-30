@@ -20,7 +20,7 @@ namespace PetrpkuWeb.Server.Models
 
 
         // relationship
-        public AppUser Author { get; set; }
+        public AppUser AppUser { get; set; }
         public CssType CssType { get; set; }
     }
 }

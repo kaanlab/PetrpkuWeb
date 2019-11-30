@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Newtonsoft.Json;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Models;
+using PetrpkuWeb.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,24 +31,24 @@ namespace PetrpkuWeb.Client.Pages
         string SearchTerm { get; set; } = String.Empty;
 
         List<LdapUser> ldapUsers;
-        ClaimsPrincipal identityUser;
-        List<AppUser> appUsersList;
-        AppUser editAppUser;
-        List<Department> departments;
-        List<Building> buildings;
-        List<AppUser> filtredAppUsers;
+        ClaimsPrincipal authUser;
+        List<AppUserViewModel> appUsersList;
+        AppUserViewModel editAppUser;
+        List<DepartmentViewModel> departments;
+        List<BuildingViewModel> buildings;
+        List<AppUserViewModel> filtredAppUsers;
 
         bool editAppUserDialogIsOpen = false;
         bool newUserDialogIsOpen = false;
 
         protected async override Task OnInitializedAsync()
         {
-            identityUser = (await AuthenticationStateTask).User;
+            authUser = (await AuthenticationStateTask).User;
 
-            appUsersList = await HttpClient.GetJsonAsync<List<AppUser>>(ApiRoutes.Users.GETALL);
-            departments = await HttpClient.GetJsonAsync<List<Department>>("api/departments/all");
-            buildings = await HttpClient.GetJsonAsync<List<Building>>("api/buildings/all");
-            ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.GETALL_LDAPUSERS);
+            appUsersList = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL);
+            departments = await HttpClient.GetJsonAsync<List<DepartmentViewModel>>(ApiRoutes.Departments.ALL);
+            buildings = await HttpClient.GetJsonAsync<List<BuildingViewModel>>(ApiRoutes.Buildings.ALL);
+            ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.ALL_LDAPUSERS);
         }
 
         async Task AddAccount()
@@ -64,30 +65,30 @@ namespace PetrpkuWeb.Client.Pages
             var byteContent = new ByteArrayContent(buffer);
             byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var response = await HttpClient.PostAsync(ApiRoutes.Account.ADD_AUTHUSER, byteContent);
+            var response = await HttpClient.PostAsync(ApiRoutes.Account.ADD_IDENTITY, byteContent);
             var content = await response.Content.ReadAsStringAsync();
 
             //Add to UsersIdentity collection
-            var appUserIdentity = JsonConvert.DeserializeObject<AppUserIdentity>(content);
-            appUsersList.Add(appUserIdentity.AssosiatedUser);
+            var appUser = JsonConvert.DeserializeObject<AppUserViewModel>(content);
+            appUsersList.Add(appUser);
             appUsersList = appUsersList.OrderBy(d => d.DisplayName).ToList();
-            Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
-
             LdapUser = new LdapUser();
+
+            Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
         }
 
 
-        void OpenEditAppUserDialog(int appUserId)
+        void OpenEditAppUserDialog(string appUserId)
         {
             editAppUserDialogIsOpen = true;
-            editAppUser = appUsersList.FirstOrDefault(u => u.AppUserId == appUserId);
+            editAppUser = appUsersList.FirstOrDefault(u => u.Id == appUserId);
         }
 
-        async Task UpdateAppUser(int appUserId)
+        async Task UpdateAppUser(string appUserId)
         {
             editAppUserDialogIsOpen = false;
-            var response = await HttpClient.PutJsonAsync<AppUser>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
-            var index = appUsersList.FindIndex(u => u.AppUserId == response.AppUserId);
+            var response = await HttpClient.PutJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
+            var index = appUsersList.FindIndex(u => u.Id == response.Id);
             appUsersList[index] = response;
             Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
         }
@@ -117,7 +118,7 @@ namespace PetrpkuWeb.Client.Pages
             {
                 string filter = SearchTerm.ToLower();
                 filtredAppUsers = appUsersList
-                    .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.Department.Name ?? "").ToLower().Contains(filter)).ToList();
+                    .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentViewModel.Name ?? "").ToLower().Contains(filter)).ToList();
                 if (filtredAppUsers.Count < 1)
                     Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
             }

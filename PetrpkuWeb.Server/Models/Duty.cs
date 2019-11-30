@@ -10,7 +10,6 @@ namespace PetrpkuWeb.Server.Models
         public DateTime DayOfDuty { get; set; }
 
         // relationship
-        public int AppUserId { get; set; }
-        public AppUser AssignedTo { get; set; }
+        public AppUser AppUser { get; set; }
     }
 }

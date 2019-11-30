@@ -1,6 +1,6 @@
-@page "/message/create"
+@page "/milrequest/create"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN_PUBLISHER)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]
 
 @using Newtonsoft.Json
 
@@ -12,7 +12,7 @@
 
 <h2 class="col-12 mb-4 text-center">Заявка на официальный сайт</h2>
 
-<EditForm Model="NewMessage" OnInvalidSubmit="@(() => Toaster.Add("Для формирования заявки необходимо заполнить разделы сайта и поле с описанием действий", MatToastType.Danger, "Ошибка!"))">
+<EditForm Model="NewMilRequest" OnInvalidSubmit="@(() => Toaster.Add("Для формирования заявки необходимо заполнить разделы сайта и поле с описанием действий", MatToastType.Danger, "Ошибка!"))">
     <div class="row">
         <div class="col-12 mb-2">
             <DataAnnotationsValidator />
@@ -51,22 +51,22 @@
         <div class="form-group col-12 mb-2">
             <label>Опишите, что необходимо сделать (заменить, добавить, удалить...)</label>
             <div class="col-12 mb-2">
-                <textarea class="form-control" rows="5" @bind="NewMessage.ToDo"></textarea>
-                <ValidationMessage For="() => NewMessage.ToDo" />
+                <textarea class="form-control" rows="5" @bind="NewMilRequest.ToDo"></textarea>
+                <ValidationMessage For="() => NewMilRequest.ToDo" />
             </div>
         </div>
 
         <div class="form-group col-12 mb-2">
             <label>Заголовок новости/материала (при необходимости)</label>
-            <input class="form-control" type="text" @bind-value="@NewMessage.Title">
-            <ValidationMessage For="() => NewMessage.Title" />
+            <input class="form-control" type="text" @bind-value="@NewMilRequest.Title">
+            <ValidationMessage For="() => NewMilRequest.Title" />
         </div>
 
         <div class="form-group col-12 mb-2">
             <label>Текст новости/материала (при необходимости)</label>
             <div class="col-12 mb-2">
-                <textarea class="form-control" rows="15" @bind="NewMessage.Content"></textarea>
-                <ValidationMessage For="() => NewMessage.Content" />
+                <textarea class="form-control" rows="15" @bind="NewMilRequest.Content"></textarea>
+                <ValidationMessage For="() => NewMilRequest.Content" />
             </div>
         </div>
 
@@ -145,11 +145,11 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private int identityUserId;
+    private string authUserId;
 
-    private MessageViewModel NewMessage { get; set; } = new MessageViewModel();
-    private List<Attachment> listOfAttachments { get; set; } = new List<Attachment>();
-    private Attachment CurrentAttachment { get; set; } = new Attachment();
+    private MilRequestViewModel NewMilRequest { get; set; } = new MilRequestViewModel();
+    private List<AttachmentViewModel> listOfAttachments { get; set; } = new List<AttachmentViewModel>();
+    private AttachmentViewModel CurrentAttachment { get; set; } = new AttachmentViewModel();
 
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
@@ -158,8 +158,8 @@
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
 
-    List<SiteSection> siteSections;
-    List<SiteSubsection> siteSubsections;
+    List<SiteSectionViewModel> siteSections;
+    List<SiteSubSectionViewModel> siteSubsections;
 
     string siteSectionId;
     string siteSubSectionId;
@@ -167,10 +167,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var identityUser = (await authenticationStateTask).User;
-        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        var authUser = (await authenticationStateTask).User;
+        authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
 
-        siteSections = await HttpClient.GetJsonAsync<List<SiteSection>>("api/sections/sitesections/all");
+        siteSections = await HttpClient.GetJsonAsync<List<SiteSectionViewModel>>(ApiRoutes.Sections.ALL);
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -207,9 +207,9 @@
                 new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
         }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.FILES, content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<AttachmentViewModel>>(content));
 
         await ClearFileInfo();
     }
@@ -219,18 +219,19 @@
         int id, subId;
         if (int.TryParse(siteSectionId, out id))
         {
-            NewMessage.SiteSectionId = id;
+            NewMilRequest.SiteSectionViewModel.SiteSectionId = id;
         }
         if (int.TryParse(siteSubSectionId, out subId))
         {
-            NewMessage.SiteSubsectionId = subId;
+            NewMilRequest.SiteSubSectionViewModel.SiteSubsectionId = subId;
         }
-        NewMessage.AppUserId = identityUserId;
-        NewMessage.Attachments = new List<Attachment>();
-        NewMessage.Attachments.AddRange(listOfAttachments);
-        var response = await HttpClient.PostJsonAsync<ArticleViewModel>("api/messages/create", NewMessage);
-        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
+        NewMilRequest.AppUserViewModel.Id = authUserId;
+        NewMilRequest.AttachmentsViewModel = new List<AttachmentViewModel>();
+        NewMilRequest.AttachmentsViewModel.AddRange(listOfAttachments);
+        var response = await HttpClient.PostJsonAsync<MilRequestViewModel>(ApiRoutes.MilRequest.CREATE, NewMilRequest);
         NavigationManager.NavigateTo("/dashboard");
+
+        Toaster.Add($"Заявка успешно опубликована: {response.Title}", MatToastType.Success, "Успех!");
     }
 
     void OpenDialog(int attachmentId)
@@ -242,26 +243,26 @@
 
     async Task UpdateAttachmentInfo()
     {
-        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
-        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
-
+        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentViewModel>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         dialogIsOpen = false;
+
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
     }
 
     async Task DeleteAttachment()
     {
-        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
+        await HttpClient.DeleteAsync($"{ApiRoutes.Upload.DELETE}/{CurrentAttachment.AttachmentId}");
         listOfAttachments.Remove(CurrentAttachment);
-        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
-
         dialogIsOpen = false;
+
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Success, "Успех!");
     }
 
     async Task SectionClicked(ChangeEventArgs sectionEvent)
     {
         //siteSubsections.Clear();
         siteSectionId = sectionEvent.Value.ToString();
-        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubsection>>($"api/sections/sitesubsections/{siteSectionId}");
+        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubSectionViewModel>>($"{ApiRoutes.Sections.SUBSECTIONS}/{siteSectionId}");
         this.StateHasChanged();
     }
 

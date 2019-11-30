@@ -31,7 +31,7 @@
 
     async Task<List<RssMil>> LoadRssFeed()
     {
-        return await HttpClient.GetJsonAsync<List<RssMil>>("api/rssfeed/mil");
+        return await HttpClient.GetJsonAsync<List<RssMil>>(ApiRoutes.Rss.MILNEWS);
     }
 
 }

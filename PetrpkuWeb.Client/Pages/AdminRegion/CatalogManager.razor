@@ -1,6 +1,6 @@
 @page "/catalog"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN)]
 
 
 <h2 class="col-12 mb-4 text-center">Справочники</h2>
@@ -110,9 +110,9 @@
                         @siteSection.Name
                         <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditSiteSectionDialog(siteSection))" Class="float-right" />
                     </li>
-                    @if (siteSection.SiteSubsections is { })
+                    @if (siteSection.SiteSubsectionsViewModel is { })
                     {
-                        @foreach (var siteSubSection in siteSection.SiteSubsections)
+                        @foreach (var siteSubSection in siteSection.SiteSubsectionsViewModel)
                         {
                             <li class="list-group-item" style="padding-left: 60px;">
                                 @siteSubSection.Title

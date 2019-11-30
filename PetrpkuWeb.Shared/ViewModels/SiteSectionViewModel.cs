@@ -8,6 +8,6 @@ namespace PetrpkuWeb.Shared.ViewModels
     {
         public int SiteSectionId { get; set; }
         public string Name { get; set; }
-        public ICollection<SiteSubSectionViewModel> SiteSubsections { get; set; }
+        public List<SiteSubSectionViewModel> SiteSubsectionsViewModel { get; set; }
     }
 }

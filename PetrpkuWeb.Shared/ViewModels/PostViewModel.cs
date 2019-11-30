@@ -16,8 +16,11 @@ namespace PetrpkuWeb.Shared.ViewModels
 
         [Required(ErrorMessage = "Поле \"Текст\" не может быть пустым")]
         public string Content { get; set; }
-        public int AppUserId { get; set; }
-        public int DepartmentId { get; set; }
-        public List<AttachmentViewModel> Attachments { get; set; }
+        public DateTime PublishDate { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public bool OnMain { get; set; }
+        public AppUserViewModel AppUserViewModel { get; set; }
+        public DepartmentViewModel DepartmentViewModel { get; set; }
+        public List<AttachmentViewModel> AttachmentsViewModel { get; set; }
     }
 }

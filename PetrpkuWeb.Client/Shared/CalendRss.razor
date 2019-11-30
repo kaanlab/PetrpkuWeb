@@ -22,7 +22,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var items = await HttpClient.GetJsonAsync<List<RssCalend>>("api/rssfeed/calend");
+        var items = await HttpClient.GetJsonAsync<List<RssCalend>>(ApiRoutes.Rss.CALEND);
         var random = new Random();
         var index = random.Next(items.Count);
         rss = items[index];

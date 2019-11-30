@@ -99,7 +99,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpGet(ApiRoutes.Account.GETALL_LDAPUSERS)]
+        [HttpGet(ApiRoutes.Account.ALL_LDAPUSERS)]
         public async Task<ActionResult> GetAllLdapUsers()
         {
             var ldapUsers = _ldapAuthenticationService.SearchAll();
@@ -127,7 +127,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpGet(ApiRoutes.Account.GETALL_IDENTITIES)]
+        [HttpGet(ApiRoutes.Account.ALL_IDENTITIES)]
         public async Task<ActionResult> GetAllAuthUsers()
         {
             var identityUsers = await _appUsersService.GetAllOrderById();

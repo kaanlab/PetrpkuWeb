@@ -107,9 +107,9 @@ namespace PetrpkuWeb.Server.Services
                 .Include(d => d.DaysOfDuty)
                 .Include(b => b.Building)
                 .Include(d => d.Department)
-                .Include(a => a.Articles)
+                .Include(a => a.Posts)
                     .ThenInclude(atach => atach.Attachments)
-                .Include(a => a.Articles)
+                .Include(a => a.Notes)
                     .ThenInclude(ct => ct.CssType)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.Id == appUserId);

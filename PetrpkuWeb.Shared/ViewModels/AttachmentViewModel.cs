@@ -15,8 +15,8 @@ namespace PetrpkuWeb.Shared.ViewModels
         public bool IsImage { get; set; }
 
         // relationship
-        public ArticleViewModel Article { get; set; }
-        public PostViewModel Post { get; set; }
-        public MessageViewModel Message { get; set; }
+        public DocSectionViewModel DocSectionViewModel { get; set; }
+        public PostViewModel PostViewModel { get; set; }
+        public MilRequestViewModel MilRequestViewModel { get; set; }
     }
 }

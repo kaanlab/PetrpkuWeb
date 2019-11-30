@@ -1,12 +1,10 @@
 @page "/department/{DepartmentId:int}"
 
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
-
-@inject HttpClient HttpClient
 @inject IMatToaster Toaster
 
 
@@ -14,20 +12,20 @@
 {
     <h2 class="col-12 mb-4 text-center">@department.Name</h2>
 
-    @if (department.ListOfUsers.Any())
+    @if (department.AppUsersViewModel.Any())
     {
         <div class="row mb-2">
             <ul class="user-profiles-list-small">
-                @foreach (var user in department.ListOfUsers.Where(u => u.IsActive))
+                @foreach (var user in department.AppUsersViewModel.Where(u => u.IsActive))
                 {
                     <li @key="user">
                         <div class="user-avatar">
-                            <a href="/user/@user.AppUserId">
+                            <a href="/user/@user.Id">
                                 <img src="@user.Avatar" width="48" />
                             </a>
                         </div>
                         <p class="user-name">
-                            <a href="/user/@user.AppUserId">@user.DisplayName</a>
+                            <a href="/user/@user.Id">@user.DisplayName</a>
                             <span>@user.WorkingPosition</span>
                         </p>
                     </li>
@@ -37,10 +35,10 @@
     }
 
     <div class="row mb-2">
-        @if (department.ListOfUsers.SingleOrDefault(u => u.AppUserId == identityUserId) is { })
+        @if (department.AppUsersViewModel.SingleOrDefault(u => u.Id == authUserId) is { })
         {
             <div class="col-12">
-                <MatButton Icon="add" Raised="true" Label="Создать" Link="@($"/department/{DepartmentId}/post/create")" Class="float-right" />
+                <MatButton Icon="add" Raised="true" Label="Создать" Link="/post/create" Class="float-right" />
             </div>
         }
     </div>
@@ -69,22 +67,20 @@ else
                 <img class="card-img-top" src="@post.Poster">
                 <div class="card-body">
                     <h5 class="card-title">@post.Title</h5>
-                    <span class="card-text">
-                        <MarkdownView Content="@post.Content.Truncate(240)" />
-                    </span>
+                    <span class="card-text">@post.Content.Truncate(240)</span>
                 </div>
                 <div class="card-footer">
                     <div class="row">
                         <div class="media col-8">
                             <div class="media-body">
-                                <p class="mt-0">@post.Author.FirstName @post.Author.LastName</p>
+                                <p class="mt-0">@post.AppUserViewModel.FirstName @post.AppUserViewModel.LastName</p>
                                 <p class="card-text"><small class="text-muted"> @post.PublishDate</small></p>
                             </div>
                         </div>
-                        @if (post.Attachments.Any())
+                        @if (post.AttachmentsViewModel.Any())
                         {
                             <div class="col-4">
-                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.Attachments.Count()</span></small>
+                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsViewModel.Count()</span></small>
                             </div>
                         }
                     </div>
@@ -104,29 +100,26 @@ else
     //[CascadingParameter]
     //private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    int identityUserId;
-    Department department;
-    List<Post> posts;
+    string authUserId;
+    DepartmentViewModel department;
+    List<PostViewModel> posts;
 
     protected async override Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        var authUser = authState.User;
 
-        if (user.Identity.IsAuthenticated)
+        if (authUser.Identity.IsAuthenticated)
         {
-            Int32.TryParse(user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value, out identityUserId);
+            authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
         }
-        else
-        {
-            identityUserId = 0;
-        }
+        
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        department = await HttpClient.GetJsonAsync<Department>($"api/departments/show/{DepartmentId}");
-        posts = await HttpClient.GetJsonAsync<List<Post>>($"api/posts/bydepartment/{DepartmentId}");
+        department = await HttpClient.GetJsonAsync<DepartmentViewModel>($"{ApiRoutes.Departments.SHOW}/{DepartmentId}");
+        posts = await HttpClient.GetJsonAsync<List<PostViewModel>>($"{ApiRoutes.Post.DEPARTMENT}/{DepartmentId}");
     }
 
 }

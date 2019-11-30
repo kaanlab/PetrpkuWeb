@@ -2,10 +2,7 @@ using Blazor.FileReader;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using PetrpkuWeb.Shared.Contracts.V1;
-using PetrpkuWeb.Shared.Models;
 using PetrpkuWeb.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -22,7 +19,7 @@ namespace PetrpkuWeb.Client.Pages
         public IFileReaderService fileReaderService { get; set; }
 
         [Parameter]
-        public int AppUserId { get; set; }
+        public string Id { get; set; }
 
         [CascadingParameter]
         private Task<AuthenticationState> AuthenticationStateTask { get; set; }
@@ -30,8 +27,8 @@ namespace PetrpkuWeb.Client.Pages
         //private Attachment Avatar { get; set; } = new Attachment();
         private FileInfoViewModel AvatarFileInfoVM { get; set; }
 
-        AppUser user;
-        int identityUserId;
+        AppUserViewModel appUser;
+        string authUserId;
         bool dialogIsOpen;
 
         ElementReference inputElement;
@@ -45,13 +42,13 @@ namespace PetrpkuWeb.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var identityUser = (await AuthenticationStateTask).User;
-            identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+            var authUser = (await AuthenticationStateTask).User;
+            authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
         }
 
         protected override async Task OnParametersSetAsync()
         {
-            user = await HttpClient.GetJsonAsync<AppUser>($"{ApiRoutes.Users.GETUSER}/{AppUserId}");
+            appUser = await HttpClient.GetJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.USER}/{Id}");
         }
 
         async Task ShowFileInfo()
@@ -81,7 +78,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task OkClick()
         {
             dialogIsOpen = false;
-            await HttpClient.PutJsonAsync<AppUser>($"{ApiRoutes.Users.UPDATE}/{user.AppUserId}", user);
+            await HttpClient.PutJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.UPDATE}/{appUser.Id}", appUser);
         }
 
         async Task UploadFile()
@@ -93,8 +90,8 @@ namespace PetrpkuWeb.Client.Pages
                     new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
             }
 
-            var response = await HttpClient.PostAsync(requestUri: "api/upload/avatar", content: multipartFormDataContent);
-            user.Avatar = await response.Content.ReadAsStringAsync();
+            var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.AVATAR, content: multipartFormDataContent);
+            appUser.Avatar = await response.Content.ReadAsStringAsync();
             await ClearFileInfo();
         }
     }

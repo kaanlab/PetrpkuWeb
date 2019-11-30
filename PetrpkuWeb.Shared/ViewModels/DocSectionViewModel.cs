@@ -7,16 +7,14 @@ namespace PetrpkuWeb.Shared.ViewModels
 {
     public class DocSectionViewModel
     {
-        public int DocumentId { get; set; }
+        public int DocSectionId { get; set; }
 
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }
 
         // relationship
-        public string Id { get; set; }
-        public AppUserViewModel Author { get; set; }
-        public int DepartmentId { get; set; }
-        public DepartmentViewModel Department { get; set; }
-        public List<AttachmentViewModel> Attachments { get; set; }
+        public AppUserViewModel AppUserViewModel { get; set; }
+        public DepartmentViewModel DepartmentViewModel { get; set; }
+        public List<AttachmentViewModel> AttachmentsViewModel { get; set; }
     }
 }

@@ -15,11 +15,8 @@ namespace PetrpkuWeb.Server.Models
         public bool IsImage { get; set; }
 
         // relationship
-        public int? ArticleId { get; set; }
-        public Article Article { get; set; }
-        public int? PostId { get; set; }
         public Post Post { get; set; }
-        public int? MessageId { get; set; }
-        public Message Message { get; set; }
+        public MilRequest MilRequest { get; set; }
+        public DocSection DocSection { get; set; }
     }
 }

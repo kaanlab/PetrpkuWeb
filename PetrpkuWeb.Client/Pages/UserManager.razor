@@ -1,6 +1,6 @@
 @page "/usermanager"
 
-@attribute [Authorize(Roles = AuthRole.ADMIN_KADRY)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
 
 
 <div class="row mb-5">
@@ -58,13 +58,13 @@
                             <td>@user.MidleName</td>
                             <td>@user.Birthday.ToShortDateString()</td>
                             <td>@user.WorkingPosition</td>
-                            <td>@user.Department?.Name</td>
-                            <td>@user.Building?.Name</td>
+                            <td>@user.DepartmentViewModel?.Name</td>
+                            <td>@user.BuildingViewModel?.Name</td>
                             <td>@user.Room</td>
                             <td>@user.IntPhone</td>
                             <td>@user.ExtPhone</td>
                             <td>@user.MobPhone</td>
-                            <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                            <td><MatButton Icon="edit" OnClick="@(() => OpenEditAppUserDialog(user.Id))" /></td>
                         </tr>
                     }
                 </tbody>
@@ -134,13 +134,13 @@
                         <td>@user.MidleName</td>
                         <td>@user.Birthday.ToShortDateString()</td>
                         <td>@user.WorkingPosition</td>
-                        <td>@user.Department?.Name</td>
-                        <td>@user.Building?.Name</td>
+                        <td>@user.DepartmentViewModel?.Name</td>
+                        <td>@user.BuildingViewModel?.Name</td>
                         <td>@user.Room</td>
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
                         <td>@user.MobPhone</td>
-                        <td><MatButton Icon="edit" Outlined="true" OnClick="@(() => OpenEditAppUserDialog(user.AppUserId))" /></td>
+                        <td><MatButton Icon="edit" Outlined="true" OnClick="@(() => OpenEditAppUserDialog(user.Id))" /></td>
                     </tr>
                 }
             </tbody>
@@ -161,7 +161,7 @@
                 <InputDate @bind-Value="@editAppUser.Birthday"></InputDate>
                 <hr />
                 <label>Подразделение</label>
-                <select class="custom-select" @bind="@editAppUser.DepartmentId">
+                <select class="custom-select" @bind="@editAppUser.DepartmentViewModel.DepartmentId">
                     @if (departments is null)
                     {
                         <option selected>(loading...)</option>
@@ -176,10 +176,10 @@
                     }
                 </select>
                 <MatTextField Label="Должность" @bind-Value="@editAppUser.WorkingPosition"></MatTextField>
-                @if (identityUser.IsInRole(AuthRole.ADMIN))
+                @if (authUser.IsInRole(AuthRoles.ADMIN))
                 {
                     <label>Корпус</label>
-                    <select class="custom-select" @bind="@editAppUser.BuildingId">
+                    <select class="custom-select" @bind="@editAppUser.BuildingViewModel.BuildingId">
                         @if (buildings is null)
                         {
                             <option selected>(loading...)</option>
@@ -210,7 +210,7 @@
             </MatDialogContent>
             <MatDialogActions>
                 <MatButton Icon="undo" OnClick="@(e => { editAppUserDialogIsOpen = false; })" Label="Отмена" />
-                <MatButton Icon="save" Type="submit" OnClick="@(() => UpdateAppUser(editAppUser.AppUserId))" Label="Сохранить" />
+                <MatButton Icon="save" Type="submit" OnClick="@(() => UpdateAppUser(editAppUser.Id))" Label="Сохранить" />
             </MatDialogActions>
         </MatDialog>
     </EditForm>

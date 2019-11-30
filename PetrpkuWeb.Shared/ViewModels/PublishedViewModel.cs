@@ -2,17 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PetrpkuWeb.Server.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class Published
+    public class PublishedViewModel
     {
         public int PublishedId { get; set; }
         public DateTime Date { get; set; }
         public bool IsPublished { get; set; }
-       
-
-        // relationship
-        public AppUser AppUser { get; set; }
-        public MilRequest MilRequest { get; set; }
+        public AppUserViewModel AppUserViewModel { get; set; }
+        public MilRequestViewModel MilRequestViewModel { get; set; }
     }
 }

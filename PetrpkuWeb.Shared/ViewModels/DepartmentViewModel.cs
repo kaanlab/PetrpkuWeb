@@ -9,7 +9,7 @@ namespace PetrpkuWeb.Shared.ViewModels
         public int DepartmentId { get; set; }
         public string Name { get; set; }
         public bool IsVisible { get; set; }
-       public List<AppUserViewModel> ListOfUsers { get; set; }
-        public List<PostViewModel> Posts { get; set; }
+       public List<AppUserViewModel> AppUsersViewModel { get; set; }
+        public List<PostViewModel> PostsViewModel { get; set; }
     }
 }

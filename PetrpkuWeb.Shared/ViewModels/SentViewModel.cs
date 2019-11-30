@@ -2,16 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PetrpkuWeb.Server.Models
+namespace PetrpkuWeb.Shared.ViewModels
 {
-    public class Sent
+    public class SentViewModel
     {
         public int SentId { get; set; }
         public DateTime Date { get; set; }
         public bool IsSent { get; set; }
-
-        // relationship
-        public AppUser AppUser { get; set; }
-        public MilRequest MilRequest { get; set; }
+        public AppUserViewModel AppUserViewModel { get; set; }
+        public MilRequestViewModel MilRequestViewModel { get; set; }
     }
 }

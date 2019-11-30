@@ -42,9 +42,9 @@
                                     if (user.DayOfDuty.DayOfYear == day.DayOfYear)
                                     {
                                         <div @key="user">
-                                            <img src="@user.AssignedTo.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
-                                            <h5 class="mt-0">@user.AssignedTo.DisplayName</h5>
-                                            <p class="card-text"><small class="text-muted"> @user.AssignedTo.WorkingPosition</small></p>
+                                            <img src="@user.AppUserViewModel.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
+                                            <h5 class="mt-0">@user.AppUserViewModel.DisplayName</h5>
+                                            <p class="card-text"><small class="text-muted"> @user.AppUserViewModel.WorkingPosition</small></p>
                                         </div>
                                     }
                                 }
@@ -69,7 +69,7 @@
     public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
 
     DateTime title = DateTime.Now;
-    List<Duty> listOfDuty;
+    List<DutyViewModel> listOfDuty;
     List<string> daysOfWeek;
     List<DateTime> days;
     DateTime startDate;
@@ -89,7 +89,7 @@
 
     async Task GetCalendarAsync(int month, int year)
     {
-        listOfDuty = await HttpClient.GetJsonAsync<List<Duty>>($"api/duty/month/{month}/{year}");
+        listOfDuty = await HttpClient.GetJsonAsync<List<DutyViewModel>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
 
         daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
             .Cast<DayOfWeek>()

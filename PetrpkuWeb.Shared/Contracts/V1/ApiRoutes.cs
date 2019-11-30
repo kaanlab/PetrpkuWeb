@@ -29,7 +29,7 @@ namespace PetrpkuWeb.Shared.Contracts.V1
 
             public const string USER = "api/v1/users/user";
 
-            public const string BIRTHDAYS = "api/v1/users/birthdays";
+            public const string BIRTHDAYS_WEEK = "api/v1/users/birthdays/week";
 
             public const string UPDATE = "api/v1/users/update";
         }
@@ -157,6 +157,10 @@ namespace PetrpkuWeb.Shared.Contracts.V1
             public const string CREATE = "api/v1/milrequest/create";
 
             public const string SHOW = "api/v1/milrequest/show";
+
+            public const string UPDATE = "api/v1/milrequest/update";
+
+            public const string DELETE = "api/v1/milrequest/delete";
         }
 
         public static class Note

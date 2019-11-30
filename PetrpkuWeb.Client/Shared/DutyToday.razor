@@ -12,11 +12,11 @@
 else
 {
     <div class="card mb-2">
-        <img src="@duty.AssignedTo.Avatar" class="card-img-top" />
+        <img src="@duty.AppUserViewModel.Avatar" class="card-img-top" />
         <div class="card-body">
-            <h5 class="card-title">@duty.AssignedTo.DisplayName</h5>
-            <p class="card-text"><small class="text-muted">@duty.AssignedTo.WorkingPosition</small></p>
-            <p class="card-text"><small class="text-muted">@duty.AssignedTo.Department.Name</small></p>
+            <h5 class="card-title">@duty.AppUserViewModel.DisplayName</h5>
+            <p class="card-text"><small class="text-muted">@duty.AppUserViewModel.WorkingPosition</small></p>
+            <p class="card-text"><small class="text-muted">@duty.AppUserViewModel.DepartmentViewModel.Name</small></p>
         </div>
     </div>
 }
@@ -24,10 +24,10 @@ else
 
 @code {
 
-    Duty duty;
+    DutyViewModel duty;
 
     protected async override Task OnInitializedAsync()
     {
-        duty = await HttpClient.GetJsonAsync<Duty>("/api/duty/today");
+        duty = await HttpClient.GetJsonAsync<DutyViewModel>(ApiRoutes.Duty.TODAY);
     }
 }

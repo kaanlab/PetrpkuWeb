@@ -6,11 +6,10 @@ namespace PetrpkuWeb.Server.Models
 {
     public class SiteSubsection
     {
-        public int SiteSubsectionId { get; set; }
+        public int SiteSubSectionId { get; set; }
         public string Title { get; set; }
 
         //
-        public int SiteSectionId { get; set; }
         public SiteSection SiteSection { get; set; }
     }
 }

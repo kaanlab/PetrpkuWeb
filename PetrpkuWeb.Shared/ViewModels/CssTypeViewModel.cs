@@ -9,6 +9,6 @@ namespace PetrpkuWeb.Shared.ViewModels
         public int CssTypeId { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
-        public IEnumerable<AnnouncementViewModel> Announcements { get; set; }
+        public List<NoteViewModel> NotesViewModels { get; set; }
     }
 }

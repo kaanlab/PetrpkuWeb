@@ -14,10 +14,8 @@ namespace PetrpkuWeb.Server.Models
         public string Title { get; set; }
 
         // relationship
-        public string Id { get; set; }
         public AppUser Author { get; set; }
-        public int DepartmentId { get; set; }
         public Department Department { get; set; }
-        public List<Attachment> Attachments { get; set; }
+        public IEnumerable<Attachment> Attachments { get; set; }
     }
 }
