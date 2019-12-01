@@ -35,8 +35,7 @@ namespace PetrpkuWeb.Client.Extensions
             if (result.Successful)
             {
                 await _localStorage.SetItemAsync("authToken", result.Token);
-                ((ApiAuthenticationStateProvider) _authenticationStateProvider).MarkUserAsAuthenticated(
-                    result.Token);
+                ((ApiAuthenticationStateProvider) _authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
 
                 return result;

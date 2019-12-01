@@ -32,20 +32,20 @@ namespace PetrpkuWeb.Client.Pages
 
         List<LdapUser> ldapUsers;
         ClaimsPrincipal authUser;
-        List<AppUserViewModel> appUsersList;
-        AppUserViewModel editAppUser;
+        List<UserManagerViewModel> appUsersList;
+        UserManagerViewModel editAppUser;
         List<DepartmentViewModel> departments;
         List<BuildingViewModel> buildings;
-        List<AppUserViewModel> filtredAppUsers;
+        List<UserManagerViewModel> filtredAppUsers;
 
         bool editAppUserDialogIsOpen = false;
         bool newUserDialogIsOpen = false;
 
-        protected async override Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
         {
             authUser = (await AuthenticationStateTask).User;
 
-            appUsersList = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL);
+            appUsersList = await HttpClient.GetJsonAsync<List<UserManagerViewModel>>(ApiRoutes.Users.ALL);
             departments = await HttpClient.GetJsonAsync<List<DepartmentViewModel>>(ApiRoutes.Departments.ALL);
             buildings = await HttpClient.GetJsonAsync<List<BuildingViewModel>>(ApiRoutes.Buildings.ALL);
             ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.ALL_LDAPUSERS);
@@ -69,7 +69,7 @@ namespace PetrpkuWeb.Client.Pages
             var content = await response.Content.ReadAsStringAsync();
 
             //Add to UsersIdentity collection
-            var appUser = JsonConvert.DeserializeObject<AppUserViewModel>(content);
+            var appUser = JsonConvert.DeserializeObject<UserManagerViewModel>(content);
             appUsersList.Add(appUser);
             appUsersList = appUsersList.OrderBy(d => d.DisplayName).ToList();
             LdapUser = new LdapUser();
@@ -87,7 +87,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task UpdateAppUser(string appUserId)
         {
             editAppUserDialogIsOpen = false;
-            var response = await HttpClient.PutJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
+            var response = await HttpClient.PutJsonAsync<UserManagerViewModel>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
             var index = appUsersList.FindIndex(u => u.Id == response.Id);
             appUsersList[index] = response;
             Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");

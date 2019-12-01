@@ -13,6 +13,5 @@ namespace PetrpkuWeb.Server.Models
 
         // relationship
         public AppUser AppUser { get; set; }
-        public MilRequest MilRequest { get; set; }
     }
 }

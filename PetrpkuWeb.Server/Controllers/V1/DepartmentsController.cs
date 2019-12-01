@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.ViewModels.CatalogRegion;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -30,7 +32,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var department = await _departmentTypeService.GetAll();
 
-            return Ok(_mapper.Map<DepartmentViewModel>(department));
+            return Ok(_mapper.Map<IEnumerable<CatalogDepartmentView>>(department));
         }
 
         [AllowAnonymous]
@@ -48,32 +50,33 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
         [HttpPost(ApiRoutes.Departments.CREATE)]
-        public async Task<ActionResult<Department>> CreateDepartmentAsync(DepartmentViewModel departmentViewModel)
+        public async Task<ActionResult<Department>> CreateDepartmentAsync(CatalogDepartmentView catalogDepartmentView)
         {
-            if (departmentViewModel is null)
+            if (catalogDepartmentView is null)
                 return BadRequest();
 
-            var department = _mapper.Map<Department>(departmentViewModel);
+            var department = _mapper.Map<Department>(catalogDepartmentView);
 
             var created = await _departmentTypeService.Create(department);
 
             if(created)
-                return Ok(_mapper.Map<DepartmentViewModel>(department));
+                return Ok(_mapper.Map<CatalogDepartmentView>(department));
 
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
-        [HttpPut(ApiRoutes.Departments.UPDATE + "/{departmentViewModelId:int}")]
-        public async Task<ActionResult> PutDepartmentAsync(int departmentViewModelId, DepartmentViewModel departmentViewModel)
+        [HttpPut(ApiRoutes.Departments.UPDATE + "/{catalogDepartmentViewId:int}")]
+        public async Task<ActionResult> UpdateDepartmentAsync(int catalogDepartmentViewId, CatalogDepartmentView catalogDepartmentView)
         {
-            if (departmentViewModelId == departmentViewModel.DepartmentId)
+            if (catalogDepartmentViewId == catalogDepartmentView.DepartmentId)
             {
-                var department = _mapper.Map<Department>(departmentViewModel);
-                var updated = await _departmentTypeService.Update(department);
+                var department = await _departmentTypeService.GetOne(catalogDepartmentViewId);
+                var updatedDepartment = _mapper.Map(catalogDepartmentView, department);
+                var updated = await _departmentTypeService.Update(updatedDepartment);
 
                 if(updated)
-                    return Ok(_mapper.Map<DepartmentViewModel>(department));
+                    return Ok(_mapper.Map<CatalogDepartmentView>(department));
             }
 
             return BadRequest();

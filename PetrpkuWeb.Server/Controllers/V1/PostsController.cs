@@ -31,7 +31,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var posts = await _postService.GetAll();
 
-            return Ok(_mapper.Map<List<PostViewModel>>(posts));
+            return Ok(_mapper.Map<IEnumerable<PostViewModel>>(posts));
         }
 
         [AllowAnonymous]
@@ -40,7 +40,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var posts = await _postService.GetByDepartment(departmentId);
 
-            return Ok(_mapper.Map<List<PostViewModel>>(posts));
+            return Ok(_mapper.Map<IEnumerable<PostViewModel>>(posts));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]

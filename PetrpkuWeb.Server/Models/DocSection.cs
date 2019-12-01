@@ -8,7 +8,7 @@ namespace PetrpkuWeb.Server.Models
 {
     public class DocSection
     {
-        public int DocumentId { get; set; }
+        public int DocSectionId { get; set; }
 
         [Required(ErrorMessage = "Поле \"Заголовок\" не может быть пустым")]
         public string Title { get; set; }

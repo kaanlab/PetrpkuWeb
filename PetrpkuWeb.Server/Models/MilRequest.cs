@@ -20,8 +20,8 @@ namespace PetrpkuWeb.Server.Models
 
         //
         public AppUser AppUser { get; set; }
-        public SiteSection Section { get; set; }
-        public SiteSubsection SubSection { get; set; }
+        public SiteSection SiteSection { get; set; }
+        public SiteSubsection SiteSubSection { get; set; }
         public IEnumerable<Attachment> Attachments { get; set; }
         public Approved Approved { get; set; }
         public Checked Checked { get; set; }

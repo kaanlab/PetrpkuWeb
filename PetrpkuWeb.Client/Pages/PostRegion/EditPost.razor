@@ -12,7 +12,7 @@
 
 @if (post is { })
 {
-    @if (identityUserId == post.Author.AppUserId || identityUser.IsInRole(AuthRole.ADMIN))
+    @if (authUserId == post.AppUserViewModel.Id || authUser.IsInRole(AuthRoles.ADMIN))
     {
         <h2 class="col-12 mb-4 text-center">Редактировать статью</h2>
 
@@ -68,16 +68,16 @@
                     </div>
                 </div>
 
-                @if (post.Attachments.Any())
+                @if (post.AttachmentsViewModel.Any())
                 {
                     <div class="form-group col-12 mb-2">
                         <label>Вложения</label>
                         <table class="table">
-                            @foreach (var attachment in post.Attachments)
+                            @foreach (var attachment in post.AttachmentsViewModel)
                             {
-                                var index = post.Attachments.IndexOf(attachment);
+                                var index = post.AttachmentsViewModel.IndexOf(attachment);
                                 <tr @key="attachment">
-                                    <td>@(post.Attachments.IndexOf(attachment) + 1)</td>
+                                    <td>@(post.AttachmentsViewModel.IndexOf(attachment) + 1)</td>
                                     @if (attachment.IsImage == true)
                                     {
                                         <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
@@ -95,10 +95,10 @@
                         </table>
                     </div>
                 }
-            <div class="col-12 mb-2">
-                <MatButton Raised="true" Icon="done" Type="submit" Label="Сохранить" OnClick="UpdatePost" Class="float-right" />
-                <MatButton Raised="true" Icon="delete_outline" Label="Удалить" OnClick="DeletePost" Class="float-right mr-2" />
-            </div>
+                <div class="col-12 mb-2">
+                    <MatButton Raised="true" Icon="done" Type="submit" Label="Сохранить" OnClick="UpdatePost" Class="float-right" />
+                    <MatButton Raised="true" Icon="delete_outline" Label="Удалить" OnClick="DeletePost" Class="float-right mr-2" />
+                </div>
             </div>
         </EditForm>
 
@@ -162,13 +162,13 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private Attachment CurrentAttachment { get; set; } = new Attachment();
+    private AttachmentViewModel CurrentAttachment { get; set; } = new AttachmentViewModel();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
     private FileInfoViewModel PosterFileInfoVM { get; set; }
 
-    Post post;
-    ClaimsPrincipal identityUser;
-    int identityUserId;
+    PostViewModel post;
+    ClaimsPrincipal authUser;
+    string authUserId;
 
     ElementReference inputElement;
     IFileReaderRef fileReaderReference;
@@ -182,14 +182,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        identityUser = (await authenticationStateTask).User;
-        identityUserId = Int32.Parse(identityUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value);
+        authUser = (await authenticationStateTask).User;
+        authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
 
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        post = await HttpClient.GetJsonAsync<Post>($"api/posts/show/{PostId}");
+        post = await HttpClient.GetJsonAsync<PostViewModel>($"{ApiRoutes.Post.SHOW}/{PostId}");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -200,23 +200,25 @@
 
     async Task UpdatePost()
     {
-        var departmentId = post.Department.DepartmentId;
-        await HttpClient.PutJsonAsync<Post>($"api/posts/update/{post.PostId}", post);
-        Toaster.Add($"Статья успешно обновлена", MatToastType.Success, "Успех!");
+        var departmentId = post.DepartmentViewModel.DepartmentId;
+        await HttpClient.PutJsonAsync<PostViewModel>($"{ApiRoutes.Post.UPDATE}/{post.PostId}", post);
         NavigationManager.NavigateTo($"/department/{departmentId}");
+
+        Toaster.Add($"Статья успешно обновлена", MatToastType.Success, "Успех!");
     }
 
     async Task DeletePost()
     {
-        var departmentId = post.Department.DepartmentId;
-        await HttpClient.DeleteAsync($"api/posts/delete/{post.PostId}");
-        Toaster.Add($"Статья {post.Title} удалена", MatToastType.Warning, "Внимание!");
+        var departmentId = post.DepartmentViewModel.DepartmentId;
+        await HttpClient.DeleteAsync($"{ApiRoutes.Post.DELETE}/{post.PostId}");
         NavigationManager.NavigateTo($"/department/{departmentId}");
+
+        Toaster.Add($"Статья {post.Title} удалена", MatToastType.Warning, "Внимание!");
     }
 
     void OpenDialog(int attachmentId)
     {
-        CurrentAttachment = post.Attachments.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+        CurrentAttachment = post.AttachmentsViewModel.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
 
         dialogIsOpen = true;
     }
@@ -250,28 +252,28 @@
                 new StreamContent(await file.OpenReadAsync(), 8192), "files", (await file.ReadFileInfoAsync()).Name);
         }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/files", content: multipartFormDataContent);
+        var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.FILES, content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        post.Attachments.AddRange(JsonConvert.DeserializeObject<List<Attachment>>(content));
+        post.AttachmentsViewModel.AddRange(JsonConvert.DeserializeObject<List<AttachmentViewModel>>(content));
 
         await ClearFileInfo();
     }
 
     async Task UpdateAttachmentInfo()
     {
-        CurrentAttachment = await HttpClient.PutJsonAsync<Attachment>($"api/upload/updateinfo/{CurrentAttachment.AttachmentId}", CurrentAttachment);
-        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
-
+        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentViewModel>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         dialogIsOpen = false;
+
+        Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
     }
 
     async Task DeleteAttachment()
     {
-        await HttpClient.DeleteAsync($"api/upload/deleteinfo/{CurrentAttachment.AttachmentId}");
-        post.Attachments.Remove(CurrentAttachment);
-        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
-
+        await HttpClient.DeleteAsync($"{ApiRoutes.Upload.DELETE}/{CurrentAttachment.AttachmentId}");
+        post.AttachmentsViewModel.Remove(CurrentAttachment);
         dialogIsOpen = false;
+
+        Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
     }
 
     async Task ClearPosterFileInfo()
@@ -302,7 +304,7 @@
                 new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
         }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/poster", content: multipartFormDataContent);
+        var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.POSTER, content: multipartFormDataContent);
         post.Poster = await response.Content.ReadAsStringAsync();
         await ClearPosterFileInfo();
     }

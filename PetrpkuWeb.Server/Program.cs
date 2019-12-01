@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PetrpkuWeb.Server.Data;
+using PetrpkuWeb.Server.Models;
 using Serilog;
 
 namespace PetrpkuWeb.Server
@@ -31,16 +28,18 @@ namespace PetrpkuWeb.Server
 #endif
                 var host = CreateHostBuilder(args).Build();
 
-                // Initialize the database
-                var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    if (!db.AppUsers.Any())
-                        SeedData.Initialize(db);
-                }
+            // Initialize the database
+            var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<AppDbContext>();
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                dbContext.Database.Migrate();
+                dbContext.EnsureSeeded(userManager);
+            }
 
-                host.Run();
+            host.Run();
 
 #if RELEASE
             }

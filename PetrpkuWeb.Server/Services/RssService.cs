@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
-using PetrpkuWeb.Server.Models;
+using PetrpkuWeb.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

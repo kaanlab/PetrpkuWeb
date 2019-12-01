@@ -40,7 +40,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<List<Note>> GetAll()
         {
             return await _db.Notes
-                .Include(a => a.Author)
+                .Include(a => a.AppUser)
                 .Include(ct => ct.CssType)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
@@ -50,7 +50,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<Note> GetOne(int noteId)
         {
             return await _db.Notes
-                .Include(a => a.Author)
+                .Include(a => a.AppUser)
                 .Include(ct => ct.CssType)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(n => n.NoteId == noteId);

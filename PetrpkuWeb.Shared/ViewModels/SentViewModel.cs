@@ -10,6 +10,5 @@ namespace PetrpkuWeb.Shared.ViewModels
         public DateTime Date { get; set; }
         public bool IsSent { get; set; }
         public AppUserViewModel AppUserViewModel { get; set; }
-        public MilRequestViewModel MilRequestViewModel { get; set; }
     }
 }

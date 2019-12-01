@@ -25,7 +25,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<Duty> DutyToday()
         {
             return await _db.Duties
-                .Include(u => u.AssignedTo)
+                .Include(u => u.AppUser)
                 .ThenInclude(b => b.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(d => d.DayOfDuty.DayOfYear == DateTime.Now.DayOfYear);
@@ -35,9 +35,9 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.Duties
                .Where(d => (d.DayOfDuty.Month == selectedMonth && d.DayOfDuty.Year == selectedYear))
-               .Include(u => u.AssignedTo)
+               .Include(u => u.AppUser)
                    .ThenInclude(b => b.Department)
-               .Include(u => u.AssignedTo)
+               .Include(u => u.AppUser)
                .OrderBy(d => d.DayOfDuty)
                .AsNoTracking()
                .ToListAsync();
@@ -133,10 +133,10 @@ namespace PetrpkuWeb.Server.Services
                     if (listOfDuty.Find(d => d.DayOfDuty.Day == day.Day) != null)
                     {
                         var duty = listOfDuty.Find(d => d.DayOfDuty.Day == day.Day);
-                        tc2 = new TableCell(new Paragraph(new Run(new Text($"{duty.AssignedTo.LastName} {duty.AssignedTo.FirstName} {duty.AssignedTo.MidleName}"))));
-                        tc3 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.Department.Name))));
-                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.WorkingPosition))));
-                        tc5 = new TableCell(new Paragraph(new Run(new Text(duty.AssignedTo.MobPhone))));
+                        tc2 = new TableCell(new Paragraph(new Run(new Text($"{duty.AppUser.LastName} {duty.AppUser.FirstName} {duty.AppUser.MidleName}"))));
+                        tc3 = new TableCell(new Paragraph(new Run(new Text(duty.AppUser.Department.Name))));
+                        tc4 = new TableCell(new Paragraph(new Run(new Text(duty.AppUser.WorkingPosition))));
+                        tc5 = new TableCell(new Paragraph(new Run(new Text(duty.AppUser.MobPhone))));
                     }
                     else
                     {

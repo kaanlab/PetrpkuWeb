@@ -30,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var docSections = await _docSectionTypeService.GetAll();
 
-            return Ok(_mapper.Map<List<DocSectionViewModel>>(docSections));
+            return Ok(_mapper.Map<IEnumerable<DocSectionViewModel>>(docSections));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
@@ -62,10 +62,10 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.DocSection.UPDATE + "/{docSectionId:int}")]
-        public async Task<ActionResult> UpdateDocSectionAsync(int docSectionId, DocSectionViewModel docSectionViewModel)
+        [HttpPut(ApiRoutes.DocSection.UPDATE + "/{docSectionViewModelId:int}")]
+        public async Task<ActionResult> UpdateDocSectionAsync(int docSectionViewModelId, DocSectionViewModel docSectionViewModel)
         {
-            if (docSectionId == docSectionViewModel.DocumentId)
+            if (docSectionViewModelId == docSectionViewModel.DocSectionId)
             {
                 var docSection = _mapper.Map<DocSection>(docSectionViewModel);
                 var updated = await _docSectionTypeService.Update(docSection);

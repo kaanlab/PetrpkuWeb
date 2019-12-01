@@ -31,6 +31,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var duty = await _dutyService.DutyToday();
 
+            if (duty is null)
+                return NotFound();
+
             return Ok(_mapper.Map<DutyViewModel>(duty));
         }
 
@@ -40,7 +43,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var dutys = await _dutyService.DutyMonth(selectedMonth, selectedYear);
 
-            return Ok(_mapper.Map<List<DutyViewModel>>(dutys));
+            return Ok(_mapper.Map<IEnumerable<DutyViewModel>>(dutys));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]

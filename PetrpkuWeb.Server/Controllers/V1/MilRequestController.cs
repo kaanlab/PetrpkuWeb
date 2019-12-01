@@ -31,7 +31,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var milRequests = await _milRequestService.GetAll();
 
-            return Ok(_mapper.Map<List<MilRequestViewModel>>(milRequests));
+            return Ok(_mapper.Map<IEnumerable<MilRequestViewModel>>(milRequests));
         }
                
         [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]

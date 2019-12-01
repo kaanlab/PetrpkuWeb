@@ -40,7 +40,7 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.Posts
                 .Include(a => a.Attachments)
-                .Include(a => a.Author)
+                .Include(a => a.AppUser)
                 .Include(d => d.Department)
                 .OrderByDescending(d => d.PublishDate)
                 .AsNoTracking()
@@ -51,7 +51,7 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.Posts
                  .Include(a => a.Attachments)
-                 .Include(a => a.Author)
+                 .Include(a => a.AppUser)
                  .Include(d => d.Department)
                  .AsNoTracking()
                  .SingleOrDefaultAsync(p => p.PostId == postId);
@@ -61,7 +61,7 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.Posts
                 .Include(a => a.Attachments)
-                .Include(a => a.Author)
+                .Include(a => a.AppUser)
                 .Include(d => d.Department)
                     .Where(d => d.Department.DepartmentId == departmentId)
                 .OrderByDescending(d => d.PublishDate)

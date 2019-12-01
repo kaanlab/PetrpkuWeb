@@ -49,7 +49,8 @@ namespace PetrpkuWeb.Server.Services
 
         public async Task<bool> Update(Department department)
         {
-            _db.Attach(department).State = EntityState.Modified;
+            //_db.Attach(department).State = EntityState.Modified;
+            _db.Update(department);
             var updated = await _db.SaveChangesAsync();
             return updated > 0;
         }

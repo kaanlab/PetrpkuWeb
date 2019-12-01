@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var cssType = await _cssTypeService.GetAll();
 
-            return Ok(_mapper.Map<CssTypeViewModel>(cssType));
+            return Ok(_mapper.Map<IEnumerable<CssTypeViewModel>>(cssType));
         }
 
         [AllowAnonymous]

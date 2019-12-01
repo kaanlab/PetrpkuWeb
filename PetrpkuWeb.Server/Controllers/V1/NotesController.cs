@@ -35,7 +35,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var notes = await _noteTypeService.GetAll();
 
-            return Ok(_mapper.Map<List<NoteViewModel>>(notes));
+            return Ok(_mapper.Map<IEnumerable<NoteViewModel>>(notes));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]

@@ -1,7 +1,7 @@
 @inject HttpClient HttpClient
 
 
-<ListTemplate Loader="@LoadArticles">
+<ListTemplate Loader="@LoadNotes">
     <LoadingContent>
         <div class="spinner-border text-primary text-center" role="status">
             <span class="sr-only">Loading...</span>
@@ -15,19 +15,17 @@
         </div>
     </EmptyContent>
     <ItemContent Context="item">
-        <div @key="item" class="card border-@item.CssType.Value mb-2">
-            <div class="card-body text-@item.CssType.Value">
+        <div @key="item" class="card border-@item.CssTypeViewModel.Value mb-2">
+            <div class="card-body text-@item.CssTypeViewModel.Value">
                 <h5 class="card-title">@item.Title</h5>
-                <span class="card-text">
-                    <MarkdownView Content="@item.Content.Truncate(200)" />
-                </span>
+                <span class="card-text">@item.Content</span>
             </div>
             <div class="card-footer">
                 <div class="row">
                     <div class="media col-8">
-                        <img src="@item.Author.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
+                        <img src="@item.AppUserViewModel.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
                         <div class="media-body">
-                            <p class="mb-0">@item.Author.FirstName @item.Author.LastName</p>
+                            <p class="mb-0">@item.AppUserViewModel.FirstName @item.AppUserViewModel.LastName</p>
                             <p class="card-text">
                                 <small class="text-muted">Опубликовано: @item.PublishDate</small>
                                 @if (item.UpdateDate.HasValue)
@@ -36,16 +34,10 @@
                                 }
                             </p>
                         </div>
-                    </div>
-                    @if (item.Attachments.Any())
-                    {
-                        <div class="col-4">
-                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.Attachments.Count()</span></small>
-                        </div>
-                    }
+                    </div>                  
                 </div>
             </div>
-            <a class="stretched-link" href="/article/show/@item.ArticleId"></a>
+            <a class="stretched-link" href="/article/show/@item.NoteId"></a>
         </div>
     </ItemContent>
 </ListTemplate>
@@ -53,9 +45,9 @@
 
 @code {
 
-    async Task<List<Article>> LoadArticles()
+    async Task<List<NoteViewModel>> LoadNotes()
     {
-        return await HttpClient.GetJsonAsync<List<Article>>("api/articles/all");
+        return await HttpClient.GetJsonAsync<List<NoteViewModel>>(ApiRoutes.Note.ALL);
     }
 
 }

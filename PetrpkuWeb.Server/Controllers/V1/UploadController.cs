@@ -204,7 +204,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
                     attachments.Add(attachment);
                 }
 
-                return Ok(_mapper.Map<List<AttachmentViewModel>>(attachments));
+                return Ok(_mapper.Map<IEnumerable<AttachmentViewModel>>(attachments));
             }
             catch (NotSupportedException ex)
             {

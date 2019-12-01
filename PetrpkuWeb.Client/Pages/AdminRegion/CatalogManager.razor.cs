@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System;
+using PetrpkuWeb.Shared.ViewModels.CatalogRegion;
 
-
-namespace PetrpkuWeb.Client.Pages.Admin
+namespace PetrpkuWeb.Client.Pages.AdminRegion
 {
     public partial class CatalogManager
     {
@@ -18,13 +19,13 @@ namespace PetrpkuWeb.Client.Pages.Admin
         [Inject]
         public HttpClient HttpClient { get; set; }
 
-        DepartmentViewModel NewDepartment { get; set; } = new DepartmentViewModel();
+        CatalogDepartmentView NewDepartment { get; set; } = new CatalogDepartmentView();
         BuildingViewModel NewBuilding { get; set; } = new BuildingViewModel();
         SiteSectionViewModel NewSiteSection { get; set; } = new SiteSectionViewModel();
         SiteSubSectionViewModel NewSiteSubSection { get; set; } = new SiteSubSectionViewModel();
         CssTypeViewModel NewCssType { get; set; } = new CssTypeViewModel();
  
-        private List<DepartmentViewModel> departments;
+        private List<CatalogDepartmentView> departments;
         private List<BuildingViewModel> buildings;
         private List<SiteSectionViewModel> siteSections;
         //private List<SiteSubSectionViewModel> siteSubSections;
@@ -34,7 +35,7 @@ namespace PetrpkuWeb.Client.Pages.Admin
 
         string ListCssClass;
 
-        DepartmentViewModel currentDepartment;
+        CatalogDepartmentView currentDepartment;
         private string _departmentName;
         public string DepatrmentName
         {
@@ -97,9 +98,9 @@ namespace PetrpkuWeb.Client.Pages.Admin
         private bool editCssTypeDialogIsOpen;
 
 
-        protected async override Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
         {
-            departments = await HttpClient.GetJsonAsync<List<DepartmentViewModel>>(ApiRoutes.Departments.ALL);
+            departments = await HttpClient.GetJsonAsync<List<CatalogDepartmentView>>(ApiRoutes.Departments.ALL);
             buildings = await HttpClient.GetJsonAsync<List<BuildingViewModel>>(ApiRoutes.Buildings.ALL);
             siteSections = await HttpClient.GetJsonAsync<List<SiteSectionViewModel>>(ApiRoutes.Sections.ALL_INCLUDE_SUBSECTIONS);
             cssTypes = await HttpClient.GetJsonAsync<List<CssTypeViewModel>>(ApiRoutes.CssType.ALL);
@@ -109,13 +110,13 @@ namespace PetrpkuWeb.Client.Pages.Admin
         async Task AddNewDepartment()
         {
             newDepartmentDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<DepartmentViewModel>(ApiRoutes.Departments.CREATE, NewDepartment);
+            var response = await HttpClient.PostJsonAsync<CatalogDepartmentView>(ApiRoutes.Departments.CREATE, NewDepartment);
             Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
             departments.Add(response);
-            NewDepartment = new DepartmentViewModel();
+            NewDepartment = new CatalogDepartmentView();
         }
 
-        void OpenEditDepartmentDialog(DepartmentViewModel department)
+        void OpenEditDepartmentDialog(CatalogDepartmentView department)
         {
             editDepartmentDialogIsOpen = true;
             currentDepartment = department;

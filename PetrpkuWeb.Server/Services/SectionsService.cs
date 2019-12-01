@@ -24,7 +24,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<List<SiteSection>> GetSiteSectionsIncludeSubSections()
         {
             return await _db.SiteSections
-                .Include(ss => ss.SiteSubsections)
+                .Include(ss => ss.SiteSubSections)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -94,7 +94,7 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.SiteSubsections
                  .AsNoTracking()
-                 .SingleOrDefaultAsync(u => u.SiteSubsectionId == siteSubSectionId);
+                 .SingleOrDefaultAsync(u => u.SiteSubSectionId == siteSubSectionId);
         }
 
         public async Task<bool> UpdateSubSection(SiteSubsection siteSubSection)
@@ -107,7 +107,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<bool> DeleteSubSection(int siteSubSectionId)
         {
             var siteSubSection = await _db.SiteSubsections
-                    .SingleOrDefaultAsync(s => s.SiteSubsectionId == siteSubSectionId);
+                    .SingleOrDefaultAsync(s => s.SiteSubSectionId == siteSubSectionId);
 
             if (siteSubSection is null)
                 return false;

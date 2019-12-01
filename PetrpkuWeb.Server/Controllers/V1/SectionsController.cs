@@ -36,7 +36,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var siteSections = await _sectionsService.GetSiteSections();
 
-            return Ok(_mapper.Map<List<SiteSectionViewModel>>(siteSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(siteSections));
         }
 
         [AllowAnonymous]
@@ -45,7 +45,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var siteSections = await _sectionsService.GetSiteSectionsIncludeSubSections();
 
-            return Ok(_mapper.Map<List<SiteSectionViewModel>>(siteSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(siteSections));
         }
 
         [AllowAnonymous]
@@ -113,7 +113,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var subSections = await _sectionsService.GetSubSectionsIncludeSections();
 
-            return Ok(_mapper.Map<SiteSubSectionViewModel>(subSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSubSectionViewModel>>(subSections));
         }
 
         [AllowAnonymous]
@@ -122,7 +122,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var subSections = await _sectionsService.GetSubsectionsForSection(siteSectionId);
 
-            return Ok(_mapper.Map<SiteSectionViewModel>(subSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(subSections));
         }
 
         [AllowAnonymous]

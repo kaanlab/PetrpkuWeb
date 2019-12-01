@@ -130,9 +130,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.Account.ALL_IDENTITIES)]
         public async Task<ActionResult> GetAllAuthUsers()
         {
-            var identityUsers = await _appUsersService.GetAllOrderById();
+            var appUsers = await _appUsersService.GetAllOrderById();
 
-            return Ok(_mapper.Map<AppUserViewModel>(identityUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserViewModel>>(appUsers));
         }
 
 

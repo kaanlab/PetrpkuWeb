@@ -60,12 +60,12 @@ namespace PetrpkuWeb.Server.Services
         public async Task UpdateEmail(AppUser appUser, IAuthUser authUser)
         {
             // update email if changed
-            
-                appUser.Email = authUser.Email;
-                appUser.NormalizedEmail = authUser.Email.ToUpperInvariant();
 
-                await _userManager.UpdateAsync(appUser);
- 
+            appUser.Email = authUser.Email;
+            appUser.NormalizedEmail = authUser.Email.ToUpperInvariant();
+
+            await _userManager.UpdateAsync(appUser);
+
         }
 
 
@@ -84,8 +84,8 @@ namespace PetrpkuWeb.Server.Services
         {
             return await _db.Users
                 .Include(b => b.Building)
-                .Include(d => d.Department)                
-                .Where(u => u.IsActive && u.IsDuty )
+                .Include(d => d.Department)
+                .Where(u => u.IsActive && u.IsDuty)
                 .OrderBy(u => u.DisplayName)
                 .AsNoTracking()
                 .ToListAsync();
@@ -125,11 +125,30 @@ namespace PetrpkuWeb.Server.Services
                 .ToListAsync();
         }
 
+        public async Task<AppUser> FindById(string appUserId)
+        {
+            return await _userManager.FindByIdAsync(appUserId);
+        }
+
         public async Task<bool> Update(AppUser appUser)
         {
-            //_db.AppUsers.Update(appUser);
             var updated = await _userManager.UpdateAsync(appUser);
+
             return updated.Succeeded;
+        }
+
+        public async Task<bool> AddToRole(AppUser appUser, string appRole)
+        {
+            var added = await _userManager.AddToRoleAsync(appUser, appRole);
+
+            return added.Succeeded;
+        }
+
+        public async Task<bool> RemoveFromRole(AppUser appUser, string appRole)
+        {
+            var removed = await _userManager.RemoveFromRoleAsync(appUser, appRole);
+
+            return removed.Succeeded;
         }
     }
 }

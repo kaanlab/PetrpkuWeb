@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var buildings = await _buildingTypeService.GetAll();
 
-            return Ok(_mapper.Map<BuildingViewModel>(buildings));
+            return Ok(_mapper.Map<IEnumerable<BuildingViewModel>>(buildings));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]

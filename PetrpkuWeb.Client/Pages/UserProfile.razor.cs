@@ -78,7 +78,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task OkClick()
         {
             dialogIsOpen = false;
-            await HttpClient.PutJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.UPDATE}/{appUser.Id}", appUser);
+            await HttpClient.PutJsonAsync<ProfileViewModel>($"{ApiRoutes.Users.UPDATE}/{appUser.Id}", appUser);
         }
 
         async Task UploadFile()

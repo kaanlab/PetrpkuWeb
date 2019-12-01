@@ -12,6 +12,5 @@ namespace PetrpkuWeb.Shared.ViewModels
 
         // relationship
         public AppUserViewModel AppUserViewModel { get; set; }
-        public MilRequestViewModel MilRequestViewModel { get; set; }
     }
 }

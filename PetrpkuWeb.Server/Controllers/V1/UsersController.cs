@@ -21,7 +21,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         private readonly IMapper _mapper;
 
         public UsersController(
-            IAppUsersService appUsersService, 
+            IAppUsersService appUsersService,
             IMapper mapper)
         {
             _appUsersService = appUsersService;
@@ -41,7 +41,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         [HttpGet(ApiRoutes.Users.ALL_ACTIVE_DUTIES)]
         public async Task<ActionResult> GetAllActiveDuties()
         {
-            var appUsers =  await _appUsersService.GetAllActiveDutiesOrderByDispalyName();
+            var appUsers = await _appUsersService.GetAllActiveDutiesOrderByDispalyName();
 
             return Ok(_mapper.Map<List<AppUserViewModel>>(appUsers));
         }
@@ -52,7 +52,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUsers = await _appUsersService.GetAllOrderByDispalyName();
 
-            return Ok(_mapper.Map<List<AppUserViewModel>>(appUsers));
+            return Ok(_mapper.Map<List<UserManagerViewModel>>(appUsers));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
@@ -65,7 +65,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Users.BIRTHDAYS)]
+        [HttpGet(ApiRoutes.Users.BIRTHDAYS_WEEK)]
         public async Task<ActionResult> GetBirthdays()
         {
             var firstDayOfWeek = DateTime.Now.FirstDayOfWeek();
@@ -79,17 +79,44 @@ namespace PetrpkuWeb.Server.Controllers.V1
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.Users.UPDATE + "/{appUserId:int}")]
-        public async Task<ActionResult> UpdateUserAsync(int appUserId, AppUserViewModel appUser)
+        [HttpPut(ApiRoutes.Users.UPDATE + "/{profileViewModelId}")]
+        public async Task<ActionResult> UpdateUserAsync(string profileViewModelId, ProfileViewModel profileViewModel)
         {
-            if (appUserId == appUser.AppUserId)
+            if (profileViewModelId == profileViewModel.Id)
             {
-                var userToUpdate = _mapper.Map<AppUser>(appUser);
-                var updated = await _appUsersService.Update(userToUpdate);
-                if(updated)
+                var appUser = await _appUsersService.FindById(profileViewModelId);
+                var updatedUser = _mapper.Map(profileViewModel, appUser);
+                var updated = await _appUsersService.Update(updatedUser);
+                if (updated)
                 {
-                    return Ok();
+                    return Ok(_mapper.Map<ProfileViewModel>(appUser));
                 }
+            }
+            return BadRequest();
+        }
+
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpPost(ApiRoutes.Users.ADD_TO_ROLE)]
+        public async Task<ActionResult> AddToRole(UserManagerViewModel appUserViewModel, string appRole)
+        {
+            var appUser = await _appUsersService.FindById(appUserViewModel.Id);
+            var addedToRole = await _appUsersService.AddToRole(appUser, appRole);
+            if (addedToRole)
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpPost(ApiRoutes.Users.REMOVE_FROM_ROLE)]
+        public async Task<ActionResult> RemoveFromRole(UserManagerViewModel appUserViewModel, string appRole)
+        {
+            var appUser = await _appUsersService.FindById(appUserViewModel.Id);
+            var removedFromRole = await _appUsersService.RemoveFromRole(appUser, appRole);
+            if (removedFromRole)
+            {
+                return Ok();
             }
             return BadRequest();
         }

@@ -1,6 +1,6 @@
 @page "/note/create"
 
-@attribute [Authorize(Roles = AuthRoles.ANY)]
+@attribute [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
 
 @using Newtonsoft.Json
 
@@ -85,7 +85,8 @@
     {
         NewNote.AppUserViewModel = appUser;
         var response = await HttpClient.PostJsonAsync<NoteViewModel>(ApiRoutes.Note.CREATE, NewNote);
-        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
         NavigationManager.NavigateTo("/");
+
+        Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
     }
 }

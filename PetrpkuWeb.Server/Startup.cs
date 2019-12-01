@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using PetrpkuWeb.NovellDirectoryLdap;
 using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Server.Models;
+using PetrpkuWeb.Server.Services;
 
 namespace PetrpkuWeb.Server
 {
@@ -34,20 +35,32 @@ namespace PetrpkuWeb.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IRssService, RssService>();
+            services.AddScoped<IAppUsersService, AppUsersService>();
+            services.AddScoped<ISectionsService, SectionsServices>();
+            services.AddScoped<IDutyService, DutyService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<ITypeService<Note>, NoteService>();
+            services.AddScoped<ITypeService<Building>, BuildingsService>();
+            services.AddScoped<ITypeService<Department>, DepartmentsService>();
+            services.AddScoped<ITypeService<CssType>, CssTypeService>();
+
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
-            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
-            services.AddScoped<ILdapAuthenticationService, LdapAuthenticationService>();
-
 #if DEBUG
+            services.AddScoped<ILdapAuthenticationService, FakeAuthenticationService>();
+
             services.AddDbContext<AppDbContext>(
                options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_debug")));
 #else
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MsSql_release")));
+
+            services.Configure<LdapConfig>(Configuration.GetSection("ldap"));
+            services.AddScoped<ILdapAuthenticationService, LdapAuthenticationService>();
 #endif
             services.AddDefaultIdentity<AppUser>()
                 .AddRoles<IdentityRole>()
@@ -79,7 +92,7 @@ namespace PetrpkuWeb.Server
             //services.AddCors();
             services.AddHttpClient();
             services.AddMemoryCache();
-            services.AddAutoMapper(typeof(Data.AppMappingProfile));
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

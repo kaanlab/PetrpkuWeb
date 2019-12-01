@@ -32,6 +32,10 @@ namespace PetrpkuWeb.Shared.Contracts.V1
             public const string BIRTHDAYS_WEEK = "api/v1/users/birthdays/week";
 
             public const string UPDATE = "api/v1/users/update";
+
+            public const string ADD_TO_ROLE = "api/v1/users/addtorole";
+
+            public const string REMOVE_FROM_ROLE = "api/v1/users/removefromrole";
         }
 
         public static class Rss
@@ -187,6 +191,17 @@ namespace PetrpkuWeb.Shared.Contracts.V1
             public const string UPDATE = "api/v1/docsections/update";
 
             public const string DELETE = "api/v1/docsections/delete";
+        }
+
+        public static class Roles
+        {
+            public const string ALL = "api/v1/roles/all";
+
+            public const string SHOW = "api/v1/roles/show";
+
+            //public const string CREATE = "api/v1/roles/create";
+
+            //public const string UPDATE = "api/v1/roles/update";
         }
     }
 }
