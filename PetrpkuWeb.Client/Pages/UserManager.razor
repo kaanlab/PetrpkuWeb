@@ -58,8 +58,8 @@
                             <td>@user.MidleName</td>
                             <td>@user.Birthday.ToShortDateString()</td>
                             <td>@user.WorkingPosition</td>
-                            <td>@user.DepartmentViewModel?.Name</td>
-                            <td>@user.BuildingViewModel?.Name</td>
+                            <td>@user.DepartmentView?.Name</td>
+                            <td>@user.BuildingView?.Name</td>
                             <td>@user.Room</td>
                             <td>@user.IntPhone</td>
                             <td>@user.ExtPhone</td>
@@ -134,8 +134,8 @@
                         <td>@user.MidleName</td>
                         <td>@user.Birthday.ToShortDateString()</td>
                         <td>@user.WorkingPosition</td>
-                        <td>@user.DepartmentViewModel?.Name</td>
-                        <td>@user.BuildingViewModel?.Name</td>
+                        <td>@user.DepartmentView?.Name</td>
+                        <td>@user.BuildingView?.Name</td>
                         <td>@user.Room</td>
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
@@ -161,7 +161,7 @@
                 <InputDate @bind-Value="@editAppUser.Birthday"></InputDate>
                 <hr />
                 <label>Подразделение</label>
-                <select class="custom-select" @bind="@editAppUser.DepartmentViewModel.DepartmentId">
+                <select class="custom-select" @bind="@editAppUser.DepartmentView.DepartmentId">
                     @if (departments is null)
                     {
                         <option selected>(loading...)</option>
@@ -179,7 +179,7 @@
                 @if (authUser.IsInRole(AuthRoles.ADMIN))
                 {
                     <label>Корпус</label>
-                    <select class="custom-select" @bind="@editAppUser.BuildingViewModel.BuildingId">
+                    <select class="custom-select" @bind="@editAppUser.BuildingView.BuildingId">
                         @if (buildings is null)
                         {
                             <option selected>(loading...)</option>

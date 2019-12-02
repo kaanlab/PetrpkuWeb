@@ -20,7 +20,7 @@
     }
     else
     {
-        @if (authUserId == milRequest.AppUserViewModel.Id || authUser.IsInRole(AuthRoles.ADMIN))
+        @if (authUserId == milRequest.AppUserView.Id || authUser.IsInRole(AuthRoles.ADMIN))
         {
             <h2 class="col-12 mb-4 text-center">Редактировать заявку на официальный сайт</h2>
 
@@ -38,7 +38,7 @@
                     {
                         <div class="row col-12 mb-2">
                             <div class="col-8">
-                                <input type="text" class="form-control" placeholder="@milRequest.SiteSectionViewModel.Name" readonly>
+                                <input type="text" class="form-control" placeholder="@milRequest.SiteSectionView.Name" readonly>
                             </div>
                             <div class="col-4">
                                 <select class="custom-select" @onchange="@SectionClicked">
@@ -52,7 +52,7 @@
                         </div>
                         <div class="row col-12 mb-2">
                             <div class="col-8">
-                                <input type="text" class="form-control" placeholder="@milRequest.SiteSubSectionViewModel.Title" readonly>
+                                <input type="text" class="form-control" placeholder="@milRequest.SiteSubSectionView.Title" readonly>
                             </div>
                             <div class="col-4">
                                 <select class="custom-select" @onchange="@SubsectionClicked">
@@ -92,11 +92,11 @@
                     </div>
 
                     <table class="table">
-                        @foreach (var attachment in milRequest.AttachmentsViewModel)
+                        @foreach (var attachment in milRequest.AttachmentsView)
                         {
-                            var index = milRequest.AttachmentsViewModel.IndexOf(attachment);
+                            var index = milRequest.AttachmentsView.IndexOf(attachment);
                             <tr @key="attachment">
-                                <td>@(milRequest.AttachmentsViewModel.IndexOf(attachment) + 1)</td>
+                                <td>@(milRequest.AttachmentsView.IndexOf(attachment) + 1)</td>
                                 @if (attachment.IsImage == true)
                                 {
                                     <td><a class="spotlight" href="@attachment.Path"><img src="@CssExtension.Img(attachment.Extension)" /></a></td>
@@ -183,16 +183,16 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private AttachmentViewModel CurrentAttachment { get; set; } = new AttachmentViewModel();
+    private AttachmentView CurrentAttachment { get; set; } = new AttachmentView();
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
-    List<SiteSectionViewModel> siteSections;
-    List<SiteSubSectionViewModel> siteSubsections;
+    List<SiteSectionView> siteSections;
+    List<SiteSubSectionView> siteSubsections;
 
     string siteSectionId;
     string siteSubSectionId;
 
-    MilRequestViewModel milRequest;
+    MilRequestView milRequest;
 
     ClaimsPrincipal authUser;
     string authUserId;
@@ -208,12 +208,12 @@
         authUser = (await authenticationStateTask).User;
         authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
 
-        siteSections = await HttpClient.GetJsonAsync<List<SiteSectionViewModel>>(ApiRoutes.Sections.ALL);
+        siteSections = await HttpClient.GetJsonAsync<List<SiteSectionView>>(ApiRoutes.Sections.ALL);
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        milRequest = await HttpClient.GetJsonAsync<MilRequestViewModel>($"{ApiRoutes.MilRequest.SHOW}/{MilRequestId}");
+        milRequest = await HttpClient.GetJsonAsync<MilRequestView>($"{ApiRoutes.MilRequest.SHOW}/{MilRequestId}");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -223,8 +223,8 @@
 
     async Task UpdateMessage()
     {
-        milRequest.AppUserViewModel.Id = authUserId;
-        await HttpClient.PutJsonAsync<MilRequestViewModel>($"{ApiRoutes.MilRequest.UPDATE}/{milRequest.MilRequestId}", milRequest);
+        milRequest.AppUserView.Id = authUserId;
+        await HttpClient.PutJsonAsync<MilRequestView>($"{ApiRoutes.MilRequest.UPDATE}/{milRequest.MilRequestId}", milRequest);
         NavigationManager.NavigateTo("/dashboard");
 
         Toaster.Add($"Заявка успешно обновлена", MatToastType.Success, "Успех!");
@@ -240,7 +240,7 @@
 
     void OpenDialog(int attachmentId)
     {
-        CurrentAttachment = milRequest.AttachmentsViewModel.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
+        CurrentAttachment = milRequest.AttachmentsView.Where(a => a.AttachmentId == attachmentId).FirstOrDefault();
 
         dialogIsOpen = true;
     }
@@ -276,14 +276,14 @@
 
         var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.FILES, content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        milRequest.AttachmentsViewModel.AddRange(JsonConvert.DeserializeObject<List<AttachmentViewModel>>(content));
+        milRequest.AttachmentsView.AddRange(JsonConvert.DeserializeObject<List<AttachmentView>>(content));
 
         await ClearFileInfo();
     }
 
     async Task UpdateAttachmentInfo()
     {
-        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentViewModel>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentView>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         dialogIsOpen = false;
 
         Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
@@ -292,7 +292,7 @@
     async Task DeleteAttachment()
     {
         await HttpClient.DeleteAsync($"{ApiRoutes.Upload.DELETE}/{CurrentAttachment.AttachmentId}");
-        milRequest.AttachmentsViewModel.Remove(CurrentAttachment);
+        milRequest.AttachmentsView.Remove(CurrentAttachment);
         dialogIsOpen = false;
 
         Toaster.Add($"Файл {CurrentAttachment.Name} удален", MatToastType.Warning, "Внимание!");
@@ -302,15 +302,15 @@
     {
         //siteSubsections.Clear();
         siteSectionId = sectionEvent.Value.ToString();
-        milRequest.SiteSectionViewModel = siteSections.Find(s => s.SiteSectionId == int.Parse(siteSectionId));
-        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubSectionViewModel>>($"{ApiRoutes.Sections.SUBSECTIONS}/{siteSectionId}");
+        milRequest.SiteSectionView = siteSections.Find(s => s.SiteSectionId == int.Parse(siteSectionId));
+        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubSectionView>>($"{ApiRoutes.Sections.SUBSECTIONS}/{siteSectionId}");
         this.StateHasChanged();
     }
 
     void SubsectionClicked(ChangeEventArgs subSectionEvent)
     {
         siteSubSectionId = subSectionEvent.Value.ToString();
-        milRequest.SiteSubSectionViewModel = siteSubsections.Find(ss => ss.SiteSubsectionId == int.Parse(siteSubSectionId));
+        milRequest.SiteSubSectionView = siteSubsections.Find(ss => ss.SiteSubsectionId == int.Parse(siteSubSectionId));
         this.StateHasChanged();
     }
 }

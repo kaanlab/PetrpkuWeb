@@ -8,6 +8,7 @@ namespace PetrpkuWeb.Server.Services
 {
     public interface IDutyService
     {
+        Task<Duty> GetOne(int dutyId);
         Task<Duty> DutyToday();
         Task<List<Duty>> DutyMonth(int selectedMonth, int selectedYear);
         Task<byte[]> GetFileAsync(int selectedMonth, int selectedYear);

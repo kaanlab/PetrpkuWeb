@@ -26,13 +26,13 @@
             </EmptyContent>
             <ItemContent Context="item">
                 <tr @key="item">
-                    <td>@item.AppUserViewModel.DisplayName</td>
-                    <td>@item.SiteSectionViewModel.Name</td>
-                    <td>@item.SiteSubSectionViewModel.Title</td>
+                    <td>@item.AppUserView.DisplayName</td>
+                    <td>@item.SiteSectionView.Name</td>
+                    <td>@item.SiteSubSectionView.Title</td>
                     <td>@item.Title.Truncate(50)</td>
                     <td>@item.CreateDate.ToShortDateString()</td>
                     <td>
-                        @if (item.ApprovedViewModel.IsApproved)
+                        @if (item.ApprovedView.IsApproved)
                         {
                             <span class="badge badge-success">Согласован</span>
                         }
@@ -40,7 +40,7 @@
                         {
                             <span class="badge badge-danger">Согласовать</span>
                         }
-                        @if (item.CheckedViewModel.IsChecked)
+                        @if (item.CheckedView.IsChecked)
                         {
                             <span class="badge badge-success">Проверен</span>
                         }
@@ -48,7 +48,7 @@
                         {
                             <span class="badge badge-danger">Проверить</span>
                         }
-                        @if (item.SentViewModel.IsSent)
+                        @if (item.SentView.IsSent)
                         {
                             <span class="badge badge-success">Отправлен</span>
                         }
@@ -56,7 +56,7 @@
                         {
                             <span class="badge badge-danger">Отпраить</span>
                         }
-                        @if (item.PublishedViewModel.IsPublished)
+                        @if (item.PublishedView.IsPublished)
                         {
                             <span class="badge badge-success">Опубликован</span>
                         }
@@ -78,8 +78,8 @@
 
 @code {
 
-    async Task<List<MilRequestViewModel>> LoadMilRequests()
+    async Task<List<MilRequestView>> LoadMilRequests()
     {
-        return await HttpClient.GetJsonAsync<List<MilRequestViewModel>>(ApiRoutes.MilRequest.ALL);
+        return await HttpClient.GetJsonAsync<List<MilRequestView>>(ApiRoutes.MilRequest.ALL);
     }
 }

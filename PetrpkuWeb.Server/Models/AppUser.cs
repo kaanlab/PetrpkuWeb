@@ -22,7 +22,7 @@ namespace PetrpkuWeb.Server.Models
         public bool LdapAuth { get; set; }
 
         // relationship
-        public IEnumerable<Duty> DaysOfDuty { get; set; }
+        public IEnumerable<Duty> Duties { get; set; }
         public IEnumerable<Note> Notes { get; set; }
         public IEnumerable<Post> Posts { get; set; }
         public IEnumerable<DocSection> DocSections { get; set; }

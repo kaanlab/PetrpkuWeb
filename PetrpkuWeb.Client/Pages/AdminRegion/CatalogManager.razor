@@ -110,9 +110,9 @@
                         @siteSection.Name
                         <MatButton Outlined="true" Icon="edit" OnClick="@(() => OpenEditSiteSectionDialog(siteSection))" Class="float-right" />
                     </li>
-                    @if (siteSection.SiteSubsectionsViewModel is { })
+                    @if (siteSection.SiteSubsectionsView is { })
                     {
-                        @foreach (var siteSubSection in siteSection.SiteSubsectionsViewModel)
+                        @foreach (var siteSubSection in siteSection.SiteSubsectionsView)
                         {
                             <li class="list-group-item" style="padding-left: 60px;">
                                 @siteSubSection.Title

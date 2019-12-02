@@ -37,10 +37,10 @@
                     {
                         <tr @key="dutyUser">
                             <th scope="row">@dutyUser.DayOfDuty.Day</th>
-                            <td>@dutyUser.AppUserViewModel.LastName @dutyUser.AppUserViewModel.FirstName @dutyUser.AppUserViewModel.MidleName</td>
-                            <td>@dutyUser.AppUserViewModel.DepartmentViewModel.Name</td>
-                            <td>@dutyUser.AppUserViewModel.WorkingPosition</td>
-                            <td>@dutyUser.AppUserViewModel.MobPhone</td>
+                            <td>@dutyUser.AppUserView.LastName @dutyUser.AppUserView.FirstName @dutyUser.AppUserView.MidleName</td>
+                            <td>@dutyUser.AppUserView.DepartmentView.Name</td>
+                            <td>@dutyUser.AppUserView.WorkingPosition</td>
+                            <td>@dutyUser.AppUserView.MobPhone</td>
                             <td><MatButton Outlined="true" Icon="delete_forever" OnClick="@(() => RemoveDutyUser(dutyUser))" /></td>
                         </tr>
                     }
@@ -63,12 +63,12 @@
             </div>
         </div>
         <div class="row">
-            <EditForm Model="@AppointDuty" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберите дату и назначте дежурного",MatToastType.Danger,"Ошибка!"))">
+            <EditForm Model="@DutyAppointment" OnValidSubmit="@AddDuty" OnInvalidSubmit="@(() => Toaster.Add("Выберите дату и назначте дежурного",MatToastType.Danger,"Ошибка!"))">
                 <div class="col-12">
                     <DataAnnotationsValidator />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дата" @bind-Value="AppointDuty.Day" Outlined="true">
+                    <MatSelect Label="Дата" @bind-Value="DutyAppointment.Day" Outlined="true">
                         @if (listOfDays is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
@@ -82,10 +82,10 @@
                             }
                         }
                     </MatSelect>
-                    <ValidationMessage For="() => AppointDuty.Day" />
+                    <ValidationMessage For="() => DutyAppointment.Day" />
                 </div>
                 <div class="col-12 mb-2">
-                    <MatSelect Label="Дежурный" @bind-Value="AppointDuty.User" Outlined="true">
+                    <MatSelect Label="Дежурный" @bind-Value="DutyAppointment.User" Outlined="true">
                         @if (users is null)
                         {
                             <MatOption Value="">(loading...)</MatOption>
@@ -99,7 +99,7 @@
                             }
                         }
                     </MatSelect>
-                    <ValidationMessage For="() => AppointDuty.User" />
+                    <ValidationMessage For="() => DutyAppointment.User" />
                 </div>
                 <div class="col-12 mb-2">
                     <MatButton Raised="true" Icon="add" Type="submit" Label="Добавить" />
@@ -114,11 +114,11 @@
 
     public DateTime? PikDate { get; set; } = DateTime.Now;
 
-    private List<DutyViewModel> ListOfDuty { get; set; } = new List<DutyViewModel>();
-    private AppointDutyViewModel AppointDuty { get; set; } = new AppointDutyViewModel();
+    private List<DutyAppUserView> ListOfDuty { get; set; } = new List<DutyAppUserView>();
+    private DutyAppointmentView DutyAppointment { get; set; } = new DutyAppointmentView();
 
     List<DateTime> listOfDays;
-    List<AppUserViewModel> users;
+    List<AppUserDepartmentBuildingView> users;
     DateTime title = DateTime.Now;
 
     bool isSortedAscending;
@@ -132,13 +132,13 @@
 
         await GetCalendarAsync(month, year);
 
-        users = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL_ACTIVE_DUTIES);
+        users = await HttpClient.GetJsonAsync<List<AppUserDepartmentBuildingView>>(ApiRoutes.Users.ALL_ACTIVE_DUTIES);
     }
 
     async Task GetCalendarAsync(int month, int year)
     {
         ListOfDuty = null;
-        ListOfDuty = await HttpClient.GetJsonAsync<List<DutyViewModel>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
+        ListOfDuty = await HttpClient.GetJsonAsync<List<DutyAppUserView>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
 
         listOfDays = Enumerable.Range(1, DateTime.DaysInMonth(year, month)).Select(day => new DateTime(year, month, day)).ToList();
 
@@ -146,7 +146,7 @@
         title = PikDate.Value;
     }
 
-    async Task RemoveDutyUser(DutyViewModel dutyUser)
+    async Task RemoveDutyUser(DutyAppUserView dutyUser)
     {
         if (dutyUser.DutyId > 0)
         {
@@ -157,7 +157,7 @@
             listOfDays.Add(dutyUser.DayOfDuty);
             listOfDays = listOfDays.OrderBy(d => d.Day).ToList();
 
-            Toaster.Add($"{deleteDutyUser.AppUserViewModel.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
+            Toaster.Add($"{deleteDutyUser.AppUserView.DisplayName} снят с дежурства на {deleteDutyUser.DayOfDuty.ToShortDateString()}", MatToastType.Danger, "Внимание!");
         }
     }
 
@@ -165,24 +165,24 @@
     {
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
-        var day = Int32.Parse(AppointDuty.Day);
-        var id = AppointDuty.User;
+        var day = Int32.Parse(DutyAppointment.Day);
+        var id = DutyAppointment.User;
         var date = new DateTime(year, month, day);
         var findUser = users.Where(u => u.Id == id).FirstOrDefault();
 
-        var duty = new DutyViewModel()
+        var duty = new DutyAppUserView()
         {
             DayOfDuty = date,
-            AppUserViewModel = findUser
+            AppUserView = findUser
         };
 
         ListOfDuty.Add(duty);
         listOfDays.Remove(duty.DayOfDuty);
 
-        var response = await HttpClient.PostJsonAsync<DutyViewModel>(ApiRoutes.Duty.CREATE, duty);
-        AppointDuty = new AppointDutyViewModel();
+        var response = await HttpClient.PostJsonAsync<DutyAppUserView>(ApiRoutes.Duty.CREATE, duty);
+        DutyAppointment = new DutyAppointmentView();
 
-        Toaster.Add($"{response.AppUserViewModel.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
+        Toaster.Add($"{response.AppUserView.DisplayName} назначен дежурным на {response.DayOfDuty.ToShortDateString()}", MatToastType.Success, "Успех!");
     }
 
     async Task DownloadFile(int month, int year)

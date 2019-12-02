@@ -4,11 +4,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -34,7 +33,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUsers = await _appUsersService.GetAllActiveOrderByDispalyName();
 
-            return Ok(_mapper.Map<List<AppUserViewModel>>(appUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserDepartmentBuildingView>>(appUsers));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
@@ -43,7 +42,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUsers = await _appUsersService.GetAllActiveDutiesOrderByDispalyName();
 
-            return Ok(_mapper.Map<List<AppUserViewModel>>(appUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserDepartmentBuildingView>>(appUsers));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
@@ -52,7 +51,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUsers = await _appUsersService.GetAllOrderByDispalyName();
 
-            return Ok(_mapper.Map<List<UserManagerViewModel>>(appUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserDepartmentBuildingView>>(appUsers));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
@@ -61,7 +60,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUser = await _appUsersService.GetById(appUserId);
 
-            return Ok(_mapper.Map<AppUserViewModel>(appUser));
+            return Ok(_mapper.Map<AppUserDepartmentBuildingView>(appUser));
         }
 
         [AllowAnonymous]
@@ -75,21 +74,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
             var appUsers = await _appUsersService.GetBirthdaysForOneWeek(firstDayOfWeek, lastDayOfWeek);
 
-            return Ok(_mapper.Map<List<AppUserViewModel>>(appUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserDepartmentBuildingView>>(appUsers));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.Users.UPDATE + "/{profileViewModelId}")]
-        public async Task<ActionResult> UpdateUserAsync(string profileViewModelId, ProfileViewModel profileViewModel)
+        [HttpPut(ApiRoutes.Users.UPDATE + "/{appUserViewId}")]
+        public async Task<ActionResult> UpdateUserAsync(string appUserViewId, AppUserDepartmentBuildingView appUserView)
         {
-            if (profileViewModelId == profileViewModel.Id)
+            if (appUserViewId == appUserView.Id)
             {
-                var appUser = await _appUsersService.FindById(profileViewModelId);
-                var updatedUser = _mapper.Map(profileViewModel, appUser);
+                var appUser = await _appUsersService.FindById(appUserViewId);
+                var updatedUser = _mapper.Map(appUserView, appUser);
                 var updated = await _appUsersService.Update(updatedUser);
                 if (updated)
                 {
-                    return Ok(_mapper.Map<ProfileViewModel>(appUser));
+                    return Ok(_mapper.Map<AppUserDepartmentBuildingView>(updatedUser));
                 }
             }
             return BadRequest();
@@ -97,9 +96,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpPost(ApiRoutes.Users.ADD_TO_ROLE)]
-        public async Task<ActionResult> AddToRole(UserManagerViewModel appUserViewModel, string appRole)
+        public async Task<ActionResult> AddToRole(AppUserDepartmentBuildingView appUserView, string appRole)
         {
-            var appUser = await _appUsersService.FindById(appUserViewModel.Id);
+            var appUser = await _appUsersService.FindById(appUserView.Id);
             var addedToRole = await _appUsersService.AddToRole(appUser, appRole);
             if (addedToRole)
             {
@@ -110,9 +109,9 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpPost(ApiRoutes.Users.REMOVE_FROM_ROLE)]
-        public async Task<ActionResult> RemoveFromRole(UserManagerViewModel appUserViewModel, string appRole)
+        public async Task<ActionResult> RemoveFromRole(AppUserDepartmentBuildingView appUserView, string appRole)
         {
-            var appUser = await _appUsersService.FindById(appUserViewModel.Id);
+            var appUser = await _appUsersService.FindById(appUserView.Id);
             var removedFromRole = await _appUsersService.RemoveFromRole(appUser, appRole);
             if (removedFromRole)
             {

@@ -32,7 +32,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var department = await _departmentTypeService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<CatalogDepartmentView>>(department));
+            return Ok(_mapper.Map<IEnumerable<DepartmentView>>(department));
         }
 
         [AllowAnonymous]
@@ -50,7 +50,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
         [HttpPost(ApiRoutes.Departments.CREATE)]
-        public async Task<ActionResult<Department>> CreateDepartmentAsync(CatalogDepartmentView catalogDepartmentView)
+        public async Task<ActionResult<Department>> CreateDepartmentAsync(DepartmentView catalogDepartmentView)
         {
             if (catalogDepartmentView is null)
                 return BadRequest();
@@ -60,14 +60,14 @@ namespace PetrpkuWeb.Server.Controllers.V1
             var created = await _departmentTypeService.Create(department);
 
             if(created)
-                return Ok(_mapper.Map<CatalogDepartmentView>(department));
+                return Ok(_mapper.Map<DepartmentView>(department));
 
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
         [HttpPut(ApiRoutes.Departments.UPDATE + "/{catalogDepartmentViewId:int}")]
-        public async Task<ActionResult> UpdateDepartmentAsync(int catalogDepartmentViewId, CatalogDepartmentView catalogDepartmentView)
+        public async Task<ActionResult> UpdateDepartmentAsync(int catalogDepartmentViewId, DepartmentView catalogDepartmentView)
         {
             if (catalogDepartmentViewId == catalogDepartmentView.DepartmentId)
             {
@@ -76,7 +76,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
                 var updated = await _departmentTypeService.Update(updatedDepartment);
 
                 if(updated)
-                    return Ok(_mapper.Map<CatalogDepartmentView>(department));
+                    return Ok(_mapper.Map<DepartmentView>(department));
             }
 
             return BadRequest();

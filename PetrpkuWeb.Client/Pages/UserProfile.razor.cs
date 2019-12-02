@@ -2,7 +2,7 @@ using Blazor.FileReader;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using PetrpkuWeb.Shared.Contracts.V1;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -27,7 +27,7 @@ namespace PetrpkuWeb.Client.Pages
         //private Attachment Avatar { get; set; } = new Attachment();
         private FileInfoViewModel AvatarFileInfoVM { get; set; }
 
-        AppUserViewModel appUser;
+        AppUserDutiesNotesPostsMilRequestsView appUser;
         string authUserId;
         bool dialogIsOpen;
 
@@ -48,7 +48,7 @@ namespace PetrpkuWeb.Client.Pages
 
         protected override async Task OnParametersSetAsync()
         {
-            appUser = await HttpClient.GetJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.USER}/{Id}");
+            appUser = await HttpClient.GetJsonAsync<AppUserDutiesNotesPostsMilRequestsView>($"{ApiRoutes.Users.USER}/{Id}");
         }
 
         async Task ShowFileInfo()
@@ -78,7 +78,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task OkClick()
         {
             dialogIsOpen = false;
-            await HttpClient.PutJsonAsync<ProfileViewModel>($"{ApiRoutes.Users.UPDATE}/{appUser.Id}", appUser);
+            await HttpClient.PutJsonAsync<AppUserView>($"{ApiRoutes.Users.UPDATE}/{appUser.Id}", appUser);
         }
 
         async Task UploadFile()

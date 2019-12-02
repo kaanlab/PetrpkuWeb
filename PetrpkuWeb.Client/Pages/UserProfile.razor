@@ -15,9 +15,9 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"><MatIcon Icon="notification_important" /><span class="ml-2">@appUser.Birthday.ToShortDateString()</span></li>
                         <li class="list-group-item"><MatIcon Icon="face" /><span class="ml-2">@appUser.LastName @appUser.FirstName @appUser.MidleName</span></li>
-                        <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@appUser.DepartmentViewModel?.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="work" /><span class="ml-2">@appUser.DepartmentView?.Name</span></li>
                         <li class="list-group-item"><MatIcon Icon="business_center" /><span class="ml-2">@appUser.WorkingPosition</span></li>
-                        <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@appUser.BuildingViewModel?.Name</span></li>
+                        <li class="list-group-item"><MatIcon Icon="location_city" /><span class="ml-2">@appUser.BuildingView?.Name</span></li>
                         <li class="list-group-item"><MatIcon Icon="meeting_room" /><span class="ml-2">@appUser.Room</span></li>
                         <li class="list-group-item"><MatIcon Icon="contact_phone" /><span class="ml-2">@appUser.IntPhone</span></li>
                         <li class="list-group-item"><MatIcon Icon="phone" /><span class="ml-2">@appUser.ExtPhone</span></li>
@@ -33,14 +33,14 @@
             </div>
             <div class="col-4 border-right">
 
-                @if (appUser.NotesViewModel.Any())
+                @if (appUser.NotesView.Any())
                 {
                     <h3 class="text-center">Мои объявления</h3>
 
-                    @foreach (var note in appUser.NotesViewModel.OrderByDescending(p => p.PublishDate))
+                    @foreach (var note in appUser.NotesView.OrderByDescending(p => p.PublishDate))
                     {
-                        <div @key="note" class="card border-@note.CssTypeViewModel.Value mb-2">
-                            <div class="card-body text-@note.CssTypeViewModel.Value">
+                        <div @key="note" class="card border-@note.CssTypeView.Value mb-2">
+                            <div class="card-body text-@note.CssTypeView.Value">
                                 <h5 class="card-title">@note.Title</h5>
                                 <span class="card-text">@note.Content</span>
                             </div>
@@ -67,11 +67,11 @@
             <div class="col-4">
                 <div class="col-4 border-right">
 
-                    @if (appUser.PostsViewModel.Any())
+                    @if (appUser.PostsView.Any())
                     {
                         <h3 class="text-center">Мои объявления</h3>
 
-                        @foreach (var post in appUser.PostsViewModel.OrderByDescending(p => p.PublishDate))
+                        @foreach (var post in appUser.PostsView.OrderByDescending(p => p.PublishDate))
                         {
                             <div @key="post" class="card">
                                 <div class="card-body">
@@ -88,10 +88,10 @@
                                                 <small class="text-muted">Обновлено: @post.UpdateDate.Value</small>
                                             }
                                         </div>
-                                        @if (post.AttachmentsViewModel.Any())
+                                        @if (post.AttachmentsView.Any())
                                         {
                                             <div class="col-4">
-                                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsViewModel.Count()</span></small>
+                                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsView.Count()</span></small>
                                             </div>
                                         }
 
@@ -108,12 +108,12 @@
                 </div>
 
                 <div class="col-4">
-                    @if (appUser.DaysOfDutyViewModel.Any())
+                    @if (appUser.DutiesView.Any())
                     {
 
                         <h3 class="text-center">Мои дежурства</h3>
                         <table class="table table-striped">
-                            @foreach (var duty in appUser.DaysOfDutyViewModel.OrderByDescending(d => d.DayOfDuty))
+                            @foreach (var duty in appUser.DutiesView.OrderByDescending(d => d.DayOfDuty))
                             {
                                 <tr @key="duty">
                                     <td>@duty.DayOfDuty.ToShortDateString()</td>

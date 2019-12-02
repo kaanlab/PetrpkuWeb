@@ -1,4 +1,4 @@
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;

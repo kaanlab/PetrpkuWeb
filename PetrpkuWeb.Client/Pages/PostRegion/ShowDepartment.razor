@@ -12,11 +12,11 @@
 {
     <h2 class="col-12 mb-4 text-center">@department.Name</h2>
 
-    @if (department.AppUsersViewModel.Any())
+    @if (department.AppUsersView.Any())
     {
         <div class="row mb-2">
             <ul class="user-profiles-list-small">
-                @foreach (var user in department.AppUsersViewModel.Where(u => u.IsActive))
+                @foreach (var user in department.AppUsersView.Where(u => u.IsActive))
                 {
                     <li @key="user">
                         <div class="user-avatar">
@@ -35,7 +35,7 @@
     }
 
     <div class="row mb-2">
-        @if (department.AppUsersViewModel.SingleOrDefault(u => u.Id == authUserId) is { })
+        @if (department.AppUsersView.SingleOrDefault(u => u.Id == authUserId) is { })
         {
             <div class="col-12">
                 <MatButton Icon="add" Raised="true" Label="Создать" Link="/post/create" Class="float-right" />
@@ -73,14 +73,14 @@ else
                     <div class="row">
                         <div class="media col-8">
                             <div class="media-body">
-                                <p class="mt-0">@post.AppUserViewModel.FirstName @post.AppUserViewModel.LastName</p>
+                                <p class="mt-0">@post.AppUserView.FirstName @post.AppUserView.LastName</p>
                                 <p class="card-text"><small class="text-muted"> @post.PublishDate</small></p>
                             </div>
                         </div>
-                        @if (post.AttachmentsViewModel.Any())
+                        @if (post.AttachmentsView.Any())
                         {
                             <div class="col-4">
-                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsViewModel.Count()</span></small>
+                                <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@post.AttachmentsView.Count()</span></small>
                             </div>
                         }
                     </div>
@@ -101,8 +101,8 @@ else
     //private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     string authUserId;
-    DepartmentViewModel department;
-    List<PostViewModel> posts;
+    DepartmentAppUsersPostsView department;
+    List<PostAppUserDepartmentAttachmentsView> posts;
 
     protected async override Task OnInitializedAsync()
     {
@@ -118,8 +118,8 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        department = await HttpClient.GetJsonAsync<DepartmentViewModel>($"{ApiRoutes.Departments.SHOW}/{DepartmentId}");
-        posts = await HttpClient.GetJsonAsync<List<PostViewModel>>($"{ApiRoutes.Post.DEPARTMENT}/{DepartmentId}");
+        department = await HttpClient.GetJsonAsync<DepartmentAppUsersPostsView>($"{ApiRoutes.Departments.SHOW}/{DepartmentId}");
+        posts = await HttpClient.GetJsonAsync<List<PostAppUserDepartmentAttachmentsView>>($"{ApiRoutes.Post.DEPARTMENT}/{DepartmentId}");
     }
 
 }

@@ -56,18 +56,13 @@ namespace PetrpkuWeb.Server.Services
             return appUser;
         }
 
-
         public async Task UpdateEmail(AppUser appUser, IAuthUser authUser)
         {
-            // update email if changed
-
             appUser.Email = authUser.Email;
             appUser.NormalizedEmail = authUser.Email.ToUpperInvariant();
 
             await _userManager.UpdateAsync(appUser);
-
         }
-
 
         public async Task<List<AppUser>> GetAllActiveOrderByDispalyName()
         {
@@ -104,7 +99,7 @@ namespace PetrpkuWeb.Server.Services
         public async Task<AppUser> GetById(string appUserId)
         {
             return await _db.Users
-                .Include(d => d.DaysOfDuty)
+                .Include(d => d.Duties)
                 .Include(b => b.Building)
                 .Include(d => d.Department)
                 .Include(a => a.Posts)

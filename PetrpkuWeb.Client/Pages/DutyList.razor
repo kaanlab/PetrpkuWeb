@@ -42,9 +42,9 @@
                                     if (user.DayOfDuty.DayOfYear == day.DayOfYear)
                                     {
                                         <div @key="user">
-                                            <img src="@user.AppUserViewModel.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
-                                            <h5 class="mt-0">@user.AppUserViewModel.DisplayName</h5>
-                                            <p class="card-text"><small class="text-muted"> @user.AppUserViewModel.WorkingPosition</small></p>
+                                            <img src="@user.AppUserView.Avatar" class="rounded-circle mr-3" style="width: 3rem;">
+                                            <h5 class="mt-0">@user.AppUserView.DisplayName</h5>
+                                            <p class="card-text"><small class="text-muted"> @user.AppUserView.WorkingPosition</small></p>
                                         </div>
                                     }
                                 }
@@ -66,10 +66,10 @@
 
 @code {
 
-    public DateTime? PikDate { get; set; } = DateTime.Now.ToLocalTime();
+    public DateTime? PikDate { get; set; }
 
     DateTime title = DateTime.Now;
-    List<DutyViewModel> listOfDuty;
+    List<DutyAppUserView> listOfDuty;
     List<string> daysOfWeek;
     List<DateTime> days;
     DateTime startDate;
@@ -78,7 +78,12 @@
     string mutedClass = "d-none d-lg-inline-block bg-light text-muted";
 
 
-    protected async override Task OnInitializedAsync()
+    protected override void OnInitialized()
+    {
+        PikDate = DateTime.Now.ToLocalTime();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var year = PikDate.Value.Year;
         var month = PikDate.Value.Month;
@@ -86,10 +91,9 @@
         await GetCalendarAsync(month, year);
     }
 
-
     async Task GetCalendarAsync(int month, int year)
     {
-        listOfDuty = await HttpClient.GetJsonAsync<List<DutyViewModel>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
+        listOfDuty = await HttpClient.GetJsonAsync<List<DutyAppUserView>>($"{ApiRoutes.Duty.MONTH}/{month}/{year}");
 
         daysOfWeek = Enum.GetValues(typeof(DayOfWeek))
             .Cast<DayOfWeek>()

@@ -22,6 +22,11 @@ namespace PetrpkuWeb.Server.Services
             _db = db;
         }
 
+        public async Task<Duty> GetOne(int dutyId)
+        {
+            return await _db.Duties.AsNoTracking().SingleOrDefaultAsync(d => d.DutyId == dutyId);
+        }
+
         public async Task<Duty> DutyToday()
         {
             return await _db.Duties
@@ -70,7 +75,8 @@ namespace PetrpkuWeb.Server.Services
 
         public async Task<bool> Update(Duty duty)
         {
-            _db.Attach(duty).State = EntityState.Modified;
+            //_db.Attach(duty).State = EntityState.Modified;
+            _db.Update(duty);
             var updated = await _db.SaveChangesAsync();
             return updated > 0;
         }

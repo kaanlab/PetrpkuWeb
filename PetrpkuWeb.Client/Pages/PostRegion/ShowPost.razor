@@ -15,13 +15,13 @@
             <span class="card-text">@post.Content</span>
         </div>
         <ul class="list-group list-group-flush">
-            @if (post.AttachmentsViewModel.Any())
+            @if (post.AttachmentsView.Any())
             {
-                @if (post.AttachmentsViewModel.Where(a => a.IsImage == true).Count() > 1)
+                @if (post.AttachmentsView.Where(a => a.IsImage == true).Count() > 1)
                 {
                     Random rand = new Random(3);
                     <li class="list-group-item img-container">
-                        @foreach (var attachment in post.AttachmentsViewModel.Where(a => a.IsImage == true))
+                        @foreach (var attachment in post.AttachmentsView.Where(a => a.IsImage == true))
                         {
                             int index = rand.Next(imgCssClass.Length);
                             <a @key="attachment" class="spotlight @imgCssClass[index]" href="@attachment.Path">
@@ -31,16 +31,16 @@
                     </li>
                 }
 
-                @if (post.AttachmentsViewModel.Where(a => a.IsImage == true).Count() == 1)
+                @if (post.AttachmentsView.Where(a => a.IsImage == true).Count() == 1)
                 {
                     <li class="list-group-item">
-                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@post.AttachmentsViewModel.SingleOrDefault(a => a.IsImage == true).Path" />
+                        <img class="spotlight img-thumbnail img-fluid" style="width: 14rem;" src="@post.AttachmentsView.SingleOrDefault(a => a.IsImage == true).Path" />
                     </li>
                 }
 
                 <li class="list-group-item">
                     <table class="table">
-                        @foreach (var attachment in post.AttachmentsViewModel.Where(a => a.IsImage == false))
+                        @foreach (var attachment in post.AttachmentsView.Where(a => a.IsImage == false))
                         {
                             <tr @key="attachment">
                                 <td><img class="img-fluid" src="@CssExtension.Img(attachment.Extension)" /></td>
@@ -60,11 +60,11 @@
             }
         </ul>
         <div class="card-footer text-muted">
-            @if (authUserId == post.AppUserViewModel.Id || authUser.IsInRole(AuthRoles.ADMIN))
+            @if (authUserId == post.AppUserView.Id || authUser.IsInRole(AuthRoles.ADMIN))
             {
                 <MatButton Icon="edit" Link="@($"/post/edit/{post.PostId}")" />
             }
-            <p>@post.AppUserViewModel.FirstName @post.AppUserViewModel.LastName</p>
+            <p>@post.AppUserView.FirstName @post.AppUserView.LastName</p>
             @if (post.UpdateDate.HasValue)
             {
                 <p>Обновлено: @post.UpdateDate.Value.ToShortDateString()</p>
@@ -82,7 +82,7 @@
     ClaimsPrincipal authUser;
     string authUserId;
 
-    PostViewModel post;
+    PostAppUserDepartmentAttachmentsView post;
 
     string[] imgCssClass = { "big", "vertical", String.Empty };
 
@@ -99,7 +99,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        post = await HttpClient.GetJsonAsync<PostViewModel>($"{ApiRoutes.Post.SHOW}/{PostId}");
+        post = await HttpClient.GetJsonAsync<PostAppUserDepartmentAttachmentsView>($"{ApiRoutes.Post.SHOW}/{PostId}");
 
     }
 

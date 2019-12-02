@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Newtonsoft.Json;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Models;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,11 +32,11 @@ namespace PetrpkuWeb.Client.Pages
 
         List<LdapUser> ldapUsers;
         ClaimsPrincipal authUser;
-        List<UserManagerViewModel> appUsersList;
-        UserManagerViewModel editAppUser;
-        List<DepartmentViewModel> departments;
-        List<BuildingViewModel> buildings;
-        List<UserManagerViewModel> filtredAppUsers;
+        List<AppUserDepartmentBuildingView> appUsersList;
+        AppUserDepartmentBuildingView editAppUser;
+        List<DepartmentView> departments;
+        List<BuildingView> buildings;
+        List<AppUserDepartmentBuildingView> filtredAppUsers;
 
         bool editAppUserDialogIsOpen = false;
         bool newUserDialogIsOpen = false;
@@ -45,9 +45,9 @@ namespace PetrpkuWeb.Client.Pages
         {
             authUser = (await AuthenticationStateTask).User;
 
-            appUsersList = await HttpClient.GetJsonAsync<List<UserManagerViewModel>>(ApiRoutes.Users.ALL);
-            departments = await HttpClient.GetJsonAsync<List<DepartmentViewModel>>(ApiRoutes.Departments.ALL);
-            buildings = await HttpClient.GetJsonAsync<List<BuildingViewModel>>(ApiRoutes.Buildings.ALL);
+            appUsersList = await HttpClient.GetJsonAsync<List<AppUserDepartmentBuildingView>>(ApiRoutes.Users.ALL);
+            departments = await HttpClient.GetJsonAsync<List<DepartmentView>>(ApiRoutes.Departments.ALL);
+            buildings = await HttpClient.GetJsonAsync<List<BuildingView>>(ApiRoutes.Buildings.ALL);
             ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.ALL_LDAPUSERS);
         }
 
@@ -69,7 +69,7 @@ namespace PetrpkuWeb.Client.Pages
             var content = await response.Content.ReadAsStringAsync();
 
             //Add to UsersIdentity collection
-            var appUser = JsonConvert.DeserializeObject<UserManagerViewModel>(content);
+            var appUser = JsonConvert.DeserializeObject<AppUserDepartmentBuildingView>(content);
             appUsersList.Add(appUser);
             appUsersList = appUsersList.OrderBy(d => d.DisplayName).ToList();
             LdapUser = new LdapUser();
@@ -87,7 +87,7 @@ namespace PetrpkuWeb.Client.Pages
         async Task UpdateAppUser(string appUserId)
         {
             editAppUserDialogIsOpen = false;
-            var response = await HttpClient.PutJsonAsync<UserManagerViewModel>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
+            var response = await HttpClient.PutJsonAsync<AppUserDepartmentBuildingView>($"{ApiRoutes.Users.UPDATE}/{appUserId}", editAppUser);
             var index = appUsersList.FindIndex(u => u.Id == response.Id);
             appUsersList[index] = response;
             Toaster.Add($"Информация о пользователе {response.DisplayName} успешно обновлена", MatToastType.Success, "Успех!");
@@ -118,7 +118,7 @@ namespace PetrpkuWeb.Client.Pages
             {
                 string filter = SearchTerm.ToLower();
                 filtredAppUsers = appUsersList
-                    .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentViewModel.Name ?? "").ToLower().Contains(filter)).ToList();
+                    .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentView.Name ?? "").ToLower().Contains(filter)).ToList();
                 if (filtredAppUsers.Count < 1)
                     Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
             }

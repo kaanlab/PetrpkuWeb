@@ -20,7 +20,7 @@
 
         <div class="form-group col-12 mb-2">
             <label>Тип объявления</label>
-            <select class="custom-select" @bind="NewNote.CssTypeViewModel.CssTypeId">
+            <select class="custom-select" @bind="NewNote.CssTypeView.CssTypeId">
                 @if (cssTypes is null)
                 {
                     <option selected>(loading...)</option>
@@ -64,10 +64,10 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private NoteViewModel NewNote { get; set; } = new NoteViewModel();
+    private NoteAppUserCssTypeView NewNote { get; set; } = new NoteAppUserCssTypeView();
 
-    private List<CssTypeViewModel> cssTypes;
-    private AppUserViewModel appUser;
+    private List<CssTypeView> cssTypes;
+    private AppUserView appUser;
 
     bool dialogIsOpen = false;
 
@@ -76,15 +76,15 @@
     {
         var authUser = (await authenticationStateTask).User;
         var authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
-        appUser = await HttpClient.GetJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.USER}/{authUserId}");
-        cssTypes = await HttpClient.GetJsonAsync<List<CssTypeViewModel>>(ApiRoutes.CssType.ALL);
+        appUser = await HttpClient.GetJsonAsync<AppUserView>($"{ApiRoutes.Users.USER}/{authUserId}");
+        cssTypes = await HttpClient.GetJsonAsync<List<CssTypeView>>(ApiRoutes.CssType.ALL);
     }
 
 
     async Task AddNote()
     {
-        NewNote.AppUserViewModel = appUser;
-        var response = await HttpClient.PostJsonAsync<NoteViewModel>(ApiRoutes.Note.CREATE, NewNote);
+        NewNote.AppUserView = appUser;
+        var response = await HttpClient.PostJsonAsync<NoteAppUserCssTypeView>(ApiRoutes.Note.CREATE, NewNote);
         NavigationManager.NavigateTo("/");
 
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");

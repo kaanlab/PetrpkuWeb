@@ -59,15 +59,15 @@ namespace PetrpkuWeb.Server.Data
                 .ForMember(dest => dest.Posts, opt => opt.MapFrom(src => src.PostsViewModel))
                 .ReverseMap();
 
-            CreateMap<AppUser, ProfileViewModel>()
+            CreateMap<AppUser, AppUserView>()
                 .ReverseMap();
 
-            CreateMap<AppUser, UserManagerViewModel>()
+            CreateMap<AppUser, UserManagerView>()
                 .ForMember(dest => dest.BuildingViewModel, opt => opt.MapFrom(src => src.Building))
                 .ForMember(dest => dest.DepartmentViewModel, opt => opt.MapFrom(src => src.Department))
                 .ReverseMap();
 
-            CreateMap<CatalogDepartmentView, Department>()
+            CreateMap<DepartmentView, Department>()
                 .ReverseMap();
 
         }

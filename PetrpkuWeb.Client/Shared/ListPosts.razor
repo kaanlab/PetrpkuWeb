@@ -25,14 +25,14 @@
                 <div class="row">
                     <div class="media col-8">
                         <div class="media-body">
-                            <p class="mt-0">@item.AppUserViewModel.FirstName @item.AppUserViewModel.LastName</p>
+                            <p class="mt-0">@item.AppUserView.FirstName @item.AppUserView.LastName</p>
                             <p class="card-text"><small class="text-muted"> @item.PublishDate</small></p>
                         </div>
                     </div>
-                    @if (item.AttachmentsViewModel.Any())
+                    @if (item.AttachmentsView.Any())
                     {
                         <div class="col-4">
-                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.AttachmentsViewModel.Count()</span></small>
+                            <small class="text-muted">Файлы: <span class="badge badge-pill badge-secondary">@item.AttachmentsView.Count()</span></small>
                         </div>
                     }
                 </div>
@@ -46,9 +46,9 @@
 
 @code {
 
-    async Task<List<PostViewModel>> LoadPosts()
+    async Task<List<PostAppUserDepartmentAttachmentsView>> LoadPosts()
     {
-        var posts = await HttpClient.GetJsonAsync<List<PostViewModel>>(ApiRoutes.Post.ALL);
+        var posts = await HttpClient.GetJsonAsync<List<PostAppUserDepartmentAttachmentsView>>(ApiRoutes.Post.ALL);
 
         return posts.Where(p => p.OnMain).ToList();
     }

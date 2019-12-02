@@ -49,8 +49,8 @@
                             <td>@user.FirstName</td>
                             <td>@user.MidleName</td>
                             <td>@user.WorkingPosition</td>
-                            <td>@user.DepartmentViewModel?.Name</td>
-                            <td>@user.BuildingViewModel?.Name</td>
+                            <td>@user.DepartmentView?.Name</td>
+                            <td>@user.BuildingView?.Name</td>
                             <td>@user.Room</td>
                             <td>@user.IntPhone</td>
                             <td>@user.ExtPhone</td>
@@ -104,8 +104,8 @@
                         <td>@user.FirstName</td>
                         <td>@user.MidleName</td>
                         <td>@user.WorkingPosition</td>
-                        <td>@user.DepartmentViewModel?.Name</td>
-                        <td>@user.BuildingViewModel?.Name</td>
+                        <td>@user.DepartmentView?.Name</td>
+                        <td>@user.BuildingView?.Name</td>
                         <td>@user.Room</td>
                         <td>@user.IntPhone</td>
                         <td>@user.ExtPhone</td>
@@ -120,12 +120,12 @@
 
     string SearchTerm { get; set; } = String.Empty;
 
-    List<AppUserViewModel> appUsers;
-    List<AppUserViewModel> filtredAppUsers;
+    List<AppUserDepartmentBuildingView> appUsers;
+    List<AppUserDepartmentBuildingView> filtredAppUsers;
 
     protected async override Task OnInitializedAsync()
     {
-        appUsers = await HttpClient.GetJsonAsync<List<AppUserViewModel>>(ApiRoutes.Users.ALL_ACTIVE);
+        appUsers = await HttpClient.GetJsonAsync<List<AppUserDepartmentBuildingView>>(ApiRoutes.Users.ALL_ACTIVE);
     }
 
     void SearchKeyDown(KeyboardEventArgs e)
@@ -153,7 +153,7 @@
         {
             string filter = SearchTerm.ToLower();
             filtredAppUsers = appUsers
-                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentViewModel.Name ?? "").ToLower().Contains(filter)).ToList();
+                .Where(u => (u.LastName ?? "").ToLower().Contains(filter) || (u.IntPhone ?? "").ToLower().Contains(filter) || (u.DepartmentView.Name ?? "").ToLower().Contains(filter)).ToList();
             if (filtredAppUsers.Count < 1)
                 Toaster.Add($"Пользователь не найден. Попробуйте другой критерий поиска", MatToastType.Danger, "Ошибка!");
         }

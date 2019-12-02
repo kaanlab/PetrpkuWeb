@@ -12,7 +12,7 @@
 
 @if (appUser is { })
 {
-    <h2 class="col-12 mb-4 text-center">Новая статья в @appUser.DepartmentViewModel.Name </h2>
+    <h2 class="col-12 mb-4 text-center">Новая статья в @appUser.DepartmentView.Name </h2>
 
     <EditForm Model="NewPost" OnInvalidSubmit="@(() => Toaster.Add("Для публикации необходимо заполнить поля заголовок и текст",MatToastType.Danger,"Ошибка!"))">
         <div class="row">
@@ -149,14 +149,14 @@
 
     private string authUserId;
 
-    private PostViewModel NewPost { get; set; } = new PostViewModel();
-    private List<AttachmentViewModel> listOfAttachments { get; set; } = new List<AttachmentViewModel>();
-    private AttachmentViewModel CurrentAttachment { get; set; } = new AttachmentViewModel();
+    private PostAppUserDepartmentAttachmentsView NewPost { get; set; } = new PostAppUserDepartmentAttachmentsView();
+    private List<AttachmentView> listOfAttachments { get; set; } = new List<AttachmentView>();
+    private AttachmentView CurrentAttachment { get; set; } = new AttachmentView();
 
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
     private FileInfoViewModel PosterFileInfoVM { get; set; }
 
-    private AppUserViewModel appUser;
+    private AppUserDepartmentBuildingView appUser;
 
     bool dialogIsOpen = false;
 
@@ -173,7 +173,7 @@
     {
         var authUser = (await authenticationStateTask).User;
         authUserId = authUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData).Value;
-        appUser = await HttpClient.GetJsonAsync<AppUserViewModel>($"{ApiRoutes.Users.USER}/{authUserId}");
+        appUser = await HttpClient.GetJsonAsync<AppUserDepartmentBuildingView>($"{ApiRoutes.Users.USER}/{authUserId}");
     }
 
     protected override void OnAfterRender(bool isFirstRender)
@@ -213,7 +213,7 @@
 
         var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.FILES, content: multipartFormDataContent);
         var content = await response.Content.ReadAsStringAsync();
-        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<AttachmentViewModel>>(content));
+        listOfAttachments.AddRange(JsonConvert.DeserializeObject<List<AttachmentView>>(content));
 
         await ClearFileInfo();
     }
@@ -246,19 +246,19 @@
                 new StreamContent(await file.OpenReadAsync(), 8192), "file", (await file.ReadFileInfoAsync()).Name);
         }
 
-        var response = await HttpClient.PostAsync(requestUri: "api/upload/poster", content: multipartFormDataContent);
+        var response = await HttpClient.PostAsync(requestUri: ApiRoutes.Upload.POSTER, content: multipartFormDataContent);
         NewPost.Poster = await response.Content.ReadAsStringAsync();
         await ClearPosterFileInfo();
     }
 
     async Task AddPost()
     {
-        NewPost.AppUserViewModel = appUser;
-        NewPost.DepartmentViewModel = appUser.DepartmentViewModel;
-        NewPost.AttachmentsViewModel = new List<AttachmentViewModel>();
-        NewPost.AttachmentsViewModel.AddRange(listOfAttachments);
-        var response = await HttpClient.PostJsonAsync<PostViewModel>(ApiRoutes.Post.CREATE, NewPost);
-        NavigationManager.NavigateTo($"/department/{appUser.DepartmentViewModel.DepartmentId}");
+        NewPost.AppUserView = appUser;
+        NewPost.DepartmentView = appUser.DepartmentView;
+        NewPost.AttachmentsView = new List<AttachmentView>();
+        NewPost.AttachmentsView.AddRange(listOfAttachments);
+        var response = await HttpClient.PostJsonAsync<PostAppUserDepartmentAttachmentsView>(ApiRoutes.Post.CREATE, NewPost);
+        NavigationManager.NavigateTo($"/department/{appUser.DepartmentView.DepartmentId}");
 
         Toaster.Add($"Объявление успешно опубликовано: {response.Title}", MatToastType.Success, "Успех!");
     }
@@ -272,7 +272,7 @@
 
     async Task UpdateAttachmentInfo()
     {
-        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentViewModel>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
+        CurrentAttachment = await HttpClient.PutJsonAsync<AttachmentView>($"{ApiRoutes.Upload.UPDATE}/{CurrentAttachment.AttachmentId}", CurrentAttachment);
         Toaster.Add($"Информация для файла {CurrentAttachment.Name} успешно обновлена", MatToastType.Success, "Успех!");
 
         dialogIsOpen = false;

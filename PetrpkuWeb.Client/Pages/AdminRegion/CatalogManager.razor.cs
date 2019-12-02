@@ -1,13 +1,12 @@
 using MatBlazor;
 using Microsoft.AspNetCore.Components;
 using PetrpkuWeb.Shared.Contracts.V1;
-using PetrpkuWeb.Shared.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System;
-using PetrpkuWeb.Shared.ViewModels.CatalogRegion;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Client.Pages.AdminRegion
 {
@@ -19,23 +18,23 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         [Inject]
         public HttpClient HttpClient { get; set; }
 
-        CatalogDepartmentView NewDepartment { get; set; } = new CatalogDepartmentView();
-        BuildingViewModel NewBuilding { get; set; } = new BuildingViewModel();
-        SiteSectionViewModel NewSiteSection { get; set; } = new SiteSectionViewModel();
-        SiteSubSectionViewModel NewSiteSubSection { get; set; } = new SiteSubSectionViewModel();
-        CssTypeViewModel NewCssType { get; set; } = new CssTypeViewModel();
- 
-        private List<CatalogDepartmentView> departments;
-        private List<BuildingViewModel> buildings;
-        private List<SiteSectionViewModel> siteSections;
-        //private List<SiteSubSectionViewModel> siteSubSections;
-        private List<CssTypeViewModel> cssTypes;
+        DepartmentView NewDepartment { get; set; } = new DepartmentView();
+        BuildingAppUserView NewBuilding { get; set; } = new BuildingAppUserView();
+        SiteSectionView NewSiteSection { get; set; } = new SiteSectionView();
+        SiteSubSectionView NewSiteSubSection { get; set; } = new SiteSubSectionView();
+        CssTypeView NewCssType { get; set; } = new CssTypeView();
 
-        private CssTypeViewModel currentCssType;
+        private List<DepartmentView> departments;
+        private List<BuildingAppUserView> buildings;
+        private List<SiteSectionView> siteSections;
+        //private List<SiteSubSectionViewModel> siteSubSections;
+        private List<CssTypeView> cssTypes;
+
+        private CssTypeView currentCssType;
 
         string ListCssClass;
 
-        CatalogDepartmentView currentDepartment;
+        DepartmentView currentDepartment;
         private string _departmentName;
         public string DepatrmentName
         {
@@ -47,7 +46,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             }
         }
 
-        BuildingViewModel currentBuilding;
+        BuildingAppUserView currentBuilding;
         private string _buildingName;
         public string BuildingName
         {
@@ -59,7 +58,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             }
         }
 
-        SiteSectionViewModel currentSiteSection;
+        SiteSectionView currentSiteSection;
         private string _siteSectionName;
         public string SiteSectionName
         {
@@ -71,7 +70,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             }
         }
 
-        SiteSubSectionViewModel currentSiteSubSection;
+        SiteSubSectionView currentSiteSubSection;
         private string _siteSubSectionName;
         public string SiteSubSectionName
         {
@@ -100,23 +99,24 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
 
         protected override async Task OnInitializedAsync()
         {
-            departments = await HttpClient.GetJsonAsync<List<CatalogDepartmentView>>(ApiRoutes.Departments.ALL);
-            buildings = await HttpClient.GetJsonAsync<List<BuildingViewModel>>(ApiRoutes.Buildings.ALL);
-            siteSections = await HttpClient.GetJsonAsync<List<SiteSectionViewModel>>(ApiRoutes.Sections.ALL_INCLUDE_SUBSECTIONS);
-            cssTypes = await HttpClient.GetJsonAsync<List<CssTypeViewModel>>(ApiRoutes.CssType.ALL);
+            departments = await HttpClient.GetJsonAsync<List<DepartmentView>>(ApiRoutes.Departments.ALL);
+            buildings = await HttpClient.GetJsonAsync<List<BuildingAppUserView>>(ApiRoutes.Buildings.ALL);
+            siteSections = await HttpClient.GetJsonAsync<List<SiteSectionView>>(ApiRoutes.Sections.ALL_INCLUDE_SUBSECTIONS);
+            cssTypes = await HttpClient.GetJsonAsync<List<CssTypeView>>(ApiRoutes.CssType.ALL);
         }
 
         #region Department
         async Task AddNewDepartment()
         {
             newDepartmentDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<CatalogDepartmentView>(ApiRoutes.Departments.CREATE, NewDepartment);
-            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+            var response = await HttpClient.PostJsonAsync<DepartmentView>(ApiRoutes.Departments.CREATE, NewDepartment);
             departments.Add(response);
-            NewDepartment = new CatalogDepartmentView();
+            NewDepartment = new DepartmentView();
+
+            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         }
 
-        void OpenEditDepartmentDialog(CatalogDepartmentView department)
+        void OpenEditDepartmentDialog(DepartmentView department)
         {
             editDepartmentDialogIsOpen = true;
             currentDepartment = department;
@@ -133,9 +133,10 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             editDepartmentDialogIsOpen = false;
             currentDepartment.Name = DepatrmentName;
-            await HttpClient.PutJsonAsync<DepartmentViewModel>($"{ApiRoutes.Departments.UPDATE}/{currentDepartment.DepartmentId}", currentDepartment);
-            Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
+            await HttpClient.PutJsonAsync<DepartmentView>($"{ApiRoutes.Departments.UPDATE}/{currentDepartment.DepartmentId}", currentDepartment);
             currentDepartment = null;
+
+            Toaster.Add($"Информация о подразделении успешно обновлена", MatToastType.Success, "Успех!");
         }
 
         async Task DeleteDepartment()
@@ -143,8 +144,9 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             editDepartmentDialogIsOpen = false;
             var response = await HttpClient.DeleteAsync($"{ApiRoutes.Departments.DELETE}/{currentDepartment.DepartmentId}");
             departments.Remove(currentDepartment);
-            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentDepartment = null;
+
+            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         }
         #endregion
 
@@ -152,13 +154,14 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         async Task AddNewBuilding()
         {
             newBuildingDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<BuildingViewModel>(ApiRoutes.Buildings.CREATE, NewBuilding);
-            Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
+            var response = await HttpClient.PostJsonAsync<BuildingAppUserView>(ApiRoutes.Buildings.CREATE, NewBuilding);
             buildings.Add(response);
-            NewBuilding = new BuildingViewModel();
+            NewBuilding = new BuildingAppUserView();
+
+            Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         }
 
-        void OpenEditBuildingDialog(BuildingViewModel building)
+        void OpenEditBuildingDialog(BuildingAppUserView building)
         {
             editBuildingDialogIsOpen = true;
             currentBuilding = building;
@@ -175,9 +178,10 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             editBuildingDialogIsOpen = false;
             currentBuilding.Name = BuildingName;
-            await HttpClient.PutJsonAsync<BuildingViewModel>($"{ApiRoutes.Buildings.UPDATE}/{currentBuilding.BuildingId}", currentBuilding);
-            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+            await HttpClient.PutJsonAsync<BuildingAppUserView>($"{ApiRoutes.Buildings.UPDATE}/{currentBuilding.BuildingId}", currentBuilding);
             currentBuilding = null;
+
+            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
         }
 
         async Task DeleteBuilding()
@@ -185,19 +189,21 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             editBuildingDialogIsOpen = false;
             var response = await HttpClient.DeleteAsync($"{ApiRoutes.Buildings.DELETE}/{currentBuilding.BuildingId}");
             buildings.Remove(currentBuilding);
-            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentBuilding = null;
+
+            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         }
-#endregion
+        #endregion
 
         #region SiteSection
         async Task AddNewSiteSection()
         {
             newSiteSectionDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<SiteSectionViewModel>(ApiRoutes.Sections.CREATE, NewSiteSection);
-            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+            var response = await HttpClient.PostJsonAsync<SiteSectionView>(ApiRoutes.Sections.CREATE, NewSiteSection);
             siteSections.Add(response);
-            NewSiteSection = new SiteSectionViewModel();
+            NewSiteSection = new SiteSectionView();
+
+            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         }
 
         void CancelUpdateSiteSection()
@@ -206,7 +212,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             currentSiteSection = null;
         }
 
-        void OpenEditSiteSectionDialog(SiteSectionViewModel siteSection)
+        void OpenEditSiteSectionDialog(SiteSectionView siteSection)
         {
             editSiteSectionDialogIsOpen = true;
             currentSiteSection = siteSection;
@@ -218,17 +224,19 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             editSiteSectionDialogIsOpen = false;
             var response = await HttpClient.DeleteAsync($"{ApiRoutes.Sections.DELETE}/{currentSiteSection.SiteSectionId}");
             siteSections.Remove(currentSiteSection);
-            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
             currentSiteSection = null;
+
+            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         }
 
         async Task UpdateSiteSection()
         {
             editSiteSectionDialogIsOpen = false;
             currentSiteSection.Name = SiteSectionName;
-            await HttpClient.PutJsonAsync<SiteSectionViewModel>($"{ApiRoutes.Sections.UPDATE}/{currentSiteSection.SiteSectionId}", currentSiteSection);
-            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+            await HttpClient.PutJsonAsync<SiteSectionView>($"{ApiRoutes.Sections.UPDATE}/{currentSiteSection.SiteSectionId}", currentSiteSection);
             currentSiteSection = null;
+
+            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
         }
         #endregion
 
@@ -237,11 +245,11 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             newSiteSubSectionDialogIsOpen = false;
             var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == int.Parse(dropDownSiteSectionId));
-            NewSiteSubSection.SiteSectionViewModel = siteSection;
-            var response = await HttpClient.PostJsonAsync<SiteSubSectionViewModel>(ApiRoutes.Sections.SUBSECTION_CREATE, NewSiteSubSection);
+            NewSiteSubSection.SiteSectionView = siteSection;
+            var response = await HttpClient.PostJsonAsync<SiteSubSectionView>(ApiRoutes.Sections.SUBSECTION_CREATE, NewSiteSubSection);
             var index = siteSections.FindIndex(s => s.SiteSectionId == siteSection.SiteSectionId);
-            siteSections[index].SiteSubsectionsViewModel.Add(response);
-            NewSiteSubSection = new SiteSubSectionViewModel();
+            siteSections[index].SiteSubsectionsView.Add(response);
+            NewSiteSubSection = new SiteSubSectionView();
 
             Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         }
@@ -252,7 +260,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             currentSiteSubSection = null;
         }
 
-        void OpenEditSiteSubSectionDialog(SiteSubSectionViewModel siteSubSection)
+        void OpenEditSiteSubSectionDialog(SiteSubSectionView siteSubSection)
         {
             editSiteSubSectionDialogIsOpen = true;
             currentSiteSubSection = siteSubSection;
@@ -262,35 +270,38 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         async Task DeleteSiteSubSection()
         {
             editSiteSubSectionDialogIsOpen = false;
-            var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == currentSiteSubSection.SiteSectionViewModel.SiteSectionId);
+            var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == currentSiteSubSection.SiteSectionView.SiteSectionId);
             var response = await HttpClient.DeleteAsync($"{ApiRoutes.Sections.SUBSECTION_DELETE}/{currentSiteSubSection.SiteSubsectionId}");
-            var index = siteSections.FindIndex(s => s.SiteSectionId == NewSiteSubSection.SiteSectionViewModel.SiteSectionId);
-            siteSections[index].SiteSubsectionsViewModel.Remove(currentSiteSubSection);
-            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
+            var index = siteSections.FindIndex(s => s.SiteSectionId == NewSiteSubSection.SiteSectionView.SiteSectionId);
+            siteSections[index].SiteSubsectionsView.Remove(currentSiteSubSection);
             currentSiteSubSection = null;
+
+            Toaster.Add($"Запись удалена", MatToastType.Warning, "Внимание!");
         }
 
         async Task UpdateSiteSubSection()
         {
             editSiteSubSectionDialogIsOpen = false;
             currentSiteSubSection.Title = SiteSubSectionName;
-            await HttpClient.PutJsonAsync<SiteSubSectionViewModel>($"{ApiRoutes.Sections.SUBSECTION_UPDATE}/{currentSiteSubSection.SiteSubsectionId}", currentSiteSubSection);
-            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
+            await HttpClient.PutJsonAsync<SiteSubSectionView>($"{ApiRoutes.Sections.SUBSECTION_UPDATE}/{currentSiteSubSection.SiteSubsectionId}", currentSiteSubSection);
             currentSiteSubSection = null;
+
+            Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");
         }
-#endregion
+        #endregion
 
         #region CssType
         async Task AddNewCssType()
         {
             newCssTypeDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<CssTypeViewModel>(ApiRoutes.CssType.CREATE, NewCssType);
-            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
+            var response = await HttpClient.PostJsonAsync<CssTypeView>(ApiRoutes.CssType.CREATE, NewCssType);
             cssTypes.Add(response);
-            NewCssType = new CssTypeViewModel();
+            NewCssType = new CssTypeView();
+
+            Toaster.Add($"Новое подразделение успешно добавлено", MatToastType.Success, "Успех!");
         }
 
-        void OpenEditCssTypeDialog(CssTypeViewModel cssType)
+        void OpenEditCssTypeDialog(CssTypeView cssType)
         {
             editCssTypeDialogIsOpen = true;
             currentCssType = cssType;
@@ -304,7 +315,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         async Task UpdateCssType()
         {
             editCssTypeDialogIsOpen = false;
-            await HttpClient.PutJsonAsync<CssTypeViewModel>($"{ApiRoutes.CssType.UPDATE}/{currentCssType.CssTypeId}", currentCssType);
+            await HttpClient.PutJsonAsync<CssTypeView>($"{ApiRoutes.CssType.UPDATE}/{currentCssType.CssTypeId}", currentCssType);
             currentCssType = null;
 
             Toaster.Add($"Информация о CSS типе обновлена", MatToastType.Success, "Успех!");
@@ -313,7 +324,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         async Task DeleteCssType()
         {
             editCssTypeDialogIsOpen = false;
-            var response = await HttpClient.DeleteAsync($"api/csstype/delete/{currentCssType.CssTypeId}");
+            var response = await HttpClient.DeleteAsync($"{ApiRoutes.CssType.DELETE}/{currentCssType.CssTypeId}");
             cssTypes.Remove(currentCssType);
             currentCssType = null;
 
