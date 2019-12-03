@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using PetrpkuWeb.Shared.Extensions;
@@ -30,21 +30,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var docSections = await _docSectionTypeService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<DocSectionViewModel>>(docSections));
+            return Ok(_mapper.Map<IEnumerable<DocSectionAppUserDepartmentAttachmentsView>>(docSections));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpPost(ApiRoutes.DocSection.CREATE)]
-        public async Task<ActionResult> CreateDocSection(DocSectionViewModel docSectionViewModel)
+        public async Task<ActionResult> CreateDocSection(DocSectionAppUserDepartmentAttachmentsView docSectionView)
         {
-            if (docSectionViewModel is null)
+            if (docSectionView is null)
                 return BadRequest();
 
-            var docSection = _mapper.Map<DocSection>(docSectionViewModel);
+            var docSection = _mapper.Map<DocSection>(docSectionView);
             var created = await _docSectionTypeService.Create(docSection);
             
            if(created)
-                return Ok(_mapper.Map<DocSectionViewModel>(docSection));
+                return Ok(_mapper.Map<DocSectionAppUserDepartmentAttachmentsView>(docSection));
 
             return BadRequest();
         }
@@ -58,20 +58,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (docSection is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DocSectionViewModel>(docSection));
+            return Ok(_mapper.Map<DocSectionAppUserDepartmentAttachmentsView>(docSection));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.DocSection.UPDATE + "/{docSectionViewModelId:int}")]
-        public async Task<ActionResult> UpdateDocSectionAsync(int docSectionViewModelId, DocSectionViewModel docSectionViewModel)
+        [HttpPut(ApiRoutes.DocSection.UPDATE + "/{docSectionViewId:int}")]
+        public async Task<ActionResult> UpdateDocSectionAsync(int docSectionViewId, DocSectionAppUserDepartmentAttachmentsView docSectionView)
         {
-            if (docSectionViewModelId == docSectionViewModel.DocSectionId)
+            if (docSectionViewId == docSectionView.DocSectionId)
             {
-                var docSection = _mapper.Map<DocSection>(docSectionViewModel);
-                var updated = await _docSectionTypeService.Update(docSection);
+                var docSection = await _docSectionTypeService.GetOne(docSectionViewId);
+                var updatedDocSection = _mapper.Map(docSectionView, docSection);
+                var updated = await _docSectionTypeService.Update(updatedDocSection);
 
                 if(updated)
-                    return Ok(_mapper.Map<DocSectionViewModel>(docSection));
+                    return Ok(_mapper.Map<DocSectionAppUserDepartmentAttachmentsView>(updatedDocSection));
             }
             return BadRequest();
         }

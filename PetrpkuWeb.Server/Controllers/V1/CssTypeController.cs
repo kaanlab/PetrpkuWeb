@@ -7,7 +7,7 @@ using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -30,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var cssType = await _cssTypeService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<CssTypeViewModel>>(cssType));
+            return Ok(_mapper.Map<IEnumerable<CssTypeView>>(cssType));
         }
 
         [AllowAnonymous]
@@ -42,36 +42,36 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (cssType is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<CssTypeViewModel>(cssType));
+            return Ok(_mapper.Map<CssTypeView>(cssType));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpPost(ApiRoutes.CssType.CREATE)]
-        public async Task<ActionResult> CreateCssType(CssTypeViewModel cssTypeViewModel)
+        public async Task<ActionResult> CreateCssType(CssTypeView cssTypeView)
         {
-            if (cssTypeViewModel is null)
+            if (cssTypeView is null)
                 return NotFound();
 
-            var cssType = _mapper.Map<CssType>(cssTypeViewModel);
+            var cssType = _mapper.Map<CssType>(cssTypeView);
             var created = await _cssTypeService.Create(cssType);
 
             if(created)
-                return Ok(_mapper.Map<CssTypeViewModel>(cssType));
+                return Ok(_mapper.Map<CssTypeView>(cssType));
 
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN)]
-        [HttpPut(ApiRoutes.CssType.UPDATE + "/{cssTypeViewModelId:int}")]
-        public async Task<ActionResult> UpdateCssType(int cssTypeViewModelId, CssTypeViewModel cssTypeViewModel)
+        [HttpPut(ApiRoutes.CssType.UPDATE + "/{cssTypeViewId:int}")]
+        public async Task<ActionResult> UpdateCssType(int cssTypeViewId, CssTypeView cssTypeView)
         {
-            if (cssTypeViewModelId == cssTypeViewModel.CssTypeId)
+            if (cssTypeViewId == cssTypeView.CssTypeId)
             {
-                var cssType = _mapper.Map<CssType>(cssTypeViewModel);
+                var cssType = _mapper.Map<CssType>(cssTypeView);
                 var updated = await _cssTypeService.Update(cssType);
                 
                 if (updated)
-                    return Ok(_mapper.Map<CssTypeViewModel>(cssType));
+                    return Ok(_mapper.Map<CssTypeView>(cssType));
             }
 
             return BadRequest();

@@ -41,7 +41,7 @@
                     {
                         @foreach (var subsection in siteSubsections)
                         {
-                            <option value="@subsection.SiteSubsectionId">@subsection.Title</option>
+                            <option value="@subsection.SiteSubSectionId">@subsection.Title</option>
                         }
                     }
                 </select>
@@ -223,7 +223,7 @@
         }
         if (int.TryParse(siteSubSectionId, out subId))
         {
-            NewMilRequest.SiteSubSectionView.SiteSubsectionId = subId;
+            NewMilRequest.SiteSubSectionView.SiteSubSectionId = subId;
         }
         NewMilRequest.AppUserView.Id = authUserId;
         NewMilRequest.AttachmentsView = new List<AttachmentView>();

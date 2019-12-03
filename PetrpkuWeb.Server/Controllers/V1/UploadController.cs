@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PetrpkuWeb.Shared.Models;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using PetrpkuWeb.Server.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using ImageMagick;
 using PetrpkuWeb.Shared.Extensions;
@@ -204,7 +199,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
                     attachments.Add(attachment);
                 }
 
-                return Ok(_mapper.Map<IEnumerable<AttachmentViewModel>>(attachments));
+                return Ok(_mapper.Map<IEnumerable<AttachmentView>>(attachments));
             }
             catch (NotSupportedException ex)
             {
@@ -212,20 +207,24 @@ namespace PetrpkuWeb.Server.Controllers.V1
             }
         }
 
-        [HttpPut(ApiRoutes.Upload.UPDATE + "/{attachmentId:int}")]
-        public async Task<ActionResult> UpdateAttachment(int attachmentViewModelId, AttachmentViewModel attachmentViewModel)
+        [HttpPut(ApiRoutes.Upload.UPDATE + "/{attachmentViewId:int}")]
+        public async Task<ActionResult> UpdateAttachment(int attachmentViewId, AttachmentView attachmentView)
         {
-            if (attachmentViewModelId != attachmentViewModel.AttachmentId)
+            if (attachmentViewId != attachmentView.AttachmentId)
             {
                 return BadRequest();
             }
 
-            var attachment = _mapper.Map<Attachment>(attachmentViewModel);
+            var attachment = await _db.Attachments.FindAsync(attachmentViewId);
+            var updatedAttachment = _mapper.Map(attachmentView, attachment);
 
-            _db.Entry(attachment).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
+            _db.Update(updatedAttachment);
+            var updated = await _db.SaveChangesAsync();
+            
+            if(updated > 0)
+                return Ok(_mapper.Map<AttachmentView>(attachment));
 
-            return Ok(_mapper.Map<AttachmentViewModel>(attachment));
+            return BadRequest();
         }
 
         [HttpDelete(ApiRoutes.Upload.DELETE + "/{attachmentId:int}")]

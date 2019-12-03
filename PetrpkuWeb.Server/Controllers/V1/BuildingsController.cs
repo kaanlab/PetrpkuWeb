@@ -7,7 +7,7 @@ using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {

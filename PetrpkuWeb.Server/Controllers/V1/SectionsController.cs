@@ -1,19 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PetrpkuWeb.Server.Data;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.Models;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -36,7 +30,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var siteSections = await _sectionsService.GetSiteSections();
 
-            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(siteSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionView>>(siteSections));
         }
 
         [AllowAnonymous]
@@ -45,7 +39,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var siteSections = await _sectionsService.GetSiteSectionsIncludeSubSections();
 
-            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(siteSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionView>>(siteSections));
         }
 
         [AllowAnonymous]
@@ -57,37 +51,42 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (siteSection is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<SiteSectionViewModel>(siteSection));
+            return Ok(_mapper.Map<SiteSectionView>(siteSection));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]
         [HttpPost(ApiRoutes.Sections.CREATE)]
-        public async Task<ActionResult> AddSiteSectionAsync(SiteSectionViewModel siteSectionViewModel)
+        public async Task<ActionResult> AddSiteSectionAsync(SiteSectionView siteSectionView)
         {
-            if (siteSectionViewModel is null)
-                return NotFound();
+            if (siteSectionView is null)
+                return BadRequest();
 
-            var siteSection = _mapper.Map<SiteSection>(siteSectionViewModel);
+            var siteSection = _mapper.Map<SiteSection>(siteSectionView);
 
             var created = await _sectionsService.Create(siteSection);
 
             if (created)
-                return Ok(_mapper.Map<SiteSectionViewModel>(siteSection));
+                return Ok(_mapper.Map<SiteSectionView>(siteSection));
 
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]
-        [HttpPut(ApiRoutes.Sections.UPDATE + "/{siteSectionViewModelId:int}")]
-        public async Task<ActionResult> UpdateSiteSectionAsync(int siteSectionViewModelId, SiteSectionViewModel siteSectionViewModel)
+        [HttpPut(ApiRoutes.Sections.UPDATE + "/{siteSectionViewId:int}")]
+        public async Task<ActionResult> UpdateSiteSectionAsync(int siteSectionViewId, SiteSectionView siteSectionView)
         {
-            if (siteSectionViewModelId == siteSectionViewModel.SiteSectionId)
+            var siteSection = await _sectionsService.GetSiteSection(siteSectionViewId);
+
+            if (siteSection is null)
+                return BadRequest();
+
+            if (siteSection.SiteSectionId == siteSectionView.SiteSectionId)
             {
-                var siteSection = _mapper.Map<SiteSection>(siteSectionViewModel);
-                var updated = await _sectionsService.Update(siteSection);
+                var updatedSiteSection = _mapper.Map(siteSectionView, siteSection);
+                var updated = await _sectionsService.Update(updatedSiteSection);
 
                 if (updated)
-                    return Ok(_mapper.Map<SiteSectionViewModel>(siteSection));
+                    return Ok(_mapper.Map<SiteSectionView>(updatedSiteSection));
             }
 
             return BadRequest();
@@ -113,7 +112,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var subSections = await _sectionsService.GetSubSectionsIncludeSections();
 
-            return Ok(_mapper.Map<IEnumerable<SiteSubSectionViewModel>>(subSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSubSectionView>>(subSections));
         }
 
         [AllowAnonymous]
@@ -122,7 +121,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var subSections = await _sectionsService.GetSubsectionsForSection(siteSectionId);
 
-            return Ok(_mapper.Map<IEnumerable<SiteSectionViewModel>>(subSections));
+            return Ok(_mapper.Map<IEnumerable<SiteSectionView>>(subSections));
         }
 
         [AllowAnonymous]
@@ -134,35 +133,39 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (siteSubSection is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<SiteSubSectionViewModel>(siteSubSection));
+            return Ok(_mapper.Map<SiteSubSectionView>(siteSubSection));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]
         [HttpPost(ApiRoutes.Sections.SUBSECTION_CREATE)]
-        public async Task<ActionResult> CreateSiteSubSectionAsync(SiteSubSectionViewModel siteSubSectionViewModel)
+        public async Task<ActionResult> CreateSiteSubSectionAsync(SiteSubSectionView siteSubSectionView)
         {
-            if (siteSubSectionViewModel is null)
+            if (siteSubSectionView is null)
                 return NotFound();
 
-            var siteSubSection = _mapper.Map<SiteSubsection>(siteSubSectionViewModel);
+            var siteSubSection = _mapper.Map<SiteSubsection>(siteSubSectionView);
             var created = await _sectionsService.CreateSubSections(siteSubSection);
 
             if (created)
-                return Ok(_mapper.Map<SiteSubSectionViewModel>(siteSubSection));
+                return Ok(_mapper.Map<SiteSubSectionView>(siteSubSection));
 
             return BadRequest();
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_PUBLISHER)]
-        [HttpPut(ApiRoutes.Sections.UPDATE + "/{siteSubSectionId:int}")]
-        public async Task<ActionResult> UpdateSiteSubSectionAsync(int siteSubSectionViewModelId, SiteSubsection siteSubSectionViewModel)
+        [HttpPut(ApiRoutes.Sections.UPDATE + "/{siteSubSectionViewId:int}")]
+        public async Task<ActionResult> UpdateSiteSubSectionAsync(int siteSubSectionViewId, SiteSubSectionView siteSubSectionView)
         {
-            if (siteSubSectionViewModelId == siteSubSectionViewModel.SiteSubSectionId)
+            var siteSubSection = await _sectionsService.GetSiteSubSection(siteSubSectionViewId);
+            if (siteSubSection is null)
+                return BadRequest();
+
+            if (siteSubSection.SiteSubSectionId == siteSubSectionView.SiteSubSectionId)
             {
-                var siteSubSection = _mapper.Map<SiteSubsection>(siteSubSectionViewModel);
+                var updatedSiteSubSection = _mapper.Map(siteSubSectionView, siteSubSection);
                 var updated = await _sectionsService.UpdateSubSection(siteSubSection);
 
-                if(updated)
+                if (updated)
                     return Ok(siteSubSection);
             }
 
@@ -176,7 +179,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (ModelState.IsValid)
             {
                 var deleted = await _sectionsService.DeleteSubSection(siteSubSectionViewModelId);
-                if(deleted)
+                if (deleted)
                     return NoContent();
             }
 

@@ -7,8 +7,8 @@ using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.ViewModels;
-using PetrpkuWeb.Shared.ViewModels.CatalogRegion;
+using PetrpkuWeb.Shared.Views;
+
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -45,17 +45,17 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (department is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DepartmentViewModel>(department));
+            return Ok(_mapper.Map<DepartmentView>(department));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
         [HttpPost(ApiRoutes.Departments.CREATE)]
-        public async Task<ActionResult<Department>> CreateDepartmentAsync(DepartmentView catalogDepartmentView)
+        public async Task<ActionResult<Department>> CreateDepartmentAsync(DepartmentView departmentView)
         {
-            if (catalogDepartmentView is null)
+            if (departmentView is null)
                 return BadRequest();
 
-            var department = _mapper.Map<Department>(catalogDepartmentView);
+            var department = _mapper.Map<Department>(departmentView);
 
             var created = await _departmentTypeService.Create(department);
 

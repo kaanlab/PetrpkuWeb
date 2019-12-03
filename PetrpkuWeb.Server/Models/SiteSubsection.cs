@@ -8,8 +8,6 @@ namespace PetrpkuWeb.Server.Models
     {
         public int SiteSubSectionId { get; set; }
         public string Title { get; set; }
-
-        //
         public SiteSection SiteSection { get; set; }
     }
 }

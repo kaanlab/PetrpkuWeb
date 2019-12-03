@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PetrpkuWeb.Server.Data;
-using PetrpkuWeb.Shared.Models;
-using Microsoft.EntityFrameworkCore;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using PetrpkuWeb.Shared.Extensions;
@@ -35,21 +30,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var notes = await _noteTypeService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<NoteViewModel>>(notes));
+            return Ok(_mapper.Map<IEnumerable<NoteAppUserCssTypeView>>(notes));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpPost(ApiRoutes.Note.CREATE)]
-        public async Task<ActionResult> CreateNote(NoteViewModel noteViewModel)
+        public async Task<ActionResult> CreateNote(NoteAppUserCssTypeView noteView)
         {
-            if (noteViewModel is null)
+            if (noteView is null)
                 return BadRequest();
 
-            var note = _mapper.Map<Note>(noteViewModel);
+            var note = _mapper.Map<Note>(noteView);
             var created = await _noteTypeService.Create(note);
             
            if(created)
-                return Ok(_mapper.Map<NoteViewModel>(note));
+                return Ok(_mapper.Map<NoteAppUserCssTypeView>(note));
 
             return BadRequest();
         }
@@ -63,20 +58,22 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (note is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<NoteViewModel>(note));
+            return Ok(_mapper.Map<NoteAppUserCssTypeView>(note));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.Note.UPDATE + "/{noteId:int}")]
-        public async Task<ActionResult> UpdateNoteAsync(int noteId, NoteViewModel noteViewModel)
+        [HttpPut(ApiRoutes.Note.UPDATE + "/{noteViewId:int}")]
+        public async Task<ActionResult> UpdateNoteAsync(int noteViewId, NoteAppUserCssTypeView noteView)
         {
-            if (noteId == noteViewModel.NoteId)
+            var note = await _noteTypeService.GetOne(noteViewId);
+
+            if (note.NoteId == noteView.NoteId)
             {
-                var note = _mapper.Map<Note>(noteViewModel);
-                var updated = await _noteTypeService.Update(note);
+                var updatedNote = _mapper.Map(noteView, note);
+                var updated = await _noteTypeService.Update(updatedNote);
 
                 if(updated)
-                    return Ok(_mapper.Map<NoteViewModel>(note));
+                    return Ok(_mapper.Map<NoteAppUserCssTypeView>(updatedNote));
             }
             return BadRequest();
         }

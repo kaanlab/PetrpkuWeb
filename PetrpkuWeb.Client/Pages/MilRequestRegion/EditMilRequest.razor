@@ -57,11 +57,11 @@
                             <div class="col-4">
                                 <select class="custom-select" @onchange="@SubsectionClicked">
                                     <option selected>--- Выберите подраздел сайта ---</option>
-                                    @if (siteSubsections is { })
+                                    @if (siteSubSections is { })
                                     {
-                                        @foreach (var subsection in siteSubsections)
+                                        @foreach (var subsection in siteSubSections)
                                         {
-                                            <option value="@subsection.SiteSubsectionId">@subsection.Title</option>
+                                            <option value="@subsection.SiteSubSectionId">@subsection.Title</option>
                                         }
                                     }
                                 </select>
@@ -187,7 +187,7 @@
     private List<FileInfoViewModel> ListFileInfoVM { get; set; } = new List<FileInfoViewModel>();
 
     List<SiteSectionView> siteSections;
-    List<SiteSubSectionView> siteSubsections;
+    List<SiteSubSectionView> siteSubSections;
 
     string siteSectionId;
     string siteSubSectionId;
@@ -303,14 +303,14 @@
         //siteSubsections.Clear();
         siteSectionId = sectionEvent.Value.ToString();
         milRequest.SiteSectionView = siteSections.Find(s => s.SiteSectionId == int.Parse(siteSectionId));
-        siteSubsections = await HttpClient.GetJsonAsync<List<SiteSubSectionView>>($"{ApiRoutes.Sections.SUBSECTIONS}/{siteSectionId}");
+        siteSubSections = await HttpClient.GetJsonAsync<List<SiteSubSectionView>>($"{ApiRoutes.Sections.SUBSECTIONS}/{siteSectionId}");
         this.StateHasChanged();
     }
 
     void SubsectionClicked(ChangeEventArgs subSectionEvent)
     {
         siteSubSectionId = subSectionEvent.Value.ToString();
-        milRequest.SiteSubSectionView = siteSubsections.Find(ss => ss.SiteSubsectionId == int.Parse(siteSubSectionId));
+        milRequest.SiteSubSectionView = siteSubSections.Find(ss => ss.SiteSubSectionId == int.Parse(siteSubSectionId));
         this.StateHasChanged();
     }
 }

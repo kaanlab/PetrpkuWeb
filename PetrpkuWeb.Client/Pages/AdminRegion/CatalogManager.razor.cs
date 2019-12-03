@@ -271,7 +271,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             editSiteSubSectionDialogIsOpen = false;
             var siteSection = siteSections.SingleOrDefault(s => s.SiteSectionId == currentSiteSubSection.SiteSectionView.SiteSectionId);
-            var response = await HttpClient.DeleteAsync($"{ApiRoutes.Sections.SUBSECTION_DELETE}/{currentSiteSubSection.SiteSubsectionId}");
+            var response = await HttpClient.DeleteAsync($"{ApiRoutes.Sections.SUBSECTION_DELETE}/{currentSiteSubSection.SiteSubSectionId}");
             var index = siteSections.FindIndex(s => s.SiteSectionId == NewSiteSubSection.SiteSectionView.SiteSectionId);
             siteSections[index].SiteSubsectionsView.Remove(currentSiteSubSection);
             currentSiteSubSection = null;
@@ -283,7 +283,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             editSiteSubSectionDialogIsOpen = false;
             currentSiteSubSection.Title = SiteSubSectionName;
-            await HttpClient.PutJsonAsync<SiteSubSectionView>($"{ApiRoutes.Sections.SUBSECTION_UPDATE}/{currentSiteSubSection.SiteSubsectionId}", currentSiteSubSection);
+            await HttpClient.PutJsonAsync<SiteSubSectionView>($"{ApiRoutes.Sections.SUBSECTION_UPDATE}/{currentSiteSubSection.SiteSubSectionId}", currentSiteSubSection);
             currentSiteSubSection = null;
 
             Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");

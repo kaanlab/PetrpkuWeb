@@ -16,7 +16,7 @@ using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
 using PetrpkuWeb.Shared.Models;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -121,7 +121,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
             {
                 var appUserIdentity = await _appUsersService.Add(authUser);
 
-                return Ok(_mapper.Map<AppUserViewModel>(appUserIdentity));
+                return Ok(_mapper.Map<AppUserView>(appUserIdentity));
             }
             return BadRequest();
         }
@@ -132,7 +132,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var appUsers = await _appUsersService.GetAllOrderById();
 
-            return Ok(_mapper.Map<IEnumerable<AppUserViewModel>>(appUsers));
+            return Ok(_mapper.Map<IEnumerable<AppUserView>>(appUsers));
         }
 
 

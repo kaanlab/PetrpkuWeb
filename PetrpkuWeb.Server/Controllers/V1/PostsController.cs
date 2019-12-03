@@ -8,7 +8,7 @@ using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Server.Services;
 using PetrpkuWeb.Shared.Contracts.V1;
 using PetrpkuWeb.Shared.Extensions;
-using PetrpkuWeb.Shared.ViewModels;
+using PetrpkuWeb.Shared.Views;
 
 namespace PetrpkuWeb.Server.Controllers.V1
 {
@@ -31,7 +31,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var posts = await _postService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<PostViewModel>>(posts));
+            return Ok(_mapper.Map<IEnumerable<PostAppUserDepartmentAttachmentsView>>(posts));
         }
 
         [AllowAnonymous]
@@ -40,26 +40,26 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var posts = await _postService.GetByDepartment(departmentId);
 
-            return Ok(_mapper.Map<IEnumerable<PostViewModel>>(posts));
+            return Ok(_mapper.Map<IEnumerable<PostAppUserDepartmentAttachmentsView>>(posts));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
         [HttpPost(ApiRoutes.Post.CREATE)]
-        public async Task<ActionResult> CreatePost(PostViewModel postViewModel)
+        public async Task<ActionResult> CreatePost(PostAppUserDepartmentAttachmentsView postView)
         {
-            if (postViewModel is null)
+            if (postView is null)
                 return NotFound();
 
-            var post = _mapper.Map<Post>(postViewModel);
+            var post = _mapper.Map<Post>(postView);
 
-            if (string.IsNullOrEmpty(postViewModel.Poster))
+            if (string.IsNullOrEmpty(postView.Poster))
                 post.Poster = "/img/site/default_poster.jpg";
 
             post.PublishDate = DateTime.Now;
 
             var created = await _postService.Create(post);
             if (created)
-                return Ok(_mapper.Map<PostViewModel>(post));
+                return Ok(_mapper.Map<PostAppUserDepartmentAttachmentsView>(post));
 
             return BadRequest();
         }
@@ -73,18 +73,20 @@ namespace PetrpkuWeb.Server.Controllers.V1
             if (post is null)
                 return NotFound();
 
-            return Ok(_mapper.Map<PostViewModel>(post));
+            return Ok(_mapper.Map<PostAppUserDepartmentAttachmentsView>(post));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY_USER)]
-        [HttpPut(ApiRoutes.Post.UPDATE + "/{postViewModelId:int}")]
-        public async Task<ActionResult> UpdatePostAsync(int postViewModelId, PostViewModel postViewModel)
+        [HttpPut(ApiRoutes.Post.UPDATE + "/{postViewId:int}")]
+        public async Task<ActionResult> UpdatePostAsync(int postViewId, PostView postView)
         {
-            if (postViewModelId == postViewModel.PostId)
+            var post = await _postService.GetOne(postViewId);
+
+            if (post.PostId == postView.PostId)
             {
-                var post = _mapper.Map<Post>(postViewModel);
-                post.UpdateDate = DateTime.Now;
-                var updated = await _postService.Update(post);
+                var updatedPost = _mapper.Map(postView, post);
+                updatedPost.UpdateDate = DateTime.Now;
+                var updated = await _postService.Update(updatedPost);
 
                 if (updated)
                     return Ok(post);
