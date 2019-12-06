@@ -19,13 +19,13 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         public HttpClient HttpClient { get; set; }
 
         DepartmentView NewDepartment { get; set; } = new DepartmentView();
-        BuildingAppUserView NewBuilding { get; set; } = new BuildingAppUserView();
+        BuildingView NewBuilding { get; set; } = new BuildingView();
         SiteSectionView NewSiteSection { get; set; } = new SiteSectionView();
         SiteSubSectionView NewSiteSubSection { get; set; } = new SiteSubSectionView();
         CssTypeView NewCssType { get; set; } = new CssTypeView();
 
         private List<DepartmentView> departments;
-        private List<BuildingAppUserView> buildings;
+        private List<BuildingView> buildings;
         private List<SiteSectionView> siteSections;
         //private List<SiteSubSectionViewModel> siteSubSections;
         private List<CssTypeView> cssTypes;
@@ -46,7 +46,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
             }
         }
 
-        BuildingAppUserView currentBuilding;
+        BuildingView currentBuilding;
         private string _buildingName;
         public string BuildingName
         {
@@ -100,7 +100,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         protected override async Task OnInitializedAsync()
         {
             departments = await HttpClient.GetJsonAsync<List<DepartmentView>>(ApiRoutes.Departments.ALL);
-            buildings = await HttpClient.GetJsonAsync<List<BuildingAppUserView>>(ApiRoutes.Buildings.ALL);
+            buildings = await HttpClient.GetJsonAsync<List<BuildingView>>(ApiRoutes.Buildings.ALL);
             siteSections = await HttpClient.GetJsonAsync<List<SiteSectionView>>(ApiRoutes.Sections.ALL_INCLUDE_SUBSECTIONS);
             cssTypes = await HttpClient.GetJsonAsync<List<CssTypeView>>(ApiRoutes.CssType.ALL);
         }
@@ -154,14 +154,14 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         async Task AddNewBuilding()
         {
             newBuildingDialogIsOpen = false;
-            var response = await HttpClient.PostJsonAsync<BuildingAppUserView>(ApiRoutes.Buildings.CREATE, NewBuilding);
+            var response = await HttpClient.PostJsonAsync<BuildingView>(ApiRoutes.Buildings.CREATE, NewBuilding);
             buildings.Add(response);
-            NewBuilding = new BuildingAppUserView();
+            NewBuilding = new BuildingView();
 
             Toaster.Add($"Информация о новом здании успешно добавлена", MatToastType.Success, "Успех!");
         }
 
-        void OpenEditBuildingDialog(BuildingAppUserView building)
+        void OpenEditBuildingDialog(BuildingView building)
         {
             editBuildingDialogIsOpen = true;
             currentBuilding = building;
@@ -178,7 +178,7 @@ namespace PetrpkuWeb.Client.Pages.AdminRegion
         {
             editBuildingDialogIsOpen = false;
             currentBuilding.Name = BuildingName;
-            await HttpClient.PutJsonAsync<BuildingAppUserView>($"{ApiRoutes.Buildings.UPDATE}/{currentBuilding.BuildingId}", currentBuilding);
+            await HttpClient.PutJsonAsync<BuildingView>($"{ApiRoutes.Buildings.UPDATE}/{currentBuilding.BuildingId}", currentBuilding);
             currentBuilding = null;
 
             Toaster.Add($"Запись успешно обновлена", MatToastType.Success, "Успех!");

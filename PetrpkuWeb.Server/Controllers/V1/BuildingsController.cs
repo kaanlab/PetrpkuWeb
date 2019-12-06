@@ -30,21 +30,21 @@ namespace PetrpkuWeb.Server.Controllers.V1
         {
             var buildings = await _buildingTypeService.GetAll();
 
-            return Ok(_mapper.Map<IEnumerable<BuildingAppUserView>>(buildings));
+            return Ok(_mapper.Map<IEnumerable<BuildingView>>(buildings));
         }
 
         [Authorize(Roles = AuthRoles.ADMIN_KADRY)]
         [HttpPost(ApiRoutes.Buildings.CREATE)]
-        public async Task<ActionResult> AddBuildingAsync(BuildingAppUserView buildingViewModel)
+        public async Task<ActionResult> AddBuildingAsync(BuildingView buildingView)
         {
-            if (buildingViewModel is null)
+            if (buildingView is null)
                 return NotFound();
 
-            var building = _mapper.Map<Building>(buildingViewModel);
+            var building = _mapper.Map<Building>(buildingView);
             var created = await _buildingTypeService.Create(building);
 
             if(created)
-                return Ok(_mapper.Map<BuildingAppUserView>(building));
+                return Ok(_mapper.Map<BuildingView>(building));
 
             return BadRequest();
         }
@@ -59,7 +59,7 @@ namespace PetrpkuWeb.Server.Controllers.V1
                 var updated = await _buildingTypeService.Update(building);
 
                 if(updated)
-                    return Ok(_mapper.Map<BuildingAppUserView>(building));
+                    return Ok(_mapper.Map<BuildingView>(building));
             }
 
             return BadRequest();

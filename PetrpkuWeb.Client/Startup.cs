@@ -6,6 +6,7 @@ using PetrpkuWeb.Client.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
 using MatBlazor;
 using Ganss.XSS;
+using AutoMapper;
 
 namespace PetrpkuWeb.Client
 {
@@ -36,6 +37,7 @@ namespace PetrpkuWeb.Client
                 sanitizer.AllowedAttributes.Add("class");
                 return sanitizer;
             });
+            services.AddAutoMapper(typeof(WebClientMappingProfile));
         }
 
         public void Configure(IComponentsApplicationBuilder app)

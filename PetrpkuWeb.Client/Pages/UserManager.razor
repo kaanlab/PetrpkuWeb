@@ -108,6 +108,7 @@
                     <th scope="col">Гор.номер</th>
                     <th scope="col">Моб.телефон</th>
                     <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -141,12 +142,43 @@
                         <td>@user.ExtPhone</td>
                         <td>@user.MobPhone</td>
                         <td><MatButton Icon="edit" Outlined="true" OnClick="@(() => OpenEditAppUserDialog(user.Id))" /></td>
+                        <td><MatButton Icon="edit" Outlined="true" OnClick="@(() => OpenAppUserRolesDialog(user))" /></td>
                     </tr>
                 }
             </tbody>
         </table>
     }
 </div>
+
+@if (appUserRole is { })
+{
+    <EditForm Model="@appUserRole">
+        <MatDialog @bind-IsOpen="@appUserRolesDialogIsOpen">
+            <MatDialogTitle>Добавить/удалить роль @appUserRole.DisplayName</MatDialogTitle>
+
+            <label>Роль</label>
+            <select class="custom-select" @bind="@appUserRole.Role.Name">
+                @if (roles is null)
+                {
+                    <option selected>(loading...)</option>
+                }
+                else
+                {
+                    <option selected>--- Выберете роль ---</option>
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role.Id">@role.Name</option>
+                    }
+                }
+            </select>
+            <MatDialogActions>
+                <MatButton Icon="undo" OnClick="@(e => { appUserRolesDialogIsOpen = false; })" Label="Отмена" />
+                <MatButton Icon="save" Type="submit" OnClick="@(() => AddAppUserToRole())" Label="Добавить" />
+                <MatButton Icon="save" Type="submit" OnClick="@(() => RemoveAppUserToRole())" Label="Удалить" />
+            </MatDialogActions>
+        </MatDialog>
+    </EditForm>
+}
 
 @if (editAppUser is { })
 {

@@ -35,7 +35,7 @@ namespace PetrpkuWeb.Shared.Contracts.V1
 
             public const string ADD_TO_ROLE = "api/v1/users/addtorole";
 
-            public const string REMOVE_FROM_ROLE = "api/v1/users/removefromrole";
+            public const string REMOVE_FROM_ROLE = "api/v1/users/removefromrole";            
         }
 
         public static class Rss
@@ -197,7 +197,7 @@ namespace PetrpkuWeb.Shared.Contracts.V1
         {
             public const string ALL = "api/v1/roles/all";
 
-            public const string SHOW = "api/v1/roles/show";
+            public const string SHOW = "api/v1/role/show";
 
             //public const string CREATE = "api/v1/roles/create";
 

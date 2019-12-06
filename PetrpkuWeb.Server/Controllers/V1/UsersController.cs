@@ -96,10 +96,10 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpPost(ApiRoutes.Users.ADD_TO_ROLE)]
-        public async Task<ActionResult> AddToRole(AppUserDepartmentBuildingView appUserView, string appRole)
+        public async Task<ActionResult> AddToRole(AppUserRoleView appUserView)
         {
             var appUser = await _appUsersService.FindById(appUserView.Id);
-            var addedToRole = await _appUsersService.AddToRole(appUser, appRole);
+            var addedToRole = await _appUsersService.AddToRole(appUser, appUserView.Role.Name);
             if (addedToRole)
             {
                 return Ok();
@@ -109,13 +109,25 @@ namespace PetrpkuWeb.Server.Controllers.V1
 
         [Authorize(Roles = AuthRoles.ADMIN)]
         [HttpPost(ApiRoutes.Users.REMOVE_FROM_ROLE)]
-        public async Task<ActionResult> RemoveFromRole(AppUserDepartmentBuildingView appUserView, string appRole)
+        public async Task<ActionResult> RemoveFromRole(AppUserRoleView appUserView)
         {
             var appUser = await _appUsersService.FindById(appUserView.Id);
-            var removedFromRole = await _appUsersService.RemoveFromRole(appUser, appRole);
+            var removedFromRole = await _appUsersService.RemoveFromRole(appUser, appUserView.Role.Name);
             if (removedFromRole)
             {
                 return Ok();
+            }
+            return BadRequest();
+        }
+
+        [Authorize(Roles = AuthRoles.ADMIN)]
+        [HttpPost(ApiRoutes.Roles.ALL)]
+        public  ActionResult GetRoles()
+        {
+            var roles = _appUsersService.GetAllRoles();
+            if (roles is { })
+            {
+                return Ok(_mapper.Map<RoleView>(roles));
             }
             return BadRequest();
         }

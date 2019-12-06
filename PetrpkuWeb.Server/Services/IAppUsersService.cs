@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Shared.Models;
 using System;
@@ -21,5 +22,6 @@ namespace PetrpkuWeb.Server.Services
         Task<AppUser> FindById(string appUserId);
         Task<bool> AddToRole(AppUser appUser, string appRole);
         Task<bool> RemoveFromRole(AppUser appUser, string appRole);
+        IList<IdentityRole> GetAllRoles();
     }
 }

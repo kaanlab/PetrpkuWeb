@@ -11,23 +11,22 @@ namespace PetrpkuWeb.Server.Services
 {
     public class RssService : IRssService
     {
-        private readonly string _urlMil = "http://petrpku.mil.ru/more/Novosti/rss";
-        private readonly string _urlCalend = "https://www.calend.ru/img/export/today-events.rss";
+        private readonly string urlMil = "http://petrpku.mil.ru/more/Novosti/rss";
+        private readonly string urlCalend = "https://www.calend.ru/img/export/today-events.rss";
         private readonly IMemoryCache _cache;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public RssService(IMemoryCache memoryCache, IHttpClientFactory httpClientFactory)
+        public RssService(IMemoryCache memoryCache, HttpClient httpClient)
         {
             _cache = memoryCache;
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
         public async Task<List<RssMil>> GetRssMilAndCache()
         {
             if (!_cache.TryGetValue("ListOfRssMil", out List<RssMil> rssNews))
             {
-                string response;
-                var client = _httpClientFactory.CreateClient();
-                response = await client.GetStringAsync(_urlMil);
+                             
+                var response = await _httpClient.GetStringAsync(urlMil);
 
                 if (response is { })
                 {
@@ -53,9 +52,8 @@ namespace PetrpkuWeb.Server.Services
         {
             if (!_cache.TryGetValue("ListOfRssCalend", out List<RssCalend> rssNews))
             {
-                string response;
-                var client = _httpClientFactory.CreateClient();
-                response = await client.GetStringAsync(_urlCalend);
+
+                var response = await _httpClient.GetStringAsync(urlCalend);
 
                 if (response is { })
                 {

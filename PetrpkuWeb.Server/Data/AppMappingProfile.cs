@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using PetrpkuWeb.Server.Models;
 using PetrpkuWeb.Shared.Views;
 
@@ -33,7 +34,7 @@ namespace PetrpkuWeb.Server.Data
                 .ForMember(dest => dest.SiteSectionView, opt => opt.MapFrom(src => src.SiteSection))
                 .ForMember(dest => dest.SiteSubSectionView, opt => opt.MapFrom(src => src.SiteSubSection));
 
-
+            CreateMap<IdentityRole, RoleView>();
 
             //Viewmodel to Model
             CreateMap<CssTypeView, CssType>();
@@ -68,6 +69,10 @@ namespace PetrpkuWeb.Server.Data
 
             CreateMap<DepartmentView, Department>()
                 .ReverseMap();
+
+            CreateMap<BuildingView, Building>()
+                .ReverseMap();
+
 
         }
     }

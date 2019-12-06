@@ -1,3 +1,4 @@
+using AutoMapper;
 using MatBlazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -21,6 +22,9 @@ namespace PetrpkuWeb.Client.Pages
         public HttpClient HttpClient { get; set; }
 
         [Inject]
+        public IMapper Mapper { get; set; }
+
+        [Inject]
         public IMatToaster Toaster { get; set; }
 
         [CascadingParameter]
@@ -34,12 +38,15 @@ namespace PetrpkuWeb.Client.Pages
         ClaimsPrincipal authUser;
         List<AppUserDepartmentBuildingView> appUsersList;
         AppUserDepartmentBuildingView editAppUser;
+        AppUserRoleView appUserRole;
+        List<RoleView> roles;
         List<DepartmentView> departments;
         List<BuildingView> buildings;
         List<AppUserDepartmentBuildingView> filtredAppUsers;
 
         bool editAppUserDialogIsOpen = false;
         bool newUserDialogIsOpen = false;
+        bool appUserRolesDialogIsOpen = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -49,6 +56,7 @@ namespace PetrpkuWeb.Client.Pages
             departments = await HttpClient.GetJsonAsync<List<DepartmentView>>(ApiRoutes.Departments.ALL);
             buildings = await HttpClient.GetJsonAsync<List<BuildingView>>(ApiRoutes.Buildings.ALL);
             ldapUsers = await HttpClient.GetJsonAsync<List<LdapUser>>(ApiRoutes.Account.ALL_LDAPUSERS);
+
         }
 
         async Task AddAccount()
@@ -77,6 +85,25 @@ namespace PetrpkuWeb.Client.Pages
             Toaster.Add($"Пользователь успешно добавлен в систему", MatToastType.Success, "Успех!");
         }
 
+        async Task OpenAppUserRolesDialog(AppUserDepartmentBuildingView user)
+        {
+            appUserRole = Mapper.Map(user, appUserRole);
+            roles = await HttpClient.GetJsonAsync<List<RoleView>>(ApiRoutes.Roles.ALL);
+            appUserRolesDialogIsOpen = true;
+ 
+        }
+
+        async Task AddAppUserToRole()
+        {
+            var response = await HttpClient.PostJsonAsync<AppUserRoleView>(ApiRoutes.Users.ADD_TO_ROLE, appUserRole);
+            appUserRolesDialogIsOpen = false;
+        }
+
+        async Task RemoveAppUserToRole()
+        {
+            var response = await HttpClient.PostJsonAsync<AppUserRoleView>(ApiRoutes.Users.REMOVE_FROM_ROLE, appUserRole);
+            appUserRolesDialogIsOpen = false;
+        }
 
         void OpenEditAppUserDialog(string appUserId)
         {

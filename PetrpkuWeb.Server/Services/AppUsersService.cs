@@ -14,13 +14,16 @@ namespace PetrpkuWeb.Server.Services
     {
         private readonly AppDbContext _db;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public AppUsersService(
             AppDbContext db,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _db = db;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<List<AppUser>> GetAllOrderById()
@@ -144,6 +147,11 @@ namespace PetrpkuWeb.Server.Services
             var removed = await _userManager.RemoveFromRoleAsync(appUser, appRole);
 
             return removed.Succeeded;
+        }
+
+        public IList<IdentityRole> GetAllRoles()
+        {
+            return _roleManager.Roles.ToList();
         }
     }
 }
